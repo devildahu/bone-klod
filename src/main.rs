@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+mod cam;
 mod ball;
 mod animate;
 mod audio;
@@ -43,7 +44,7 @@ fn main() {
 
     #[cfg(feature = "debug")]
     app.add_plugin(RapierDebugRenderPlugin::default())
-        .add_plugin(bevy_inspector_egui_rapier::InspectableRapierPlugin)
+        // .add_plugin(bevy_inspector_egui_rapier::InspectableRapierPlugin)
         .add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new())
         .add_plugin(bevy::pbr::wireframe::WireframePlugin)
         .insert_resource(bevy::render::settings::WgpuSettings {
@@ -55,6 +56,7 @@ fn main() {
         .add_plugin(bevy_scene_hook::HookPlugin)
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin::default())
         .add_plugin(animate::Plugin)
+        .add_plugin(cam::Plugin)
         .add_plugin(ball::Plugin)
         .add_plugin(audio::Plugin)
         .add_plugin(ui::Plugin)

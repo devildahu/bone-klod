@@ -110,7 +110,7 @@ fn activate_menu(
             MainMenuElem::Start => {
                 screen_print!("Player pressed the start button");
                 audio_requests.send(AudioRequest::PlayWoodClink(SfxParam::PlayOnce));
-                game_state.set(GameState::WaitLoaded).unwrap();
+                game_state.set(GameState::Playing).unwrap();
             }
             MainMenuElem::LockMouse => {
                 let window = windows.get_primary_mut().expect(window_msg);
