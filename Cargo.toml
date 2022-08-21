@@ -1,0 +1,40 @@
+[package]
+name = "bevy_jam2_devildahu"
+version = "0.1.0"
+edition = "2021"
+exclude = ["assets"]
+license = "MIT OR Apache-2.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+dynamic = ["bevy/dynamic"]
+debug = ["bevy-inspector-egui", "bevy-inspector-egui-rapier", "bevy-debug-text-overlay/debug"]
+default = ["dynamic", "debug"]
+
+[dependencies]
+anyhow = "1"
+bevy-debug-text-overlay = { version = "3.0", default-features = false, features = ["builtin-font"] }
+bevy-scene-hook = {version = "4.0" }
+bevy-ui-navigation = "0.20"
+bevy = { version = "0.8", default-features = false, features = [
+    "bevy_audio",
+    "vorbis",
+    "bevy_winit",
+    "render",
+    "png",
+    "jpeg",
+    "x11",
+] }
+bevy_rapier3d = { version = "0.16", path = "../../gitimpo/bevy_rapier/bevy_rapier3d" }
+bevy-ui-build-macros = { path = "../bevy-ui-build-macros" }
+bevy-inspector-egui = { version = "0.12", optional = true }
+bevy-inspector-egui-rapier = { version = "0.5", features = ["rapier3d"], optional = true  }
+fastrand = "1.8"
+
+[profile.dev.package."*"]
+opt-level = 1
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
