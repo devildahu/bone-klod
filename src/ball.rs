@@ -1,14 +1,22 @@
 use bevy::prelude::{Plugin as BevyPlugin, *};
+#[cfg(feature = "editor")]
+use bevy::ui::FocusPolicy;
 use bevy_debug_text_overlay::screen_print;
+#[cfg(feature = "editor")]
+use bevy_editor_pls_default_windows::hierarchy::picking::IgnoreEditorRayCast;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
+#[cfg(feature = "editor")]
+use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
 
-use crate::{cam::OrbitCamera, state::GameState};
+#[cfg(feature = "editor")]
+use bevy_scene_hook::SceneHook;
+
+use crate::{cam::OrbitCamera, prefabs::AggloBundle, state::GameState};
 
 const INPUT_IMPULSE: f32 = 3.0;
 const KLOD_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b0100, !0b0100);
-const AGGLO_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b1000, !0);
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
@@ -90,35 +98,17 @@ struct AgglomerateToKlod {
     agglo_weight: f32,
 }
 
+/// Static physic objects
+#[derive(Component)]
+pub(crate) struct Scenery;
+
+/// Thing that can be klodded.
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
-struct Agglomerable {
-    weight: f32,
+pub(crate) struct Agglomerable {
+    pub(crate) weight: f32,
 }
 
-#[derive(Bundle)]
-struct AggloBundle {
-    agglo: Agglomerable,
-    active_events: ActiveEvents,
-    collider: Collider,
-    mass: ColliderMassProperties,
-    rigid_body: RigidBody,
-    contact_threshold: ContactForceEventThreshold,
-    collision_group: CollisionGroups,
-}
-impl AggloBundle {
-    pub(crate) fn new(mass: f32, collider: Collider) -> Self {
-        AggloBundle {
-            agglo: Agglomerable { weight: mass },
-            active_events: ActiveEvents::CONTACT_FORCE_EVENTS,
-            collider,
-            mass: ColliderMassProperties::Mass(mass),
-            rigid_body: RigidBody::Dynamic,
-            contact_threshold: ContactForceEventThreshold(mass * 1000.0),
-            collision_group: AGGLO_COLLISION_GROUP,
-        }
-    }
-}
 fn transform_relative_to(point: &GlobalTransform, reference: &GlobalTransform) -> Transform {
     let relative_affine = reference.affine().inverse() * point.affine();
     let (scale, rotation, translation) = relative_affine.to_scale_rotation_translation();
@@ -199,6 +189,18 @@ fn spawn_debug_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
+    #[cfg(feature = "editor")]
+    let pickable = || {
+        (
+            SceneHook::new(|_, cmds| {
+                cmds.insert(IgnoreEditorRayCast);
+            }),
+            PickableMesh::default(),
+            Interaction::default(),
+            FocusPolicy::default(),
+            Selection::default(),
+        )
+    };
     let mut plane = cmds.spawn_bundle(PbrBundle {
         material: mats.add(StandardMaterial {
             base_color_texture: Some(assets.load("garbage.png")),
@@ -209,12 +211,15 @@ fn spawn_debug_scene(
         mesh: meshes.add(shape::Box::new(200.0, 2.0, 200.0).into()),
         ..default()
     });
-    plane
-        .insert(Name::new("Plane"))
-        .insert_bundle((RigidBody::Fixed, Collider::cuboid(100.0, 1.0, 100.0)));
+    plane.insert_bundle((
+        Name::new("Plane"),
+        Scenery,
+        RigidBody::Fixed,
+        Collider::cuboid(100.0, 1.0, 100.0),
+    ));
     #[cfg(feature = "editor")]
     plane
-        .insert_bundle(bevy_mod_picking::PickableBundle::default())
+        .insert_bundle(pickable())
         .insert(bevy_transform_gizmo::GizmoTransformable);
 
     let mut ball = cmds.spawn_bundle(PbrBundle {
@@ -224,21 +229,29 @@ fn spawn_debug_scene(
         ..default()
     });
     ball.insert(Name::new("Red Ball"))
-        .insert_bundle(AggloBundle::new(200.0, Collider::ball(1.0)));
+        .insert_bundle(AggloBundle::new(200.0, Collider::ball(1.0), 0.9, 0.9));
     #[cfg(feature = "editor")]
-    ball.insert_bundle(bevy_mod_picking::PickableBundle::default())
+    ball.insert_bundle(pickable())
         .insert(bevy_transform_gizmo::GizmoTransformable);
 
-    let mut cube = cmds.spawn_bundle(PbrBundle {
-        material: mats.add(StandardMaterial { base_color: Color::GREEN, ..default() }),
-        mesh: meshes.add(shape::Box::new(2.0, 2.0, 2.0).into()),
+    // TODO: spawn invisible mesh encompassing the whole scene for selection purpose
+    let mut cube = cmds.spawn_bundle(SceneBundle {
+        scene: assets.load("untitled.glb#Scene0"),
         transform: Transform::from_xyz(5.0, 3.0, 5.0),
         ..default()
     });
-    cube.insert(Name::new("Green Cube"))
-        .insert_bundle(AggloBundle::new(2.0, Collider::cuboid(1.0, 1.0, 1.0)));
+    cube.insert_bundle((
+        Name::new("Green Cube"),
+        meshes.add(shape::Icosphere::default().into()),
+    ))
+    .insert_bundle(AggloBundle::new(
+        2.0,
+        Collider::cuboid(1.0, 1.0, 1.0),
+        0.9,
+        0.9,
+    ));
     #[cfg(feature = "editor")]
-    cube.insert_bundle(bevy_mod_picking::PickableBundle::default())
+    cube.insert_bundle(pickable())
         .insert(bevy_transform_gizmo::GizmoTransformable);
 
     let klod = spawn_klod(&mut cmds, Vec3::new(0.0, 3.0, 0.0));

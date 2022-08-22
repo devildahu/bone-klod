@@ -6,6 +6,9 @@ mod cam;
 mod ball;
 #[cfg(feature = "editor")]
 mod editor;
+mod prefabs;
+#[cfg(feature = "editor")]
+mod scene;
 mod state;
 mod system_helper;
 mod ui;
@@ -44,12 +47,15 @@ fn main() {
 
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
 
+    #[cfg(feature = "editor")]
+        app.add_plugin(bevy_scene_hook::HookPlugin);
+    
     #[cfg(all(feature = "debug", not(feature = "editor")))]
     app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
 
     #[cfg(feature = "debug")]
     app.add_plugin(RapierDebugRenderPlugin::default())
-        // .add_plugin(bevy_inspector_egui_rapier::InspectableRapierPlugin)
+        .add_plugin(bevy_inspector_egui_rapier::InspectableRapierPlugin)
         .add_plugin(bevy::pbr::wireframe::WireframePlugin)
         .insert_resource(bevy::render::settings::WgpuSettings {
             features: bevy::render::render_resource::WgpuFeatures::POLYGON_MODE_LINE,
@@ -60,7 +66,6 @@ fn main() {
     app.add_plugin(editor::Plugin);
 
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
-        .add_plugin(bevy_scene_hook::HookPlugin)
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin::default())
         .add_plugin(animate::Plugin)
         .add_plugin(cam::Plugin)

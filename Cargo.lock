@@ -584,26 +584,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_jam2_devildahu"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bevy",
- "bevy-debug-text-overlay",
- "bevy-inspector-egui",
- "bevy-inspector-egui-rapier",
- "bevy-scene-hook",
- "bevy-ui-build-macros",
- "bevy-ui-navigation",
- "bevy_editor_pls",
- "bevy_editor_pls_default_windows",
- "bevy_mod_picking",
- "bevy_rapier3d",
- "bevy_transform_gizmo",
- "fastrand",
-]
-
-[[package]]
 name = "bevy_log"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2096,6 +2076,28 @@ dependencies = [
  "libc",
  "libloading",
  "pkg-config",
+]
+
+[[package]]
+name = "klod"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "bevy-debug-text-overlay",
+ "bevy-inspector-egui",
+ "bevy-inspector-egui-rapier",
+ "bevy-scene-hook",
+ "bevy-ui-build-macros",
+ "bevy-ui-navigation",
+ "bevy_editor_pls",
+ "bevy_editor_pls_default_windows",
+ "bevy_mod_picking",
+ "bevy_rapier3d",
+ "bevy_transform_gizmo",
+ "fastrand",
+ "ron",
+ "serde",
 ]
 
 [[package]]
