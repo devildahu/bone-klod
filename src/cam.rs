@@ -81,11 +81,35 @@ fn update_camera_transform(
     };
 }
 
+#[derive(PartialEq, Eq)]
+struct LockCam(bool);
+impl LockCam {
+    fn locked(&self) -> bool {
+        self.0
+    }
+    fn toggle(&mut self) {
+        self.0 = !self.0
+    }
+}
+impl Default for LockCam {
+    fn default() -> Self {
+        LockCam(cfg!(feature = "editor"))
+    }
+}
+
 fn camera_movement(
     // time: Res<Time>,
     mut events: EventReader<MouseMotion>,
+    keyboard: Res<Input<KeyCode>>,
     mut query: Query<&mut OrbitCamera, With<Camera>>,
+    mut lock_cam: Local<LockCam>,
 ) {
+    if keyboard.just_pressed(KeyCode::L) {
+        lock_cam.toggle();
+    }
+    if lock_cam.locked() {
+        return;
+    }
     let mut camera = match query.get_single_mut() {
         Ok(cam) => cam,
         Err(msg) => {
@@ -112,7 +136,7 @@ impl BevyPlugin for Plugin {
             CoreStage::PostUpdate,
             SystemSet::new()
                 .with_system(camera_movement)
-                .with_system(update_camera_transform)
+                .with_system(update_camera_transform.after(camera_movement))
                 .before(TransformSystem::TransformPropagate),
         );
     }

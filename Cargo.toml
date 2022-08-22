@@ -9,6 +9,7 @@ license = "MIT OR Apache-2.0"
 
 [features]
 dynamic = ["bevy/dynamic"]
+editor = ["bevy_transform_gizmo", "bevy_editor_pls", "debug", "bevy_mod_picking", "bevy_editor_pls_default_windows"]
 debug = ["bevy-inspector-egui", "bevy-inspector-egui-rapier", "bevy-debug-text-overlay/debug"]
 default = ["dynamic", "debug"]
 
@@ -20,6 +21,7 @@ bevy-ui-navigation = "0.20"
 bevy = { version = "0.8", default-features = false, features = [
     "bevy_audio",
     "vorbis",
+      "mp3",
     "bevy_winit",
     "render",
     "png",
@@ -28,6 +30,10 @@ bevy = { version = "0.8", default-features = false, features = [
 ] }
 bevy_rapier3d = { version = "0.16", path = "../../gitimpo/bevy_rapier/bevy_rapier3d" }
 bevy-ui-build-macros = { path = "../bevy-ui-build-macros" }
+bevy_editor_pls = { version = "0.1.1", optional = true , path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls" }
+bevy_editor_pls_default_windows = { version = "0.1.1", optional = true, path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls_default_windows"  }
+bevy_mod_picking = { version = "0.8", optional = true }
+bevy_transform_gizmo = { version = "0.3.1", optional = true, path = "../../gitimpo/bevy_transform_gizmo" }
 bevy-inspector-egui = { version = "0.12", optional = true }
 bevy-inspector-egui-rapier = { version = "0.5", features = ["rapier3d"], optional = true  }
 fastrand = "1.8"

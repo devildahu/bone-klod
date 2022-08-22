@@ -46,7 +46,7 @@ impl FromWorld for MenuAssets {
         let assets = world.get_resource::<AssetServer>().unwrap();
         Self {
             team_name: assets.load("team_logo.png"),
-            title_image: assets.load("team_logo.png"),
+            title_image: assets.load("game_title.png"),
             slider_bg: assets.load("slider_background.png"),
             slider_handle: assets.load("slider_dongle.png"),
         }
@@ -241,7 +241,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
             entity[
                 image(&menu_assets.title_image);
                 Name::new("Title card"),
-                style! { size: size!(auto, 45 pct), }
+                style! { size: size!(auto, 20 pct), }
             ],
             node{ flex_direction: FD::Row }[; Name::new("Menu columns")](
                 node[; Name::new("Menu node")](

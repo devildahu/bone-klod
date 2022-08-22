@@ -199,8 +199,7 @@ fn spawn_debug_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
-    // Plane
-    cmds.spawn_bundle(PbrBundle {
+    let mut plane = cmds.spawn_bundle(PbrBundle {
         material: mats.add(StandardMaterial {
             base_color_texture: Some(assets.load("garbage.png")),
             perceptual_roughness: 0.6,
@@ -209,48 +208,55 @@ fn spawn_debug_scene(
         }),
         mesh: meshes.add(shape::Box::new(200.0, 2.0, 200.0).into()),
         ..default()
-    })
-    .insert(Name::new("Plane"))
-    .insert_bundle((RigidBody::Fixed, Collider::cuboid(100.0, 1.0, 100.0)));
+    });
+    plane
+        .insert(Name::new("Plane"))
+        .insert_bundle((RigidBody::Fixed, Collider::cuboid(100.0, 1.0, 100.0)));
+    #[cfg(feature = "editor")]
+    plane
+        .insert_bundle(bevy_mod_picking::PickableBundle::default())
+        .insert(bevy_transform_gizmo::GizmoTransformable);
 
-    // Ball
-    let ball = cmds
-        .spawn_bundle(PbrBundle {
-            material: mats.add(StandardMaterial { base_color: Color::RED, ..default() }),
-            mesh: meshes.add(shape::Icosphere::default().into()),
-            transform: Transform::from_xyz(-5.0, 3.0, -5.0),
-            ..default()
-        })
-        .insert(Name::new("Red Ball"))
-        .insert_bundle(AggloBundle::new(200.0, Collider::ball(1.0)))
-        .id();
+    let mut ball = cmds.spawn_bundle(PbrBundle {
+        material: mats.add(StandardMaterial { base_color: Color::RED, ..default() }),
+        mesh: meshes.add(shape::Icosphere::default().into()),
+        transform: Transform::from_xyz(-5.0, 3.0, -5.0),
+        ..default()
+    });
+    ball.insert(Name::new("Red Ball"))
+        .insert_bundle(AggloBundle::new(200.0, Collider::ball(1.0)));
+    #[cfg(feature = "editor")]
+    ball.insert_bundle(bevy_mod_picking::PickableBundle::default())
+        .insert(bevy_transform_gizmo::GizmoTransformable);
 
-    // Cube
-    let cube = cmds
-        .spawn_bundle(PbrBundle {
-            material: mats.add(StandardMaterial { base_color: Color::GREEN, ..default() }),
-            mesh: meshes.add(shape::Box::new(2.0, 2.0, 2.0).into()),
-            transform: Transform::from_xyz(5.0, 3.0, 5.0),
-            ..default()
-        })
-        .insert(Name::new("Green Cube"))
-        .insert_bundle(AggloBundle::new(2.0, Collider::cuboid(1.0, 1.0, 1.0)))
-        .id();
-    screen_print!("{ball:?} and {cube:?}");
-    println!("{ball:?} and {cube:?}");
+    let mut cube = cmds.spawn_bundle(PbrBundle {
+        material: mats.add(StandardMaterial { base_color: Color::GREEN, ..default() }),
+        mesh: meshes.add(shape::Box::new(2.0, 2.0, 2.0).into()),
+        transform: Transform::from_xyz(5.0, 3.0, 5.0),
+        ..default()
+    });
+    cube.insert(Name::new("Green Cube"))
+        .insert_bundle(AggloBundle::new(2.0, Collider::cuboid(1.0, 1.0, 1.0)));
+    #[cfg(feature = "editor")]
+    cube.insert_bundle(bevy_mod_picking::PickableBundle::default())
+        .insert(bevy_transform_gizmo::GizmoTransformable);
 
     let klod = spawn_klod(&mut cmds, Vec3::new(0.0, 3.0, 0.0));
 
     // Camera
-    cmds.spawn_bundle(Camera3dBundle {
+    let mut camera = cmds.spawn_bundle(Camera3dBundle {
         transform: Transform::from_xyz(-10.0, 2.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
-    })
-    .insert(OrbitCamera::follows(klod));
+    });
+    camera.insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
+    #[cfg(feature = "editor")]
+    camera
+        .insert(bevy_transform_gizmo::GizmoPickSource::default())
+        .insert_bundle(bevy_mod_picking::PickingCameraBundle::default());
 }
 
 fn ball_input(
-    keyboard: Res<Input<KeyCode>>,
+    keys: Res<Input<KeyCode>>,
     mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity), With<Klod>>,
     camera: Query<&OrbitCamera>,
 ) {
@@ -264,18 +270,13 @@ fn ball_input(
         }
     };
     let cam_rot = camera.single();
-    let force = |key_code, dir| {
-        if keyboard.pressed(key_code) {
-            dir * INPUT_IMPULSE
-        } else {
-            Vec2::ZERO
-        }
-    };
+    let force = INPUT_IMPULSE;
+    let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
-    // TODO: Q => lock camera movement
-    if keyboard.just_pressed(KeyCode::Space) {
+
+    if keys.just_pressed(KeyCode::Space) {
         *transform = Transform::from_xyz(0.0, 3.0, 0.0);
         *velocity = Velocity::default();
     }
