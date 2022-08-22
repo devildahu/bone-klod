@@ -254,12 +254,10 @@ dependencies = [
 [[package]]
 name = "bevy-inspector-egui-rapier"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bef372e6960033ec7a04b259c9a08b6a9fb5e3f6b4698091dc58aad4a4d6bc5d"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
- "bevy_rapier3d 0.16.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bevy_rapier3d",
 ]
 
 [[package]]
@@ -600,7 +598,7 @@ dependencies = [
  "bevy_editor_pls",
  "bevy_editor_pls_default_windows",
  "bevy_mod_picking",
- "bevy_rapier3d 0.16.1",
+ "bevy_rapier3d",
  "bevy_transform_gizmo",
  "fastrand",
 ]
@@ -709,20 +707,7 @@ checksum = "d92d5679e89602a18682a37846573dcd1979410179e14204280460ba9fb8713a"
 
 [[package]]
 name = "bevy_rapier3d"
-version = "0.16.1"
-dependencies = [
- "bevy",
- "bitflags",
- "log",
- "nalgebra",
- "rapier3d",
-]
-
-[[package]]
-name = "bevy_rapier3d"
-version = "0.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "080be2b08852dcc3e6bf52037f772773fd8b511863b47798cfd074862d345679"
+version = "0.16.0"
 dependencies = [
  "bevy",
  "bitflags",
@@ -3058,18 +3043,18 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "serde"
-version = "1.0.143"
+version = "1.0.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53e8e5d5b70924f74ff5c6d64d9a5acd91422117c60f48c4e07855238a254553"
+checksum = "0f747710de3dcd43b88c9168773254e809d8ddbdf9653b84e2554ab219f17860"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.143"
+version = "1.0.144"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3d8e8de557aee63c26b85b947f5e59b690d0454c753f3adeb5cd7835ab88391"
+checksum = "94ed3a816fb1d101812f83e789f888322c34e291f894f19590dc310963e87a00"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3078,9 +3063,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.83"
+version = "1.0.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38dd04e3c8279e75b31ef29dbdceebfe5ad89f4d0937213c53f7d49d01b3d5a7"
+checksum = "e55a28e3aaef9d5ce0506d0a14dbba8054ddc7e499ef522dd8b26859ec9d4a44"
 dependencies = [
  "itoa",
  "ryu",
