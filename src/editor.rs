@@ -5,8 +5,6 @@ use bevy_editor_pls_default_windows::cameras::ActiveEditorCamera;
 use bevy_mod_picking::{DefaultPickingPlugins, PickingCameraBundle};
 use bevy_transform_gizmo::{GizmoPickSource, TransformGizmoPlugin};
 
-use crate::cam::OrbitCamera;
-
 fn _count_active_cameras(cams: Query<(&Camera, &Name)>) {
     let cams: Vec<_> = cams
         .iter()
@@ -18,25 +16,22 @@ fn _count_active_cameras(cams: Query<(&Camera, &Name)>) {
 fn toggle_picking_camera(
     mut cmds: Commands,
     mut events: EventReader<EditorEvent>,
-    klod_cam: Query<Entity, With<OrbitCamera>>,
     editor_cam: Query<Entity, With<ActiveEditorCamera>>,
 ) -> Option<()> {
     for event in events.iter() {
         match event {
             EditorEvent::Toggle { now_active } => {
                 println!("toggle {now_active}");
-                let (to_enable, to_disable) = if *now_active {
-                    (editor_cam.get_single().ok()?, klod_cam.get_single().ok()?)
+                let cam = editor_cam.get_single().ok()?;
+                if *now_active {
+                    cmds.entity(cam)
+                        .insert_bundle(PickingCameraBundle::default())
+                        .insert(GizmoPickSource::default());
                 } else {
-                    (klod_cam.get_single().ok()?, editor_cam.get_single().ok()?)
+                    cmds.entity(cam)
+                        .remove_bundle::<PickingCameraBundle>()
+                        .remove::<GizmoPickSource>();
                 };
-                println!("changing picking camera");
-                cmds.entity(to_enable)
-                    .insert_bundle(PickingCameraBundle::default())
-                    .insert(GizmoPickSource::default());
-                cmds.entity(to_disable)
-                    .remove_bundle::<PickingCameraBundle>()
-                    .remove::<GizmoPickSource>();
             }
             _ => {}
         }

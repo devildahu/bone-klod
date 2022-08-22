@@ -1,3 +1,2 @@
-* remove mouse-picking from in-game camera
 * editor_pls panel to import models
 * editor_pls panel to give collider to models

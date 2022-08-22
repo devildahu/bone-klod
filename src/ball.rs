@@ -249,10 +249,6 @@ fn spawn_debug_scene(
         ..default()
     });
     camera.insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
-    #[cfg(feature = "editor")]
-    camera
-        .insert(bevy_transform_gizmo::GizmoPickSource::default())
-        .insert_bundle(bevy_mod_picking::PickingCameraBundle::default());
 }
 
 fn ball_input(
