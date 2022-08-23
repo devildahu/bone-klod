@@ -217,7 +217,38 @@ pub(crate) struct KlodScene {
     klod_spawn_transform: SerdeTransform,
     objects: Vec<PhysicsObject>,
 }
+#[derive(SystemParam)]
+struct KlodCopyQuery<'w, 's> {
+    cmds: Commands<'w, 's>,
+    assets: Res<'w, AssetServer>,
+    meshes: ResMut<'w, Assets<Mesh>>,
+    agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
+    scenery: Query<'w, 's, ObjectQuery<<SceneryData as Prefab>::Query>>,
+    empties: Query<'w, 's, ObjectQuery<<Empty as Prefab>::Query>>,
+}
 impl KlodScene {
+    pub(crate) fn copy_objects(objects: &[Entity], world: &mut World) {
+        let mut query = SystemState::<KlodCopyQuery>::new(world);
+        let KlodCopyQuery {
+            agglomerables,
+            scenery,
+            empties,
+            assets,
+            mut cmds,
+            mut meshes,
+        } = query.get_mut(world);
+        let o = objects;
+        let mut to_copy = Vec::new();
+        to_copy.extend(agglomerables.iter_many(o).map(|item| item.data(&assets)));
+        to_copy.extend(scenery.iter_many(o).map(|item| item.data(&assets)));
+        to_copy.extend(empties.iter_many(o).map(|item| item.data(&assets)));
+
+        for mut object in to_copy.into_iter() {
+            object.name = format!("Copy of {}", object.name);
+            object.spawn(&mut cmds, &assets, &mut meshes, false);
+        }
+        query.apply(world);
+    }
     fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod_spawn, klod }: &mut KlodSpawnQuery) {
         println!("Adding back entities from serialized scene: {:?}", &self);
         klod_spawn.0 = self.klod_spawn_transform.into();

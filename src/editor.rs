@@ -11,7 +11,8 @@ use bevy_editor_pls::{
     EditorEvent,
 };
 use bevy_editor_pls_default_windows::{
-    cameras::ActiveEditorCamera, hierarchy::picking::IgnoreEditorRayCast,
+    cameras::ActiveEditorCamera,
+    hierarchy::{picking::IgnoreEditorRayCast, HierarchyState, HierarchyWindow},
 };
 use bevy_inspector_egui::egui;
 use bevy_mod_picking::{DefaultPickingPlugins, PickingCameraBundle};
@@ -88,7 +89,10 @@ impl EditorWindow for SceneWindow {
     const NAME: &'static str = "Level Management";
 
     fn ui(world: &mut World, mut cx: EditorWindowContext, ui: &mut egui::Ui) {
-        let state = cx.state_mut::<SceneWindow>().unwrap();
+        let (state, hierarchy_state) = match cx.state_mut_pair::<SceneWindow, HierarchyWindow>() {
+            (Some(state), Some(hierarchy)) => (state, hierarchy),
+            _ => return,
+        };
 
         ui.horizontal_wrapped(|ui| {
             ui.vertical(|ui| {
@@ -161,9 +165,9 @@ impl EditorWindow for SceneWindow {
                 if ui.button("Add new prop").clicked() {
                     load_data(world, &state);
                 }
-                // if ui.button("Clone Selected").clicked() {
-                //     todo!()
-                // }
+                if ui.button("Copy selected").clicked() {
+                    copy_selected(world, hierarchy_state);
+                }
             });
         });
     }
@@ -177,6 +181,10 @@ fn file_name(filename: &str) -> PathBuf {
         &filename
     };
     root.join(filename)
+}
+fn copy_selected(world: &mut World, hierarchy: &HierarchyState) {
+    let to_copy: Vec<_> = hierarchy.selected.iter().collect();
+    KlodScene::copy_objects(&to_copy, world);
 }
 fn load_data(
     world: &mut World,
@@ -192,7 +200,7 @@ fn load_data(
     let mut system_state =
         SystemState::<(Commands, Res<AssetServer>, ResMut<Assets<Mesh>>)>::new(world);
     let (mut cmds, assets, mut meshes) = system_state.get_mut(world);
-    let data = if dbg!(&*spawn_name) == "" {
+    let data = if &*spawn_name == "" {
         let empty = Empty(SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) });
         ObjectType::Empty(empty)
     } else if *spawn_mass == 0.0 {

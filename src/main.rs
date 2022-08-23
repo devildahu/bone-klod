@@ -74,6 +74,7 @@ fn main() {
 
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin::default())
+        .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
         .add_plugin(audio::Plugin)
         .add_plugin(cam::Plugin)
