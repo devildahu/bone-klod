@@ -6,8 +6,12 @@ use bevy::{
         query::{QueryItem, ReadOnlyWorldQuery, WorldQuery, WorldQueryGats},
         system::{SystemParam, SystemState},
     },
-    prelude::*,
+    math::Vec3A,
+    prelude::{Plugin as BevyPlugin, *},
+    render::primitives::{Aabb, Sphere},
+    scene::{InstanceId, SceneInstance},
     ui::FocusPolicy,
+    utils::HashMap,
 };
 use bevy_editor_pls_default_windows::hierarchy::picking::IgnoreEditorRayCast;
 use bevy_mod_picking::{PickableMesh, Selection};
@@ -16,7 +20,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     ball::{Agglomerable, Scenery},
-    prefabs::{AggloData, Prefab, SceneryData},
+    prefabs::{AggloData, Prefab, SceneryData, SerdeCollider},
 };
 
 #[derive(Serialize, Debug, Deserialize)]
@@ -224,26 +228,28 @@ impl KlodScene {
         Ok(())
     }
 }
-/*
 // TODO: compute full scene AABB (probably not enough time for this jam)
-fn scene_aabb(
+fn add_scene_aabb(
     mut commands: Commands,
+    mut mesh_assets: ResMut<Assets<Mesh>>,
     scene_instances: Query<(Entity, &SceneInstance), Added<SceneInstance>>,
     scenes: Res<SceneSpawner>,
-    mut to_visit: Local<HashSet<(Entity, InstanceId)>>,
+    mut to_visit: Local<HashMap<Entity, InstanceId>>,
     meshes: Query<(&GlobalTransform, &Aabb), With<Handle<Mesh>>>,
 ) {
     for (entity, instance) in &scene_instances {
-        to_visit.insert((entity, **instance));
+        to_visit.insert(entity, **instance);
     }
     let mut visited = Vec::new();
     for (entity, to_visit) in to_visit.iter() {
-        if !scenes.instance_is_ready(*to_visit) {
-            continue;
-        }
+        let entities = match scenes.iter_instance_entities(*to_visit) {
+            Some(entities) if scenes.instance_is_ready(*to_visit) => entities,
+            _ => continue,
+        };
+        println!("bar");
         let mut min = Vec3A::splat(f32::MAX);
         let mut max = Vec3A::splat(f32::MIN);
-        for entity in scenes.iter_instance_entities(*to_visit) {
+        for entity in entities {
             if let Ok((transform, aabb)) = meshes.get(entity) {
                 // If the Aabb had not been rotated, applying the non-uniform scale would produce the
                 // correct bounds. However, it could very well be rotated and so we first convert to
@@ -258,11 +264,25 @@ fn scene_aabb(
             }
         }
         let aabb = Aabb::from_min_max(Vec3::from(min), Vec3::from(max));
-        visited.push((*to_visit, aabb));
+        visited.push((*entity, aabb));
     }
-    for (entity, visited) in visited.into_iter() {
-        commands.entity(entity).insert(aabb);
-        to_visit.remove(&visited);
+    for (entity, aabb) in visited.into_iter() {
+        println!("foo");
+        let collider = SerdeCollider::Cuboid { half_extents: aabb.half_extents.into() };
+        if aabb.min().min_element() != f32::MIN && aabb.max().max_element() != f32::MAX {
+            commands.entity(entity).insert_bundle((
+                Collider::from(collider.clone()),
+                mesh_assets.add(collider.into()),
+                aabb,
+            ));
+        }
+        to_visit.remove(&entity);
     }
 }
-*/
+
+pub(crate) struct Plugin;
+impl BevyPlugin for Plugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_to_stage(CoreStage::PostUpdate, add_scene_aabb);
+    }
+}

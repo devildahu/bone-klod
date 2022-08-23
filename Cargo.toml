@@ -37,8 +37,8 @@ bevy = { version = "0.8", default-features = false, features = [
 ] }
 bevy_rapier3d = { version = "0.16", path = "../../gitimpo/bevy_rapier/bevy_rapier3d" }
 bevy-ui-build-macros = { path = "../bevy-ui-build-macros" }
-bevy_editor_pls = { version = "0.1.1", optional = true , path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls" }
-bevy_editor_pls_default_windows = { version = "0.1.1", optional = true, path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls_default_windows"  }
+bevy_editor_pls = { version = "0.1", optional = true , path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls" }
+bevy_editor_pls_default_windows = { version = "0.1", optional = true, path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls_default_windows"  }
 bevy_mod_picking = { version = "0.8", optional = true }
 bevy_transform_gizmo = { version = "0.3.1", optional = true, path = "../../gitimpo/bevy_transform_gizmo" }
 bevy-inspector-egui = { version = "0.12", optional = true}

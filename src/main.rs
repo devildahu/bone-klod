@@ -48,7 +48,8 @@ fn main() {
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
 
     #[cfg(feature = "editor")]
-        app.add_plugin(bevy_scene_hook::HookPlugin);
+        app.add_plugin(bevy_scene_hook::HookPlugin)
+        .add_plugin(scene::Plugin);
     
     #[cfg(all(feature = "debug", not(feature = "editor")))]
     app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
