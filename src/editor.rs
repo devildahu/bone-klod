@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use bevy::{
     ecs::system::SystemState,
     prelude::{Plugin as BevyPlugin, *},
@@ -13,10 +15,12 @@ use bevy_editor_pls_default_windows::{
 };
 use bevy_inspector_egui::egui;
 use bevy_mod_picking::{DefaultPickingPlugins, PickingCameraBundle};
+use bevy_rapier3d::prelude::RapierConfiguration;
 use bevy_transform_gizmo::{GizmoPickSource, PickableGizmo, TransformGizmoPlugin};
 
 use crate::{
-    prefabs::{AggloData, SceneryData, SerdeCollider},
+    cam::OrbitCamera,
+    prefabs::{AggloData, Empty, SceneryData, SerdeCollider},
     scene::{KlodScene, ObjectType, PhysicsObject},
 };
 
@@ -28,21 +32,27 @@ fn _count_active_cameras(cams: Query<(&Camera, &Name)>) {
     println!("{cams:?} active cameras");
 }
 
-fn toggle_picking_camera(
+fn toggle_editor_active(
     mut cmds: Commands,
     mut events: EventReader<EditorEvent>,
+    mut rapier_config: ResMut<RapierConfiguration>,
+    mut orbit_cam: Query<&mut OrbitCamera>,
     editor_cam: Query<Entity, With<ActiveEditorCamera>>,
 ) -> Option<()> {
     for event in events.iter() {
         match event {
             EditorEvent::Toggle { now_active } => {
                 println!("toggle {now_active}");
+                let mut orbit_cam = orbit_cam.get_single_mut().ok()?;
+                orbit_cam.locked = *now_active;
                 let cam = editor_cam.get_single().ok()?;
                 if *now_active {
+                    rapier_config.physics_pipeline_active = false;
                     cmds.entity(cam)
                         .insert_bundle(PickingCameraBundle::default())
                         .insert(GizmoPickSource::default());
                 } else {
+                    rapier_config.physics_pipeline_active = true;
                     cmds.entity(cam)
                         .remove_bundle::<PickingCameraBundle>()
                         .remove::<GizmoPickSource>();
@@ -70,8 +80,8 @@ pub struct SceneWindowState {
     scene_save_result: Option<Result<(), Box<dyn std::error::Error + Send + Sync>>>,
 }
 
-const DEFAULT_FILENAME: &str = "scene.scn.ron";
-const DEFAULT_SCENE: &str = "untilted.glb";
+const DEFAULT_FILENAME: &str = "default.klodlvl";
+
 pub struct SceneWindow;
 impl EditorWindow for SceneWindow {
     type State = SceneWindowState;
@@ -80,106 +90,128 @@ impl EditorWindow for SceneWindow {
     fn ui(world: &mut World, mut cx: EditorWindowContext, ui: &mut egui::Ui) {
         let state = cx.state_mut::<SceneWindow>().unwrap();
 
-        let res = egui::TextEdit::singleline(&mut state.filename)
-            .hint_text(DEFAULT_FILENAME)
-            .desired_width(120.0)
-            .show(ui);
+        ui.horizontal_wrapped(|ui| {
+            ui.vertical(|ui| {
+                ui.set_width(140.0);
+                let res = egui::TextEdit::singleline(&mut state.filename)
+                    .hint_text(DEFAULT_FILENAME)
+                    .desired_width(140.0)
+                    .show(ui);
 
-        if res.response.changed() {
-            state.scene_save_result = None;
-        }
+                egui::Grid::new("Level Loader").show(ui, |ui| {
+                    if res.response.changed() {
+                        state.scene_save_result = None;
+                    }
 
-        ui.horizontal(|ui| {
-            let filename = if state.filename.is_empty() {
-                DEFAULT_FILENAME
-            } else {
-                &state.filename
-            };
-            if ui.button("Save").clicked() {
-                state.scene_save_result = Some(KlodScene::save(world, filename));
-            }
-            if ui.button("Load").clicked() {
-                state.scene_save_result = Some(KlodScene::load(world, filename));
-            }
-        });
+                    let filename = file_name(&state.filename);
+                    if ui.button("Save").clicked() {
+                        state.scene_save_result = Some(KlodScene::save(world, &filename));
+                    }
+                    if ui.button("Load").clicked() {
+                        state.scene_save_result = Some(KlodScene::load(world, &filename));
+                    }
+                    ui.end_row();
 
-        if let Some(status) = &state.scene_save_result {
-            match status {
-                Ok(()) => {
-                    ui.label(egui::RichText::new("Success!").color(egui::Color32::GREEN));
+                    match &state.scene_save_result {
+                        Some(Ok(())) => {
+                            ui.label(egui::RichText::new("Success!").color(egui::Color32::GREEN));
+                        }
+                        Some(Err(error)) => {
+                            ui.label(
+                                egui::RichText::new(error.to_string()).color(egui::Color32::RED),
+                            );
+                        }
+                        None => {}
+                    }
+                });
+            });
+            egui::Grid::new("Props management physics data").show(ui, |ui| {
+                ui.set_width(140.0);
+                ui.label("Name");
+                egui::TextEdit::singleline(&mut state.spawn_name)
+                    .hint_text("Physical Object")
+                    .desired_width(120.0)
+                    .show(ui);
+                ui.end_row();
+                ui.label("Mass");
+                let res = ui
+                    .add(egui::DragValue::new(&mut state.spawn_mass).clamp_range(0.0..=100_000.0));
+                res.on_hover_text("Set to 0 for a static landscape collider");
+                ui.end_row();
+                ui.label("Friction");
+                ui.add(
+                    egui::DragValue::new(&mut state.spawn_friction)
+                        .speed(0.05)
+                        .clamp_range(0.0..=2.0),
+                );
+                ui.end_row();
+                ui.label("Bouncy");
+                ui.add(
+                    egui::DragValue::new(&mut state.spawn_restitution)
+                        .speed(0.05)
+                        .clamp_range(0.0..=2.0),
+                );
+                ui.end_row();
+            });
+            ui.vertical(|ui| {
+                ui.set_width(160.0);
+                let res = ui.add(egui::TextEdit::singleline(&mut state.scene).desired_width(220.0));
+                res.on_hover_text("Should end with #Scene0, leave empty to load an empty");
+
+                if ui.button("Add new prop").clicked() {
+                    load_data(world, &state);
                 }
-                Err(error) => {
-                    ui.label(egui::RichText::new(error.to_string()).color(egui::Color32::RED));
-                }
-            }
-        }
-
-        ui.separator();
-
-        ui.horizontal(|ui| {
-            egui::TextEdit::singleline(&mut state.spawn_name)
-                .hint_text("Physical Object")
-                .desired_width(120.0)
-                .show(ui);
+                // if ui.button("Clone Selected").clicked() {
+                //     todo!()
+                // }
+            });
         });
-        ui.horizontal(|ui| {
-            ui.label("Mass");
-            let res =
-                ui.add(egui::DragValue::new(&mut state.spawn_mass).clamp_range(0.0..=100_000.0));
-            res.on_hover_text("Set to 0 for a static landscape collider");
-        });
-        ui.horizontal(|ui| {
-            ui.label("Friction");
-            ui.add(
-                egui::DragValue::new(&mut state.spawn_friction)
-                    .speed(0.05)
-                    .clamp_range(0.0..=2.0),
-            );
-        });
-        ui.horizontal(|ui| {
-            ui.label("Restitution");
-            ui.add(
-                egui::DragValue::new(&mut state.spawn_restitution)
-                    .speed(0.05)
-                    .clamp_range(0.0..=2.0),
-            );
-        });
-        egui::TextEdit::singleline(&mut state.scene)
-            .hint_text(DEFAULT_SCENE)
-            .desired_width(120.0)
-            .show(ui);
-        if ui.button("Add new prop").clicked() {
-            let mut system_state =
-                SystemState::<(Commands, Res<AssetServer>, ResMut<Assets<Mesh>>)>::new(world);
-            let (mut cmds, assets, mut meshes) = system_state.get_mut(world);
-            let mass = state.spawn_mass;
-            let data = if mass == 0.0 {
-                ObjectType::Scenery(SceneryData::new(
-                    SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) },
-                    state.spawn_friction,
-                    state.spawn_restitution,
-                ))
-            } else {
-                ObjectType::Agglomerable(AggloData::new(
-                    mass,
-                    SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) },
-                    state.spawn_friction,
-                    state.spawn_restitution,
-                ))
-            };
-            let data = PhysicsObject::new(
-                state.spawn_name.clone(),
-                state.scene.clone(),
-                default(),
-                data,
-            );
-            data.spawn(&mut cmds, &assets, &mut *meshes);
-            system_state.apply(world);
-        }
-        if ui.button("Clone Selected").clicked() {
-            todo!()
-        }
     }
+}
+
+fn file_name(filename: &str) -> PathBuf {
+    let root = crate::scene::get_base_path();
+    let filename = if filename.is_empty() {
+        DEFAULT_FILENAME
+    } else {
+        &filename
+    };
+    root.join(filename)
+}
+fn load_data(
+    world: &mut World,
+    SceneWindowState {
+        scene,
+        spawn_name,
+        spawn_mass,
+        spawn_restitution,
+        spawn_friction,
+        ..
+    }: &SceneWindowState,
+) {
+    let mut system_state =
+        SystemState::<(Commands, Res<AssetServer>, ResMut<Assets<Mesh>>)>::new(world);
+    let (mut cmds, assets, mut meshes) = system_state.get_mut(world);
+    let data = if dbg!(&*spawn_name) == "" {
+        let empty = Empty(SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) });
+        ObjectType::Empty(empty)
+    } else if *spawn_mass == 0.0 {
+        ObjectType::Scenery(SceneryData::new(
+            SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) },
+            *spawn_friction,
+            *spawn_restitution,
+        ))
+    } else {
+        ObjectType::Agglomerable(AggloData::new(
+            *spawn_mass,
+            SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) },
+            *spawn_friction,
+            *spawn_restitution,
+        ))
+    };
+    let data = PhysicsObject::new(spawn_name.clone(), scene.clone(), default(), data);
+    data.spawn(&mut cmds, &assets, &mut *meshes, true);
+    system_state.apply(world);
 }
 
 fn ignore_transform_gizmo(mut cmds: Commands, gizmo_elems: Query<Entity, Added<PickableGizmo>>) {
@@ -191,11 +223,14 @@ fn ignore_transform_gizmo(mut cmds: Commands, gizmo_elems: Query<Entity, Added<P
 pub struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
+        use bevy_editor_pls::controls::ControlsWindow;
+        use bevy_editor_pls_default_windows::inspector::InspectorWindow;
         app.add_plugins(DefaultPickingPlugins)
             .add_plugin(TransformGizmoPlugin::default())
             .add_plugin(EditorPlugin)
             .add_editor_window::<SceneWindow>()
+            .set_default_panels::<ControlsWindow, SceneWindow, InspectorWindow>()
             .add_system_to_stage(CoreStage::PostUpdate, ignore_transform_gizmo)
-            .add_system(err_sys!(toggle_picking_camera));
+            .add_system(err_sys!(toggle_editor_active));
     }
 }

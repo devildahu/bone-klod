@@ -29,6 +29,8 @@ pub(crate) struct OrbitCamera {
     /// In radians, the vertical angle of the camera
     y_rot: f32,
     follows: Entity,
+    /// Prevent camera from moving with mouse.
+    pub locked: bool,
 }
 
 impl OrbitCamera {
@@ -39,6 +41,7 @@ impl OrbitCamera {
         OrbitCamera {
             x_rot: 0.0,
             y_rot: std::f32::consts::FRAC_PI_2,
+            locked: false,
             distance: CAM_DIST,
             follows: entity,
         }
@@ -50,7 +53,10 @@ fn update_camera_transform(
     phys: Res<RapierContext>,
     followed: Query<&Transform, Without<OrbitCamera>>,
 ) {
-    let (camera, mut transform) = query.get_single_mut().unwrap();
+    let (camera, mut transform) = match query.get_single_mut() {
+        Ok(item) => item,
+        Err(_) => return,
+    };
     let followed = followed.get(camera.follows).unwrap();
     let followed_pos = followed.translation;
     // This is actually the crux of the orbit camera, this enables the
@@ -81,35 +87,10 @@ fn update_camera_transform(
     };
 }
 
-#[derive(PartialEq, Eq)]
-struct LockCam(bool);
-impl LockCam {
-    fn locked(&self) -> bool {
-        self.0
-    }
-    fn toggle(&mut self) {
-        self.0 = !self.0
-    }
-}
-impl Default for LockCam {
-    fn default() -> Self {
-        LockCam(cfg!(feature = "editor"))
-    }
-}
-
 fn camera_movement(
-    // time: Res<Time>,
     mut events: EventReader<MouseMotion>,
-    keyboard: Res<Input<KeyCode>>,
     mut query: Query<&mut OrbitCamera, With<Camera>>,
-    mut lock_cam: Local<LockCam>,
 ) {
-    if keyboard.just_pressed(KeyCode::L) {
-        lock_cam.toggle();
-    }
-    if lock_cam.locked() {
-        return;
-    }
     let mut camera = match query.get_single_mut() {
         Ok(cam) => cam,
         Err(msg) => {
@@ -117,11 +98,13 @@ fn camera_movement(
             return;
         }
     };
+    if camera.locked {
+        return;
+    }
     let delta = events.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
     if delta != Vec2::ZERO {
         let xy = delta * CAM_SPEED;
         camera.x_rot -= xy.x;
-        // The max(MIN) is counterintuitive, but correct
         camera.y_rot = (camera.y_rot - xy.y).max(CAM_Y_MIN).min(CAM_Y_MAX);
     }
 }

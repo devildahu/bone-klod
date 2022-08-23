@@ -196,15 +196,16 @@ impl Prefab for SceneryData {
     fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>) {
         cmds.insert_bundle((
             meshes.add(self.collider.clone().into()),
+            RigidBody::Fixed,
             Scenery,
             Collider::from(self.collider),
             Friction {
                 coefficient: self.friction,
-                combine_rule: CoefficientCombineRule::Min,
+                combine_rule: CoefficientCombineRule::Max,
             },
             Restitution {
                 coefficient: self.restitution,
-                combine_rule: CoefficientCombineRule::Min,
+                combine_rule: CoefficientCombineRule::Max,
             },
         ));
     }
@@ -246,13 +247,34 @@ impl AggloBundle {
             collision_group: AGGLO_COLLISION_GROUP,
             friction: Friction {
                 coefficient: friction,
-                combine_rule: CoefficientCombineRule::Min,
+                combine_rule: CoefficientCombineRule::Max,
             },
             restitution: Restitution {
                 coefficient: restitution,
-                combine_rule: CoefficientCombineRule::Min,
+                combine_rule: CoefficientCombineRule::Max,
             },
         }
+    }
+}
+
+#[derive(Component)]
+pub(crate) struct SceneryEmpty;
+
+#[derive(Serialize, Debug, Deserialize)]
+pub(crate) struct Empty(pub(crate) SerdeCollider);
+impl Prefab for Empty {
+    type Query = (&'static Collider, &'static SceneryEmpty);
+
+    fn from_query(item: &QueryItem<Self::Query>) -> Self {
+        Empty(item.0.as_typed_shape().into())
+    }
+    fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>) {
+        cmds.insert_bundle((
+            meshes.add(self.0.clone().into()),
+            RigidBody::Fixed,
+            SceneryEmpty,
+            Collider::from(self.0),
+        ));
     }
 }
 

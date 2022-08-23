@@ -7,13 +7,13 @@ mod ball;
 #[cfg(feature = "editor")]
 mod editor;
 mod prefabs;
-#[cfg(feature = "editor")]
 mod scene;
 mod state;
 mod system_helper;
 mod ui;
 
 use bevy_rapier3d::{render::RapierDebugRenderPlugin, prelude::{RapierPhysicsPlugin, NoUserData}};
+use scene::KlodScene;
 use state::GameState;
 
 /// Event to trigger a game over.
@@ -34,6 +34,12 @@ fn main() {
     use system_helper::EasySystemSetCtor;
 
     let mut app = App::new();
+    
+    let initial_state = if cfg!(feature = "editor") {
+        GameState::Playing
+    } else {
+        GameState::MainMenu
+    };
 
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(WindowDescriptor {
@@ -42,7 +48,7 @@ fn main() {
             present_mode: bevy::window::PresentMode::Immediate, 
             ..default()
         })
-        .add_state(GameState::MainMenu)
+        .add_state(initial_state)
         .add_plugins(DefaultPlugins);
 
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
@@ -69,13 +75,13 @@ fn main() {
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin::default())
         .add_plugin(animate::Plugin)
+        .add_plugin(audio::Plugin)
         .add_plugin(cam::Plugin)
         .add_plugin(ball::Plugin)
-        .add_plugin(audio::Plugin)
         .add_plugin(ui::Plugin)
         .add_event::<GameOver>()
         .add_system_set(GameState::WaitLoaded.on_exit(cleanup_marked::<WaitRoot>))
-        .add_startup_system(setup);
+        .add_startup_system(setup.exclusive_system());
 
     app.run();
 }
@@ -89,10 +95,11 @@ pub fn cleanup_marked<T: Component>(mut cmds: Commands, query: Query<Entity, Wit
 }
 
 fn setup(
-    mut ambiant_light: ResMut<AmbientLight>,
-    // mut cmds: Commands,
-    // mut audio_events: EventWriter<audio::AudioRequest>,
+    world: &mut World,
 ) {
-    *ambiant_light = AmbientLight { color: Color::WHITE, brightness: 1.0 };
-    // audio_events.send(audio::AudioRequest::StartMusic);
+    let mut ambiant_light = world.resource_mut::<AmbientLight>();
+    ambiant_light.color = Color::WHITE;
+    ambiant_light.brightness = 1.0;
+    let root = scene::get_base_path();
+    KlodScene::load(world, dbg!(root.join("default.klodlvl"))).unwrap();
 }

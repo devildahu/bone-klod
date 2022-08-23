@@ -27,7 +27,7 @@ impl Default for ChannelVolumes {
 
 struct AudioAssets {
     wood_clink: Option<Handle<AudioSink>>,
-    music: Handle<AudioSink>,
+    music: Option<Handle<AudioSink>>,
 }
 impl FromWorld for AudioAssets {
     fn from_world(world: &mut World) -> Self {
@@ -37,7 +37,7 @@ impl FromWorld for AudioAssets {
         let mk_loop = |file: &str| {
             sinks.get_handle(audio.play_with_settings(assets.load(file), PlaybackSettings::LOOP))
         };
-        Self { music: mk_loop("music.ogg"), wood_clink: None }
+        Self { music: None, wood_clink: None }
     }
 }
 trait AudioExt {
@@ -90,14 +90,18 @@ fn play_audio(
             }
             AudioRequest::SetVolume(AudioChannel::Music, volume) if *volume != volumes.music => {
                 volumes.music = *volume;
-                sinks.set_volume(&assets.music, volume * volumes.master);
+                if let Some(music) = &assets.music {
+                    sinks.set_volume(music, volume * volumes.master);
+                }
             }
             AudioRequest::SetVolume(AudioChannel::Master, volume) if *volume != volumes.master => {
                 volumes.master = *volume;
                 if let Some(clink) = &assets.wood_clink {
                     sinks.set_volume(clink, volume * volumes.sfx);
                 }
-                sinks.set_volume(&assets.music, volume * volumes.music);
+                if let Some(music) = &assets.music {
+                    sinks.set_volume(music, volume * volumes.music);
+                }
             }
             // Volume is equal to what it is requested to be changed to
             AudioRequest::SetVolume(_, _) => {}

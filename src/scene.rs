@@ -1,4 +1,7 @@
-use std::{error::Error, path::Path};
+use std::{
+    error::Error,
+    path::{Path, PathBuf},
+};
 
 use bevy::{
     asset::AssetPath,
@@ -13,14 +16,17 @@ use bevy::{
     ui::FocusPolicy,
     utils::HashMap,
 };
+#[cfg(feature = "editor")]
 use bevy_editor_pls_default_windows::hierarchy::picking::IgnoreEditorRayCast;
+#[cfg(feature = "editor")]
 use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ball::{Agglomerable, Scenery},
-    prefabs::{AggloData, Prefab, SceneryData, SerdeCollider},
+    ball::{spawn_klod, Agglomerable, Klod, Scenery},
+    cam::OrbitCamera,
+    prefabs::{AggloData, Empty, Prefab, SceneryData, SceneryEmpty, SerdeCollider},
 };
 
 #[derive(Serialize, Debug, Deserialize)]
@@ -63,7 +69,7 @@ where
     for<'w> <Q as WorldQueryGats<'w>>::Fetch: Clone,
 {
     name: Option<&'static Name>,
-    scene: &'static Handle<Scene>,
+    scene: Option<&'static Handle<Scene>>,
     transform: &'static Transform,
     object: Q,
 }
@@ -75,12 +81,16 @@ where
 {
     fn data(&self, assets: &AssetServer) -> PhysicsObject {
         PhysicsObject {
-            asset_path: assets.get_handle_path(self.scene).map(|t| t.to_owned()),
+            asset_path: self
+                .scene
+                .and_then(|h| assets.get_handle_path(h))
+                .map(|t| t.to_owned()),
             transform: (*self.transform).into(),
             object: (&self.object).into(),
             name: self
                 .name
-                .map_or_else(|| "Unamed Physics Object".to_owned(), |n| n.to_string()),
+                .and_then(|name| (name.as_str() != "").then(|| name.to_string()))
+                .unwrap_or_else(|| "Unamed Physics Object".to_owned()),
         }
     }
 }
@@ -94,7 +104,7 @@ impl PhysicsObject {
     ) -> Self {
         Self {
             name,
-            asset_path: Some(AssetPath::new(asset_path.into(), Some("Scene0".to_owned()))),
+            asset_path: Some(AssetPath::from(&asset_path).to_owned()),
             transform: transform.into(),
             object,
         }
@@ -105,17 +115,21 @@ impl PhysicsObject {
         cmds: &mut Commands,
         assets: &AssetServer,
         meshes: &mut Assets<Mesh>,
+        compute_aabb: bool,
     ) {
         let asset_path = match self.asset_path {
             Some(path) => path,
             None => return,
         };
         let mut object = cmds.spawn_bundle(SceneBundle {
-            scene: dbg!(assets.load(asset_path)),
+            scene: assets.load(asset_path),
             transform: self.transform.into(),
             ..default()
         });
         object.insert(Name::new(self.name));
+        if compute_aabb {
+            object.insert(ComputeDefaultAabb);
+        }
         #[cfg(feature = "editor")]
         object.insert_bundle((
             bevy_scene_hook::SceneHook::new(|_, cmds| {
@@ -128,6 +142,7 @@ impl PhysicsObject {
             bevy_transform_gizmo::GizmoTransformable,
         ));
         match self.object {
+            ObjectType::Empty(empty) => empty.spawn(&mut object, meshes),
             ObjectType::Scenery(scenery_data) => scenery_data.spawn(&mut object, meshes),
             ObjectType::Agglomerable(agglo_data) => agglo_data.spawn(&mut object, meshes),
         };
@@ -138,10 +153,16 @@ impl PhysicsObject {
 pub(crate) enum ObjectType {
     Scenery(SceneryData),
     Agglomerable(AggloData),
+    Empty(Empty),
 }
 impl<'a, 'w> From<&'a (&'w Scenery, &'w Collider, &'w Friction, &'w Restitution)> for ObjectType {
     fn from(item: &'a QueryItem<'w, <SceneryData as Prefab>::Query>) -> Self {
         ObjectType::Scenery(Prefab::from_query(item))
+    }
+}
+impl<'a, 'w> From<&'a (&'w Collider, &'w SceneryEmpty)> for ObjectType {
+    fn from(item: &'a QueryItem<'w, <Empty as Prefab>::Query>) -> Self {
+        ObjectType::Empty(Prefab::from_query(item))
     }
 }
 
@@ -158,11 +179,21 @@ impl<'a, 'w>
     }
 }
 
+#[derive(Default)]
+pub(crate) struct KlodSpawnTransform(Transform);
+impl KlodSpawnTransform {
+    pub(crate) fn get(&self) -> Transform {
+        self.0
+    }
+}
+
 #[derive(SystemParam)]
 struct KlodSceneQuery<'w, 's> {
     assets: Res<'w, AssetServer>,
     agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
     scenery: Query<'w, 's, ObjectQuery<<SceneryData as Prefab>::Query>>,
+    empties: Query<'w, 's, ObjectQuery<<Empty as Prefab>::Query>>,
+    klod_spawn: Res<'w, KlodSpawnTransform>,
 }
 #[derive(SystemParam)]
 struct KlodSweepQuery<'w, 's> {
@@ -178,35 +209,64 @@ struct KlodSpawnQuery<'w, 's> {
     cmds: Commands<'w, 's>,
     assets: Res<'w, AssetServer>,
     meshes: ResMut<'w, Assets<Mesh>>,
+    klod_spawn: ResMut<'w, KlodSpawnTransform>,
+    klod: Query<'w, 's, Entity, With<Klod>>,
 }
 #[derive(Serialize, Deserialize, Debug)]
-pub(crate) struct KlodScene(Vec<PhysicsObject>);
+pub(crate) struct KlodScene {
+    klod_spawn_transform: SerdeTransform,
+    objects: Vec<PhysicsObject>,
+}
 impl KlodScene {
-    fn spawn(self, KlodSpawnQuery { cmds, assets, meshes }: &mut KlodSpawnQuery) {
+    fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod_spawn, klod }: &mut KlodSpawnQuery) {
         println!("Adding back entities from serialized scene: {:?}", &self);
-        for object in self.0.into_iter() {
-            object.spawn(cmds, assets, meshes);
+        klod_spawn.0 = self.klod_spawn_transform.into();
+
+        let klod = if let Ok(klod) = klod.get_single() {
+            klod
+        } else {
+            let klod = spawn_klod(cmds, assets);
+            cmds.spawn_bundle(Camera3dBundle {
+                transform: Transform::from_xyz(-10.0, 2.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
+                ..default()
+            })
+            .insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
+            klod
+        };
+        cmds.entity(klod).insert(klod_spawn.0);
+
+        for object in self.objects.into_iter() {
+            object.spawn(cmds, assets, meshes, false);
         }
     }
-    fn read(KlodSceneQuery { assets, agglomerables, scenery }: &KlodSceneQuery) -> Self {
-        let mut scene = Vec::with_capacity(agglomerables.iter().len() + scenery.iter().len());
-        scene.extend(agglomerables.iter().map(|item| item.data(assets)));
-        scene.extend(scenery.iter().map(|item| item.data(assets)));
-        KlodScene(scene)
+    fn read(
+        KlodSceneQuery {
+            assets,
+            agglomerables,
+            scenery,
+            klod_spawn,
+            empties,
+        }: &KlodSceneQuery,
+    ) -> Self {
+        let mut objects = Vec::with_capacity(agglomerables.iter().len() + scenery.iter().len());
+        objects.extend(agglomerables.iter().map(|item| item.data(assets)));
+        objects.extend(scenery.iter().map(|item| item.data(assets)));
+        objects.extend(empties.iter().map(|item| item.data(assets)));
+        KlodScene { objects, klod_spawn_transform: klod_spawn.0.into() }
     }
 
     pub(crate) fn load(
         world: &mut World,
         scene_path: impl AsRef<Path>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let file = std::fs::File::open(scene_path)?;
         let mut system_state = SystemState::<KlodSweepQuery>::new(world);
         let to_sweep = system_state.get(world).to_sweep();
         for entity in to_sweep.into_iter() {
             world.entity_mut(entity).despawn_recursive();
         }
         let mut system_state = SystemState::<KlodSpawnQuery>::new(world);
-        let file = std::fs::read_to_string(scene_path)?;
-        let scene: KlodScene = ron::from_str(&file)?;
+        let scene: KlodScene = ron::de::from_reader(file)?;
         let mut query = system_state.get_mut(world);
         scene.spawn(&mut query);
         system_state.apply(world);
@@ -228,25 +288,31 @@ impl KlodScene {
         Ok(())
     }
 }
-// TODO: compute full scene AABB (probably not enough time for this jam)
+
+#[derive(Component)]
+struct ComputeDefaultAabb;
+
 fn add_scene_aabb(
     mut commands: Commands,
     mut mesh_assets: ResMut<Assets<Mesh>>,
-    scene_instances: Query<(Entity, &SceneInstance), Added<SceneInstance>>,
+    scene_instances: Query<
+        (Entity, &SceneInstance, &Transform),
+        (Added<SceneInstance>, With<ComputeDefaultAabb>),
+    >,
     scenes: Res<SceneSpawner>,
-    mut to_visit: Local<HashMap<Entity, InstanceId>>,
+    mut to_visit: Local<HashMap<Entity, (InstanceId, Vec3A)>>,
     meshes: Query<(&GlobalTransform, &Aabb), With<Handle<Mesh>>>,
 ) {
-    for (entity, instance) in &scene_instances {
-        to_visit.insert(entity, **instance);
+    for (entity, instance, transform) in &scene_instances {
+        to_visit.insert(entity, (**instance, transform.scale.into()));
+        commands.entity(entity).remove::<ComputeDefaultAabb>();
     }
     let mut visited = Vec::new();
-    for (entity, to_visit) in to_visit.iter() {
+    for (entity, (to_visit, scale)) in to_visit.iter() {
         let entities = match scenes.iter_instance_entities(*to_visit) {
             Some(entities) if scenes.instance_is_ready(*to_visit) => entities,
             _ => continue,
         };
-        println!("bar");
         let mut min = Vec3A::splat(f32::MAX);
         let mut max = Vec3A::splat(f32::MIN);
         for entity in entities {
@@ -264,11 +330,11 @@ fn add_scene_aabb(
             }
         }
         let aabb = Aabb::from_min_max(Vec3::from(min), Vec3::from(max));
-        visited.push((*entity, aabb));
+        visited.push((*entity, (aabb, *scale)));
     }
-    for (entity, aabb) in visited.into_iter() {
-        println!("foo");
-        let collider = SerdeCollider::Cuboid { half_extents: aabb.half_extents.into() };
+    for (entity, (aabb, scale)) in visited.into_iter() {
+        let extents = aabb.half_extents / scale;
+        let collider = SerdeCollider::Cuboid { half_extents: extents.into() };
         if aabb.min().min_element() != f32::MIN && aabb.max().max_element() != f32::MAX {
             commands.entity(entity).insert_bundle((
                 Collider::from(collider.clone()),
@@ -280,9 +346,37 @@ fn add_scene_aabb(
     }
 }
 
+fn fit_pickbox_to_collider(
+    colliders: Query<(&Collider, &Handle<Mesh>), Changed<Collider>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    for (collider, mesh) in &colliders {
+        if let Some(mesh) = meshes.get_mut(mesh) {
+            *mesh = SerdeCollider::from(collider.as_typed_shape()).into();
+        }
+    }
+}
+
+/// Returns the base path of the assets directory, which is normally the executable's parent
+/// directory.
+///
+/// If the `CARGO_MANIFEST_DIR` environment variable is set, then its value will be used
+/// instead. It's set by cargo when running with `cargo run`.
+pub(crate) fn get_base_path() -> PathBuf {
+    if let Ok(manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
+        PathBuf::from(manifest_dir)
+    } else {
+        let run = || Some(std::env::current_exe().ok()?.parent()?.to_owned());
+        run().unwrap()
+    }
+    .join("assets")
+}
+
 pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
-        app.add_system_to_stage(CoreStage::PostUpdate, add_scene_aabb);
+        app.init_resource::<KlodSpawnTransform>()
+            .add_system_to_stage(CoreStage::PostUpdate, add_scene_aabb)
+            .add_system(fit_pickbox_to_collider);
     }
 }

@@ -1,26 +1,17 @@
 use bevy::prelude::{Plugin as BevyPlugin, *};
-#[cfg(feature = "editor")]
-use bevy::ui::FocusPolicy;
 use bevy_debug_text_overlay::screen_print;
-#[cfg(feature = "editor")]
-use bevy_editor_pls_default_windows::hierarchy::picking::IgnoreEditorRayCast;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
-#[cfg(feature = "editor")]
-use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
 
-#[cfg(feature = "editor")]
-use bevy_scene_hook::SceneHook;
-
-use crate::{cam::OrbitCamera, prefabs::AggloBundle, state::GameState};
+use crate::{cam::OrbitCamera, prefabs::AggloBundle, scene::KlodSpawnTransform, state::GameState};
 
 const INPUT_IMPULSE: f32 = 3.0;
 const KLOD_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b0100, !0b0100);
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
-struct Klod {
+pub(crate) struct Klod {
     weight: f32,
 }
 
@@ -61,8 +52,7 @@ impl KlodElemBundle {
     }
 }
 
-pub(crate) fn spawn_klod(cmds: &mut Commands, position: Vec3) -> Entity {
-    let transform = Transform::from_translation(position);
+pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Entity {
     cmds.spawn_bundle((
         Klod { weight: 10.0 },
         RigidBody::Dynamic,
@@ -71,7 +61,7 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, position: Vec3) -> Entity {
         Name::new("Klod"),
         KLOD_COLLISION_GROUP,
     ))
-    .insert_bundle(SpatialBundle::from_transform(transform))
+    .insert_bundle(SpatialBundle::default())
     .with_children(|cmds| {
         let klod = cmds.parent_entity();
         cmds.spawn_bundle(KlodElemBundle::new(
@@ -80,14 +70,19 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, position: Vec3) -> Entity {
             Collider::ball(3.0),
             default(),
             Friction {
-                coefficient: 0.9,
-                combine_rule: CoefficientCombineRule::Min,
+                coefficient: 0.3,
+                combine_rule: CoefficientCombineRule::Max,
             },
             Restitution {
-                coefficient: 0.9,
-                combine_rule: CoefficientCombineRule::Min,
+                coefficient: 0.2,
+                combine_rule: CoefficientCombineRule::Max,
             },
         ));
+        cmds.spawn_bundle(SceneBundle {
+            scene: asset_server.load("klod.glb#Scene0"),
+            transform: Transform::from_scale(Vec3::splat(3.2)),
+            ..Default::default()
+        });
     })
     .id()
 }
@@ -183,89 +178,9 @@ fn shlurp_agglomerable(
     }
 }
 
-fn spawn_debug_scene(
-    mut cmds: Commands,
-    assets: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut mats: ResMut<Assets<StandardMaterial>>,
-) {
-    #[cfg(feature = "editor")]
-    let pickable = || {
-        (
-            SceneHook::new(|_, cmds| {
-                cmds.insert(IgnoreEditorRayCast);
-            }),
-            PickableMesh::default(),
-            Interaction::default(),
-            FocusPolicy::default(),
-            Selection::default(),
-        )
-    };
-    let mut plane = cmds.spawn_bundle(PbrBundle {
-        material: mats.add(StandardMaterial {
-            base_color_texture: Some(assets.load("garbage.png")),
-            perceptual_roughness: 0.6,
-            metallic: 0.6,
-            ..default()
-        }),
-        mesh: meshes.add(shape::Box::new(200.0, 2.0, 200.0).into()),
-        ..default()
-    });
-    plane.insert_bundle((
-        Name::new("Plane"),
-        Scenery,
-        RigidBody::Fixed,
-        Collider::cuboid(100.0, 1.0, 100.0),
-    ));
-    #[cfg(feature = "editor")]
-    plane
-        .insert_bundle(pickable())
-        .insert(bevy_transform_gizmo::GizmoTransformable);
-
-    let mut ball = cmds.spawn_bundle(PbrBundle {
-        material: mats.add(StandardMaterial { base_color: Color::RED, ..default() }),
-        mesh: meshes.add(shape::Icosphere::default().into()),
-        transform: Transform::from_xyz(-5.0, 3.0, -5.0),
-        ..default()
-    });
-    ball.insert(Name::new("Red Ball"))
-        .insert_bundle(AggloBundle::new(200.0, Collider::ball(1.0), 0.9, 0.9));
-    #[cfg(feature = "editor")]
-    ball.insert_bundle(pickable())
-        .insert(bevy_transform_gizmo::GizmoTransformable);
-
-    // TODO: spawn invisible mesh encompassing the whole scene for selection purpose
-    let mut cube = cmds.spawn_bundle(SceneBundle {
-        scene: assets.load("untitled.glb#Scene0"),
-        transform: Transform::from_xyz(5.0, 3.0, 5.0),
-        ..default()
-    });
-    cube.insert_bundle((
-        Name::new("Green Cube"),
-        meshes.add(shape::Icosphere::default().into()),
-    ))
-    .insert_bundle(AggloBundle::new(
-        2.0,
-        Collider::cuboid(1.0, 1.0, 1.0),
-        0.9,
-        0.9,
-    ));
-    #[cfg(feature = "editor")]
-    cube.insert_bundle(pickable())
-        .insert(bevy_transform_gizmo::GizmoTransformable);
-
-    let klod = spawn_klod(&mut cmds, Vec3::new(0.0, 3.0, 0.0));
-
-    // Camera
-    let mut camera = cmds.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_xyz(-10.0, 2.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
-    camera.insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
-}
-
 fn ball_input(
     keys: Res<Input<KeyCode>>,
+    default_klod_position: Res<KlodSpawnTransform>,
     mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity), With<Klod>>,
     camera: Query<&OrbitCamera>,
 ) {
@@ -286,7 +201,7 @@ fn ball_input(
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
     if keys.just_pressed(KeyCode::Space) {
-        *transform = Transform::from_xyz(0.0, 3.0, 0.0);
+        *transform = default_klod_position.get();
         *velocity = Velocity::default();
     }
 }
@@ -299,13 +214,11 @@ impl BevyPlugin for Plugin {
             .register_inspectable::<KlodElem>()
             .register_inspectable::<Agglomerable>();
 
-        app.add_event::<AgglomerateToKlod>()
-            .add_system_set(
-                SystemSet::on_update(GameState::Playing)
-                    .with_system(ball_input)
-                    .with_system(shlurp_agglomerable)
-                    .with_system(agglo_to_klod.after(shlurp_agglomerable)),
-            )
-            .add_startup_system(spawn_debug_scene);
+        app.add_event::<AgglomerateToKlod>().add_system_set(
+            SystemSet::on_update(GameState::Playing)
+                .with_system(ball_input)
+                .with_system(shlurp_agglomerable)
+                .with_system(agglo_to_klod.after(shlurp_agglomerable)),
+        );
     }
 }
