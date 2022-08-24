@@ -12,12 +12,14 @@ use bevy_editor_pls::{
 };
 use bevy_editor_pls_default_windows::{
     cameras::ActiveEditorCamera,
-    hierarchy::{picking::IgnoreEditorRayCast, HierarchyState, HierarchyWindow},
+    hierarchy::{picking::IgnoreEditorRayCast, HideInEditor, HierarchyState, HierarchyWindow},
 };
 use bevy_inspector_egui::egui;
 use bevy_mod_picking::{DefaultPickingPlugins, PickingCameraBundle};
-use bevy_rapier3d::prelude::RapierConfiguration;
-use bevy_transform_gizmo::{GizmoPickSource, PickableGizmo, TransformGizmoPlugin};
+use bevy_rapier3d::prelude::{DebugLinesMesh, RapierConfiguration};
+use bevy_transform_gizmo::{
+    GizmoPickSource, InternalGizmoCamera, PickableGizmo, TransformGizmoPlugin,
+};
 
 use crate::{
     cam::OrbitCamera,
@@ -39,6 +41,7 @@ fn toggle_editor_active(
     mut rapier_config: ResMut<RapierConfiguration>,
     mut orbit_cam: Query<&mut OrbitCamera>,
     editor_cam: Query<Entity, With<ActiveEditorCamera>>,
+    mut gizmo_camera: Query<&mut Camera, With<InternalGizmoCamera>>,
 ) -> Option<()> {
     for event in events.iter() {
         match event {
@@ -57,6 +60,8 @@ fn toggle_editor_active(
                     cmds.entity(cam)
                         .remove_bundle::<PickingCameraBundle>()
                         .remove::<GizmoPickSource>();
+                    let mut gizmo_camera = gizmo_camera.get_single_mut().ok()?;
+                    gizmo_camera.is_active = false;
                 };
             }
             _ => {}
@@ -228,6 +233,14 @@ fn ignore_transform_gizmo(mut cmds: Commands, gizmo_elems: Query<Entity, Added<P
     }
 }
 
+fn ignore_rapier_wireframes(
+    mut cmds: Commands,
+    to_ignore: Query<Entity, (With<DebugLinesMesh>, Without<HideInEditor>)>,
+) {
+    to_ignore.for_each(|entity| {
+        cmds.entity(entity).insert(HideInEditor);
+    });
+}
 pub struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
@@ -239,6 +252,7 @@ impl BevyPlugin for Plugin {
             .add_editor_window::<SceneWindow>()
             .set_default_panels::<ControlsWindow, SceneWindow, InspectorWindow>()
             .add_system_to_stage(CoreStage::PostUpdate, ignore_transform_gizmo)
+            .add_system(ignore_rapier_wireframes)
             .add_system(err_sys!(toggle_editor_active));
     }
 }
