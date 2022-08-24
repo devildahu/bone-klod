@@ -1,0 +1,143 @@
+(
+ klod_spawn_transform: (
+  rotation: (0.0, 0.0, 0.0, 1.0),
+  scale: (1.0, 1.0, 1.0),
+  translation: (0.0, 9.0, 0.0),
+ ),
+ objects: [
+  (
+   name: "Bump",
+   asset_path: Some((
+    path: "",
+    label: None,
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (0.0, 0.0, -53.468937),
+   ),
+   object: Scenery((
+    collider: Ball(
+     radius: 7.6,
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "Cylinder Bump",
+   asset_path: Some((
+    path: "",
+    label: None,
+   )),
+   transform: (
+    rotation: (0.15647227, -0.6895917, 0.68956405, 0.15646446),
+    scale: (0.99999994, 0.9999998, 0.9999999),
+    translation: (-46.27192, -4.2119827, 0.0),
+   ),
+   object: Scenery((
+    collider: Cylinder(
+     half_height: 42.3,
+     radius: 16.2,
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "Floor",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (5.0, 1.0, 5.0),
+    translation: (0.0, -0.6561203, -3.7772293),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (20.7, 0.2, 20.7),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "wall1",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.64535606, 0.76388186),
+    scale: (1.0000001, 1.0000001, 5.0),
+    translation: (104.89821, 18.97474, -3.7772293),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (20.7, 0.2, 20.7),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "wall2",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (-0.524936, -0.48144996, -0.51911056, -0.47241127),
+    scale: (0.9999997, 0.99999994, 5.0),
+    translation: (-0.94945526, 18.97474, 99.480606),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (20.7, 0.2, 20.7),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "wall4",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.45761067, 0.5416519, 0.4550601, 0.5386335),
+    scale: (0.99999964, 0.9999999, 4.999998),
+    translation: (-0.94945526, 18.97474, -109.688324),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (20.7, 0.2, 20.7),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "wall3",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (-0.64535224, -0.7638773, 0.0022360422, 0.0026466448),
+    scale: (1.0, 1.0, 5.0),
+    translation: (-102.668076, 18.97474, -3.7772293),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (20.7, 0.2, 20.7),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+ ],
+)

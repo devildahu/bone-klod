@@ -12,35 +12,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000026430803, 0.89834344, 0.000000044288836, 0.43929386),
+    rotation: (0.00000034117724, 0.89834344, -0.00000014509742, 0.43929386),
     scale: (0.9999999, 1.0, 0.9999999),
-    translation: (9.553553, -18.60877, -72.606155),
+    translation: (9.553541, -18.608772, -72.606155),
    ),
    object: Agglomerable((
     mass: 20.0,
     collider: Cuboid(
-     half_extents: (1.1999998, 1.1, 1.1999941),
+     half_extents: (1.1999997, 1.1, 1.199994),
     ),
     friction: 0.65,
-    restitution: 0.0,
-   )),
-  ),
-  (
-   name: "Ramp Right",
-   asset_path: Some((
-    path: "",
-    label: None,
-   )),
-   transform: (
-    rotation: (-0.20209198, 0.051602576, 0.24196254, 0.94760233),
-    scale: (0.9999999, 0.9999998, 1.0),
-    translation: (11.734947, -6.3654423, -32.74319),
-   ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (9.999994, 1.4999993, 29.7),
-    ),
-    friction: 0.0,
     restitution: 0.0,
    )),
   ),
@@ -51,13 +32,32 @@
     label: None,
    )),
    transform: (
-    rotation: (-0.17628972, -0.04607215, -0.19718014, 0.9632857),
-    scale: (0.9999998, 0.9999998, 0.99999994),
-    translation: (-2.4593792, -8.769799, -32.726482),
+    rotation: (-0.2758974, -0.0521762, -0.09532838, 0.95502394),
+    scale: (0.99999976, 0.9999998, 0.99999976),
+    translation: (-9.856242, -14.703426, -42.944523),
    ),
    object: Scenery((
     collider: Cuboid(
-     half_extents: (9.999994, 0.89999944, 29.299988),
+     half_extents: (9.999992, 0.89999926, 29.29998),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "Spawn side 2",
+   asset_path: Some((
+    path: "",
+    label: None,
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.19947496, 0.9799029),
+    scale: (1.0, 0.99999994, 0.99999994),
+    translation: (-33.13538, 4.1571903, 0.0),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (9.999999, 9.999795, 23.799997),
     ),
     friction: 0.0,
     restitution: 0.0,
@@ -83,6 +83,44 @@
    )),
   ),
   (
+   name: "Spawn Back",
+   asset_path: Some((
+    path: "",
+    label: None,
+   )),
+   transform: (
+    rotation: (0.2051527, 0.0, 0.0, 0.97872996),
+    scale: (1.0, 1.0, 1.0),
+    translation: (0.0, 7.395424, 25.831985),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (29.8, 10.2, 2.2),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
+   name: "Spawn side 1",
+   asset_path: Some((
+    path: "",
+    label: None,
+   )),
+   transform: (
+    rotation: (-0.007297722, -0.0010435784, -0.23878065, 0.97104555),
+    scale: (1.0, 0.99999994, 0.99999976),
+    translation: (33.081238, 4.1775703, 0.0),
+   ),
+   object: Scenery((
+    collider: Cuboid(
+     half_extents: (10.8, 10.199999, 23.199993),
+    ),
+    friction: 0.0,
+    restitution: 0.0,
+   )),
+  ),
+  (
    name: "Intersection 1 Floor",
    asset_path: Some((
     path: "",
@@ -102,57 +140,19 @@
    )),
   ),
   (
-   name: "Spawn Back",
+   name: "Ramp Right",
    asset_path: Some((
     path: "",
     label: None,
    )),
    transform: (
-    rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (1.0, 1.0, 1.0),
-    translation: (0.0, 7.701784, 8.909826),
+    rotation: (-0.22969326, 0.10369073, 0.13926063, 0.95765114),
+    scale: (0.9999996, 0.99999964, 0.99999976),
+    translation: (5.318942, -13.591695, -42.944523),
    ),
    object: Scenery((
     collider: Cuboid(
-     half_extents: (11.5, 10.2, 2.2),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
-  ),
-  (
-   name: "Spawn side 1",
-   asset_path: Some((
-    path: "",
-    label: None,
-   )),
-   transform: (
-    rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (1.0, 1.0, 1.0),
-    translation: (16.767462, 8.033663, 0.0),
-   ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (10.0, 10.2, 10.0),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
-  ),
-  (
-   name: "Spawn side 2",
-   asset_path: Some((
-    path: "",
-    label: None,
-   )),
-   transform: (
-    rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (1.0, 0.99999994, 0.99999994),
-    translation: (-18.510239, 8.390017, 0.0),
-   ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (10.0, 9.999997, 9.999997),
+     half_extents: (9.999988, 0.8999989, 29.29997),
     ),
     friction: 0.0,
     restitution: 0.0,
@@ -190,41 +190,11 @@
    ),
    object: Scenery((
     collider: Cuboid(
-     half_extents: (4.8552003, 0.4, 0.6075),
+     half_extents: (26.112432, 0.1, 2.7240505),
     ),
     friction: 0.0,
     restitution: 0.0,
    )),
-  ),
-  (
-   name: "Spawn Pad",
-   asset_path: Some((
-    path: "",
-    label: None,
-   )),
-   transform: (
-    rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (1.0, 1.0, 1.0),
-    translation: (0.0, 2.3869896, 0.0),
-   ),
-   object: Empty((Cuboid(
-    half_extents: (10.0, 0.8, 10.0),
-   ))),
-  ),
-  (
-   name: "Spawn Pad",
-   asset_path: Some((
-    path: "",
-    label: None,
-   )),
-   transform: (
-    rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (1.0, 1.0, 1.0),
-    translation: (0.0, 2.3869896, 0.0),
-   ),
-   object: Empty((Cuboid(
-    half_extents: (10.0, 0.8, 10.0),
-   ))),
   ),
  ],
 )

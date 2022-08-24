@@ -1,3 +1,5 @@
+use std::ops::{Div, Mul};
+
 use bevy::{
     ecs::query::{QueryItem, WorldQuery},
     ecs::system::EntityCommands,
@@ -52,6 +54,51 @@ pub(crate) enum SerdeCollider {
         border_radius: f32,
     },
 }
+impl Div<Vec3> for SerdeCollider {
+    type Output = SerdeCollider;
+
+    fn div(self, rhs: Vec3) -> Self::Output {
+        let rhs = 1.0 / rhs;
+        self * rhs
+    }
+}
+impl Mul<Vec3> for SerdeCollider {
+    type Output = SerdeCollider;
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        use SerdeCollider::*;
+        let Vec3 { x, y, z } = rhs;
+        let avg_mul = (x + y + z) / 3.0;
+        match self {
+            SerdeCollider::Ball { radius } => Ball { radius: radius * avg_mul },
+            SerdeCollider::Cuboid { half_extents } => Cuboid { half_extents: half_extents * rhs },
+            SerdeCollider::Capsule { a, b, radius } => {
+                Capsule { a: a * rhs, b: b * rhs, radius: radius * avg_mul }
+            }
+            SerdeCollider::Cylinder { half_height, radius } => Cylinder {
+                half_height: half_height * avg_mul,
+                radius: radius * avg_mul,
+            },
+            SerdeCollider::Cone { half_height, radius } => Cone {
+                half_height: half_height * avg_mul,
+                radius: radius * avg_mul,
+            },
+            SerdeCollider::RoundCuboid { half_extents, border_radius } => RoundCuboid {
+                half_extents: half_extents * rhs,
+                border_radius: border_radius * avg_mul,
+            },
+            SerdeCollider::RoundCylinder { half_height, radius, border_radius } => RoundCylinder {
+                half_height: half_height * avg_mul,
+                radius: radius * avg_mul,
+                border_radius: border_radius * avg_mul,
+            },
+            SerdeCollider::RoundCone { half_height, radius, border_radius } => RoundCone {
+                half_height: half_height * avg_mul,
+                radius: radius * avg_mul,
+                border_radius: border_radius * avg_mul,
+            },
+        }
+    }
+}
 impl From<SerdeCollider> for Mesh {
     fn from(collider: SerdeCollider) -> Self {
         match collider {
@@ -98,9 +145,9 @@ impl From<SerdeCollider> for Mesh {
         }
     }
 }
-impl<'a> From<ColliderView<'a>> for SerdeCollider {
-    fn from(view: ColliderView<'a>) -> Self {
-        match view {
+impl<'a> From<&'a Collider> for SerdeCollider {
+    fn from(collider: &'a Collider) -> Self {
+        match collider.as_unscaled_typed_shape() {
             ColliderView::Ball(view) => SerdeCollider::Ball { radius: view.radius() },
             ColliderView::Cuboid(view) => {
                 SerdeCollider::Cuboid { half_extents: view.half_extents() }
@@ -140,7 +187,10 @@ impl<'a> From<ColliderView<'a>> for SerdeCollider {
                 radius: view.inner_shape().radius(),
                 border_radius: view.border_radius(),
             },
-            _ => panic!("Cannot handle view type!"),
+            _ => {
+                let aabb = collider.raw.compute_local_aabb();
+                SerdeCollider::Cuboid { half_extents: aabb.half_extents().into() }
+            }
         }
     }
 }
@@ -188,7 +238,7 @@ impl Prefab for SceneryData {
 
     fn from_query((_, collider, friction, restitution): &QueryItem<Self::Query>) -> Self {
         SceneryData {
-            collider: collider.as_typed_shape().into(),
+            collider: (*collider).into(),
             friction: friction.coefficient,
             restitution: restitution.coefficient,
         }
@@ -266,7 +316,7 @@ impl Prefab for Empty {
     type Query = (&'static Collider, &'static SceneryEmpty);
 
     fn from_query(item: &QueryItem<Self::Query>) -> Self {
-        Empty(item.0.as_typed_shape().into())
+        Empty(item.0.into())
     }
     fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>) {
         cmds.insert_bundle((
@@ -291,7 +341,7 @@ impl Prefab for AggloData {
     fn from_query((collider, agglo, friction, restitution): &QueryItem<Self::Query>) -> Self {
         AggloData {
             mass: agglo.weight,
-            collider: collider.as_typed_shape().into(),
+            collider: (*collider).into(),
             friction: friction.coefficient,
             restitution: restitution.coefficient,
         }

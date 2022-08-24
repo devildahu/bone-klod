@@ -1,12 +1,15 @@
-use bevy::prelude::{Plugin as BevyPlugin, *};
+use bevy::{
+    math::Vec3Swizzles,
+    prelude::{Plugin as BevyPlugin, *},
+};
 use bevy_debug_text_overlay::screen_print;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
 
-use crate::{cam::OrbitCamera, prefabs::AggloBundle, scene::KlodSpawnTransform, state::GameState};
+use crate::{cam::OrbitCamera, prefabs::AggloBundle, state::GameState};
 
-const INPUT_IMPULSE: f32 = 3.0;
+const INPUT_IMPULSE: f32 = 6.0;
 const KLOD_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b0100, !0b0100);
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
@@ -66,15 +69,15 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
         let klod = cmds.parent_entity();
         cmds.spawn_bundle(KlodElemBundle::new(
             klod,
-            10.0,
+            90.0,
             Collider::ball(3.0),
             default(),
             Friction {
-                coefficient: 0.3,
+                coefficient: 0.9,
                 combine_rule: CoefficientCombineRule::Max,
             },
             Restitution {
-                coefficient: 0.2,
+                coefficient: 0.4,
                 combine_rule: CoefficientCombineRule::Max,
             },
         ));
@@ -198,13 +201,18 @@ fn ball_input(
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
+    let vel = velocity.linvel;
+    let force = (vel.xz() + force).clamp_length_max(30.0) - vel.xz();
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
     if keys.just_pressed(KeyCode::Space) {
-        *transform = default_klod_position.get();
+        *transform = default_klod_position.0;
         *velocity = Velocity::default();
     }
 }
+
+#[derive(Default)]
+pub(crate) struct KlodSpawnTransform(pub(crate) Transform);
 
 pub struct Plugin;
 impl BevyPlugin for Plugin {
@@ -214,11 +222,13 @@ impl BevyPlugin for Plugin {
             .register_inspectable::<KlodElem>()
             .register_inspectable::<Agglomerable>();
 
-        app.add_event::<AgglomerateToKlod>().add_system_set(
-            SystemSet::on_update(GameState::Playing)
-                .with_system(ball_input)
-                .with_system(shlurp_agglomerable)
-                .with_system(agglo_to_klod.after(shlurp_agglomerable)),
-        );
+        app.init_resource::<KlodSpawnTransform>()
+            .add_event::<AgglomerateToKlod>()
+            .add_system_set(
+                SystemSet::on_update(GameState::Playing)
+                    .with_system(ball_input)
+                    .with_system(shlurp_agglomerable)
+                    .with_system(agglo_to_klod.after(shlurp_agglomerable)),
+            );
     }
 }

@@ -102,5 +102,5 @@ fn setup(
     ambiant_light.color = Color::WHITE;
     ambiant_light.brightness = 1.0;
     let root = scene::get_base_path();
-    KlodScene::load(world, dbg!(root.join("default.klodlvl"))).unwrap();
+    KlodScene::load(world, root.join("default.klodlvl")).unwrap();
 }

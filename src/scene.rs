@@ -24,7 +24,7 @@ use bevy_rapier3d::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ball::{spawn_klod, Agglomerable, Klod, Scenery},
+    ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform, Scenery},
     cam::OrbitCamera,
     prefabs::{AggloData, Empty, Prefab, SceneryData, SceneryEmpty, SerdeCollider},
 };
@@ -176,14 +176,6 @@ impl<'a, 'w>
 {
     fn from(item: &'a QueryItem<'w, <AggloData as Prefab>::Query>) -> Self {
         ObjectType::Agglomerable(Prefab::from_query(item))
-    }
-}
-
-#[derive(Default)]
-pub(crate) struct KlodSpawnTransform(Transform);
-impl KlodSpawnTransform {
-    pub(crate) fn get(&self) -> Transform {
-        self.0
     }
 }
 
@@ -378,12 +370,15 @@ fn add_scene_aabb(
 }
 
 fn fit_pickbox_to_collider(
-    colliders: Query<(&Collider, &Handle<Mesh>), Changed<Collider>>,
+    mut colliders: Query<(&Collider, &Handle<Mesh>, &mut Aabb), Changed<Collider>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    for (collider, mesh) in &colliders {
+    for (collider, mesh, mut aabb) in &mut colliders {
         if let Some(mesh) = meshes.get_mut(mesh) {
-            *mesh = SerdeCollider::from(collider.as_typed_shape()).into();
+            *mesh = SerdeCollider::from(collider).into();
+            if let Some(new_aabb) = mesh.compute_aabb() {
+                *aabb = new_aabb;
+            }
         }
     }
 }
@@ -406,8 +401,7 @@ pub(crate) fn get_base_path() -> PathBuf {
 pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<KlodSpawnTransform>()
-            .add_system_to_stage(CoreStage::PostUpdate, add_scene_aabb)
+        app.add_system_to_stage(CoreStage::PostUpdate, add_scene_aabb)
             .add_system(fit_pickbox_to_collider);
     }
 }
