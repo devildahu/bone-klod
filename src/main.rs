@@ -6,6 +6,7 @@ mod cam;
 mod ball;
 #[cfg(feature = "editor")]
 mod editor;
+mod powers;
 mod prefabs;
 mod scene;
 mod state;
@@ -76,6 +77,7 @@ fn main() {
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin::default())
         .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
+        .add_plugin(powers::Plugin)
         .add_plugin(audio::Plugin)
         .add_plugin(cam::Plugin)
         .add_plugin(ball::Plugin)

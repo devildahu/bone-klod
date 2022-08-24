@@ -8,14 +8,39 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::ball::{Agglomerable, Scenery};
+use crate::{ball::Agglomerable, powers::Power};
 
 pub(crate) trait Prefab: Serialize + DeserializeOwned {
     type Query: WorldQuery;
 
     fn from_query(item: &QueryItem<Self::Query>) -> Self;
 
-    fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>);
+    fn spawn(self, cmds: &mut EntityCommands);
+}
+
+#[derive(Serialize, Debug, Deserialize)]
+pub(crate) struct SerdeTransform {
+    pub(crate) rotation: Quat,
+    pub(crate) scale: Vec3,
+    pub(crate) translation: Vec3,
+}
+impl From<Transform> for SerdeTransform {
+    fn from(item: Transform) -> Self {
+        SerdeTransform {
+            rotation: item.rotation,
+            scale: item.scale,
+            translation: item.translation,
+        }
+    }
+}
+impl From<SerdeTransform> for Transform {
+    fn from(item: SerdeTransform) -> Self {
+        Transform {
+            rotation: item.rotation,
+            scale: item.scale,
+            translation: item.translation,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -217,144 +242,65 @@ impl From<SerdeCollider> for Collider {
     }
 }
 
-#[derive(Serialize, Debug, Deserialize)]
-pub(crate) struct SceneryData {
-    collider: SerdeCollider,
-    friction: f32,
-    restitution: f32,
-}
-impl SceneryData {
-    pub(crate) fn new(collider: SerdeCollider, friction: f32, restitution: f32) -> Self {
-        Self { collider, friction, restitution }
-    }
-}
-impl Prefab for SceneryData {
-    type Query = (
-        &'static Scenery,
-        &'static Collider,
-        &'static Friction,
-        &'static Restitution,
-    );
+/// Static physic objects
+#[derive(Serialize, Debug, Deserialize, Component)]
+pub(crate) struct Scenery;
+impl Prefab for Scenery {
+    type Query = &'static Scenery;
 
-    fn from_query((_, collider, friction, restitution): &QueryItem<Self::Query>) -> Self {
-        SceneryData {
-            collider: (*collider).into(),
-            friction: friction.coefficient,
-            restitution: restitution.coefficient,
-        }
+    fn from_query(_: &QueryItem<Self::Query>) -> Self {
+        Self
     }
-    fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>) {
-        cmds.insert_bundle((
-            meshes.add(self.collider.clone().into()),
-            RigidBody::Fixed,
-            Scenery,
-            Collider::from(self.collider),
-            Friction {
-                coefficient: self.friction,
-                combine_rule: CoefficientCombineRule::Max,
-            },
-            Restitution {
-                coefficient: self.restitution,
-                combine_rule: CoefficientCombineRule::Max,
-            },
-        ));
+    fn spawn(self, cmds: &mut EntityCommands) {
+        cmds.insert_bundle((RigidBody::Fixed, Scenery));
     }
 }
 
 #[derive(Serialize, Debug, Deserialize)]
 pub(crate) struct AggloData {
     mass: f32,
-    collider: SerdeCollider,
-    friction: f32,
-    restitution: f32,
+    power: Power,
 }
 impl AggloData {
-    pub(crate) fn new(mass: f32, collider: SerdeCollider, friction: f32, restitution: f32) -> Self {
-        Self { mass, collider, friction, restitution }
+    pub(crate) fn new(mass: f32, power: Power) -> Self {
+        Self { mass, power }
     }
 }
 #[derive(Bundle)]
 pub(crate) struct AggloBundle {
     agglo: Agglomerable,
     active_events: ActiveEvents,
-    collider: Collider,
     mass: ColliderMassProperties,
     rigid_body: RigidBody,
     contact_threshold: ContactForceEventThreshold,
     collision_group: CollisionGroups,
-    friction: Friction,
-    restitution: Restitution,
+    power: Power,
 }
 impl AggloBundle {
-    pub(crate) fn new(mass: f32, collider: Collider, friction: f32, restitution: f32) -> Self {
+    pub(crate) fn new(mass: f32, power: Power) -> Self {
         AggloBundle {
+            power,
             agglo: Agglomerable { weight: mass },
             active_events: ActiveEvents::CONTACT_FORCE_EVENTS,
-            collider: collider.into(),
             mass: ColliderMassProperties::Mass(mass),
             rigid_body: RigidBody::Dynamic,
             contact_threshold: ContactForceEventThreshold(mass * 1000.0),
             collision_group: AGGLO_COLLISION_GROUP,
-            friction: Friction {
-                coefficient: friction,
-                combine_rule: CoefficientCombineRule::Max,
-            },
-            restitution: Restitution {
-                coefficient: restitution,
-                combine_rule: CoefficientCombineRule::Max,
-            },
         }
-    }
-}
-
-#[derive(Component)]
-pub(crate) struct SceneryEmpty;
-
-#[derive(Serialize, Debug, Deserialize)]
-pub(crate) struct Empty(pub(crate) SerdeCollider);
-impl Prefab for Empty {
-    type Query = (&'static Collider, &'static SceneryEmpty);
-
-    fn from_query(item: &QueryItem<Self::Query>) -> Self {
-        Empty(item.0.into())
-    }
-    fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>) {
-        cmds.insert_bundle((
-            meshes.add(self.0.clone().into()),
-            RigidBody::Fixed,
-            SceneryEmpty,
-            Collider::from(self.0),
-        ));
     }
 }
 
 const AGGLO_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b1000, !0);
 
 impl Prefab for AggloData {
-    type Query = (
-        &'static Collider,
-        &'static Agglomerable,
-        &'static Friction,
-        &'static Restitution,
-    );
+    type Query = (&'static Agglomerable, &'static Power);
 
-    fn from_query((collider, agglo, friction, restitution): &QueryItem<Self::Query>) -> Self {
-        AggloData {
-            mass: agglo.weight,
-            collider: (*collider).into(),
-            friction: friction.coefficient,
-            restitution: restitution.coefficient,
-        }
+    fn from_query((agglo, power): &QueryItem<Self::Query>) -> Self {
+        AggloData { mass: agglo.weight, power: **power }
     }
 
-    fn spawn(self, cmds: &mut EntityCommands, meshes: &mut Assets<Mesh>) {
-        let Self { mass, collider, friction, restitution } = self;
-        cmds.insert_bundle(AggloBundle::new(
-            mass,
-            collider.clone().into(),
-            friction,
-            restitution,
-        ))
-        .insert(meshes.add(collider.into()));
+    fn spawn(self, cmds: &mut EntityCommands) {
+        let Self { mass, power } = self;
+        cmds.insert_bundle(AggloBundle::new(mass, power));
     }
 }

@@ -23,7 +23,8 @@ use bevy_transform_gizmo::{
 
 use crate::{
     cam::OrbitCamera,
-    prefabs::{AggloData, Empty, SceneryData, SerdeCollider},
+    powers::Power,
+    prefabs::{AggloData, Scenery, SerdeCollider},
     scene::{KlodScene, ObjectType, PhysicsObject},
 };
 
@@ -83,6 +84,7 @@ pub struct SceneWindowState {
     spawn_mass: f32,
     spawn_restitution: f32,
     spawn_friction: f32,
+    power: Power,
     scene_save_result: Option<Result<(), Box<dyn std::error::Error + Send + Sync>>>,
 }
 
@@ -136,6 +138,27 @@ impl EditorWindow for SceneWindow {
             });
             egui::Grid::new("Props management physics data").show(ui, |ui| {
                 ui.set_width(140.0);
+                ui.label("Power");
+                let selected = state.power.to_string();
+                egui::ComboBox::from_id_source(ui.id())
+                    .selected_text(&selected)
+                    .show_ui(ui, |ui| {
+                        macro_rules! select_menu { ($($name: expr => $value: expr,)*) => {
+                            $( if ui.selectable_label($value == state.power, $name).clicked() {
+                                state.power = $value;
+                            } )*
+                        } }
+                        select_menu! {
+                            "Fire" => Power::Fire,
+                            "Water" => Power::Water,
+                            "Cat" => Power::Cat,
+                            "AmberRod" => Power::AmberRod,
+                            "Dig" => Power::Dig,
+                            "Saw" => Power::Saw,
+                            "None" => Power::None,
+                        }
+                    });
+                ui.end_row();
                 ui.label("Name");
                 egui::TextEdit::singleline(&mut state.spawn_name)
                     .hint_text("Physical Object")
@@ -199,30 +222,27 @@ fn load_data(
         spawn_mass,
         spawn_restitution,
         spawn_friction,
+        power,
         ..
     }: &SceneWindowState,
 ) {
     let mut system_state =
         SystemState::<(Commands, Res<AssetServer>, ResMut<Assets<Mesh>>)>::new(world);
     let (mut cmds, assets, mut meshes) = system_state.get_mut(world);
-    let data = if &*spawn_name == "" {
-        let empty = Empty(SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) });
-        ObjectType::Empty(empty)
-    } else if *spawn_mass == 0.0 {
-        ObjectType::Scenery(SceneryData::new(
-            SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) },
-            *spawn_friction,
-            *spawn_restitution,
-        ))
+    let data = if &*spawn_name == "" || *spawn_mass == 0.0 {
+        ObjectType::Scenery(Scenery)
     } else {
-        ObjectType::Agglomerable(AggloData::new(
-            *spawn_mass,
-            SerdeCollider::Cuboid { half_extents: Vec3::new(10.0, 10.0, 10.0) },
-            *spawn_friction,
-            *spawn_restitution,
-        ))
+        ObjectType::Agglomerable(AggloData::new(*spawn_mass, *power))
     };
-    let data = PhysicsObject::new(spawn_name.clone(), scene.clone(), default(), data);
+    let data = PhysicsObject::new(
+        spawn_name.clone(),
+        scene.clone(),
+        default(),
+        SerdeCollider::Cuboid { half_extents: Vec3::splat(10.0) },
+        *spawn_friction,
+        *spawn_restitution,
+        data,
+    );
     data.spawn(&mut cmds, &assets, &mut *meshes, true);
     system_state.apply(world);
 }

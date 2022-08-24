@@ -16,13 +16,12 @@
     scale: (1.0, 1.0, 1.0),
     translation: (0.0, 0.0, -53.468937),
    ),
-   object: Scenery((
-    collider: Ball(
-     radius: 7.6,
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Ball(
+    radius: 7.6,
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
   (
    name: "Cylinder Bump",
@@ -35,14 +34,13 @@
     scale: (0.99999994, 0.9999998, 0.9999999),
     translation: (-46.27192, -4.2119827, 0.0),
    ),
-   object: Scenery((
-    collider: Cylinder(
-     half_height: 42.3,
-     radius: 16.2,
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Cylinder(
+    half_height: 42.3,
+    radius: 16.2,
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
   (
    name: "Floor",
@@ -55,13 +53,12 @@
     scale: (5.0, 1.0, 5.0),
     translation: (0.0, -0.6561203, -3.7772293),
    ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (20.7, 0.2, 20.7),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
   (
    name: "wall1",
@@ -74,13 +71,12 @@
     scale: (1.0000001, 1.0000001, 5.0),
     translation: (104.89821, 18.97474, -3.7772293),
    ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (20.7, 0.2, 20.7),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
   (
    name: "wall2",
@@ -93,13 +89,12 @@
     scale: (0.9999997, 0.99999994, 5.0),
     translation: (-0.94945526, 18.97474, 99.480606),
    ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (20.7, 0.2, 20.7),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
   (
    name: "wall4",
@@ -112,13 +107,12 @@
     scale: (0.99999964, 0.9999999, 4.999998),
     translation: (-0.94945526, 18.97474, -109.688324),
    ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (20.7, 0.2, 20.7),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
   (
    name: "wall3",
@@ -131,13 +125,12 @@
     scale: (1.0, 1.0, 5.0),
     translation: (-102.668076, 18.97474, -3.7772293),
    ),
-   object: Scenery((
-    collider: Cuboid(
-     half_extents: (20.7, 0.2, 20.7),
-    ),
-    friction: 0.0,
-    restitution: 0.0,
-   )),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   object: Scenery(()),
   ),
  ],
 )

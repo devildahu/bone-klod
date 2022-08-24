@@ -24,41 +24,20 @@ use bevy_rapier3d::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform, Scenery},
+    ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform},
     cam::OrbitCamera,
-    prefabs::{AggloData, Empty, Prefab, SceneryData, SceneryEmpty, SerdeCollider},
+    powers::Power,
+    prefabs::{AggloData, Prefab, Scenery, SerdeCollider, SerdeTransform},
 };
-
-#[derive(Serialize, Debug, Deserialize)]
-struct SerdeTransform {
-    rotation: Quat,
-    scale: Vec3,
-    translation: Vec3,
-}
-impl From<Transform> for SerdeTransform {
-    fn from(item: Transform) -> Self {
-        SerdeTransform {
-            rotation: item.rotation,
-            scale: item.scale,
-            translation: item.translation,
-        }
-    }
-}
-impl From<SerdeTransform> for Transform {
-    fn from(item: SerdeTransform) -> Self {
-        Transform {
-            rotation: item.rotation,
-            scale: item.scale,
-            translation: item.translation,
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct PhysicsObject {
     name: String,
     asset_path: Option<AssetPath<'static>>,
     transform: SerdeTransform,
+    collider: SerdeCollider,
+    friction: f32,
+    restitution: f32,
     object: ObjectType,
 }
 #[derive(WorldQuery)]
@@ -71,6 +50,9 @@ where
     name: Option<&'static Name>,
     scene: Option<&'static Handle<Scene>>,
     transform: &'static Transform,
+    friction: &'static Friction,
+    restitution: &'static Restitution,
+    collider: &'static Collider,
     object: Q,
 }
 impl<'w, Q> ObjectQueryItem<'w, Q>
@@ -91,6 +73,9 @@ where
                 .name
                 .and_then(|name| (name.as_str() != "").then(|| name.to_string()))
                 .unwrap_or_else(|| "Unamed Physics Object".to_owned()),
+            collider: self.collider.into(),
+            friction: self.friction.coefficient,
+            restitution: self.restitution.coefficient,
         }
     }
 }
@@ -100,6 +85,9 @@ impl PhysicsObject {
         name: String,
         asset_path: String,
         transform: Transform,
+        collider: SerdeCollider,
+        friction: f32,
+        restitution: f32,
         object: ObjectType,
     ) -> Self {
         Self {
@@ -107,6 +95,9 @@ impl PhysicsObject {
             asset_path: Some(AssetPath::from(&asset_path).to_owned()),
             transform: transform.into(),
             object,
+            collider,
+            friction,
+            restitution,
         }
     }
 
@@ -126,7 +117,19 @@ impl PhysicsObject {
             transform: self.transform.into(),
             ..default()
         });
-        object.insert(Name::new(self.name));
+        object.insert_bundle((
+            Name::new(self.name),
+            meshes.add(self.collider.clone().into()),
+            Collider::from(self.collider),
+            Friction {
+                coefficient: self.friction,
+                combine_rule: CoefficientCombineRule::Max,
+            },
+            Restitution {
+                coefficient: self.restitution,
+                combine_rule: CoefficientCombineRule::Max,
+            },
+        ));
         if compute_aabb {
             object.insert(ComputeDefaultAabb);
         }
@@ -142,38 +145,24 @@ impl PhysicsObject {
             bevy_transform_gizmo::GizmoTransformable,
         ));
         match self.object {
-            ObjectType::Empty(empty) => empty.spawn(&mut object, meshes),
-            ObjectType::Scenery(scenery_data) => scenery_data.spawn(&mut object, meshes),
-            ObjectType::Agglomerable(agglo_data) => agglo_data.spawn(&mut object, meshes),
+            ObjectType::Scenery(scenery_data) => scenery_data.spawn(&mut object),
+            ObjectType::Agglomerable(agglo_data) => agglo_data.spawn(&mut object),
         };
     }
 }
 
 #[derive(Serialize, Debug, Deserialize)]
 pub(crate) enum ObjectType {
-    Scenery(SceneryData),
+    Scenery(Scenery),
     Agglomerable(AggloData),
-    Empty(Empty),
 }
-impl<'a, 'w> From<&'a (&'w Scenery, &'w Collider, &'w Friction, &'w Restitution)> for ObjectType {
-    fn from(item: &'a QueryItem<'w, <SceneryData as Prefab>::Query>) -> Self {
+impl<'a, 'w> From<&'a &'w Scenery> for ObjectType {
+    fn from(item: &'a QueryItem<'w, <Scenery as Prefab>::Query>) -> Self {
         ObjectType::Scenery(Prefab::from_query(item))
     }
 }
-impl<'a, 'w> From<&'a (&'w Collider, &'w SceneryEmpty)> for ObjectType {
-    fn from(item: &'a QueryItem<'w, <Empty as Prefab>::Query>) -> Self {
-        ObjectType::Empty(Prefab::from_query(item))
-    }
-}
 
-impl<'a, 'w>
-    From<&'a (
-        &'w Collider,
-        &'w Agglomerable,
-        &'w Friction,
-        &'w Restitution,
-    )> for ObjectType
-{
+impl<'a, 'w> From<&'a (&'w Agglomerable, &'w Power)> for ObjectType {
     fn from(item: &'a QueryItem<'w, <AggloData as Prefab>::Query>) -> Self {
         ObjectType::Agglomerable(Prefab::from_query(item))
     }
@@ -183,8 +172,7 @@ impl<'a, 'w>
 struct KlodSceneQuery<'w, 's> {
     assets: Res<'w, AssetServer>,
     agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
-    scenery: Query<'w, 's, ObjectQuery<<SceneryData as Prefab>::Query>>,
-    empties: Query<'w, 's, ObjectQuery<<Empty as Prefab>::Query>>,
+    scenery: Query<'w, 's, ObjectQuery<<Scenery as Prefab>::Query>>,
     klod_spawn: Res<'w, KlodSpawnTransform>,
 }
 #[derive(SystemParam)]
@@ -215,8 +203,7 @@ struct KlodCopyQuery<'w, 's> {
     assets: Res<'w, AssetServer>,
     meshes: ResMut<'w, Assets<Mesh>>,
     agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
-    scenery: Query<'w, 's, ObjectQuery<<SceneryData as Prefab>::Query>>,
-    empties: Query<'w, 's, ObjectQuery<<Empty as Prefab>::Query>>,
+    scenery: Query<'w, 's, ObjectQuery<<Scenery as Prefab>::Query>>,
 }
 impl KlodScene {
     pub(crate) fn copy_objects(objects: &[Entity], world: &mut World) {
@@ -224,7 +211,6 @@ impl KlodScene {
         let KlodCopyQuery {
             agglomerables,
             scenery,
-            empties,
             assets,
             mut cmds,
             mut meshes,
@@ -233,7 +219,6 @@ impl KlodScene {
         let mut to_copy = Vec::new();
         to_copy.extend(agglomerables.iter_many(o).map(|item| item.data(&assets)));
         to_copy.extend(scenery.iter_many(o).map(|item| item.data(&assets)));
-        to_copy.extend(empties.iter_many(o).map(|item| item.data(&assets)));
 
         for mut object in to_copy.into_iter() {
             object.name = format!("Copy of {}", object.name);
@@ -263,18 +248,11 @@ impl KlodScene {
         }
     }
     fn read(
-        KlodSceneQuery {
-            assets,
-            agglomerables,
-            scenery,
-            klod_spawn,
-            empties,
-        }: &KlodSceneQuery,
+        KlodSceneQuery { assets, agglomerables, scenery, klod_spawn }: &KlodSceneQuery,
     ) -> Self {
         let mut objects = Vec::with_capacity(agglomerables.iter().len() + scenery.iter().len());
         objects.extend(agglomerables.iter().map(|item| item.data(assets)));
         objects.extend(scenery.iter().map(|item| item.data(assets)));
-        objects.extend(empties.iter().map(|item| item.data(assets)));
         KlodScene { objects, klod_spawn_transform: klod_spawn.0.into() }
     }
 

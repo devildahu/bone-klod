@@ -7,7 +7,7 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
 
-use crate::{cam::OrbitCamera, prefabs::AggloBundle, state::GameState};
+use crate::{cam::OrbitCamera, powers::Power, prefabs::AggloBundle, state::GameState};
 
 const INPUT_IMPULSE: f32 = 6.0;
 const KLOD_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b0100, !0b0100);
@@ -20,39 +20,30 @@ pub(crate) struct Klod {
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
-struct KlodElem {
+pub(crate) struct KlodElem {
     klod: Entity,
 }
 
-#[derive(Bundle)]
-struct KlodElemBundle {
-    elem: KlodElem,
-    collision_group: CollisionGroups,
+fn spawn_klod_elem(
+    cmds: &mut ChildBuilder,
+    klod: Entity,
+    mass: f32,
     collider: Collider,
-    mass: ColliderMassProperties,
+    transform: Transform,
     friction: Friction,
     restitution: Restitution,
-    transform: Transform,
-}
-impl KlodElemBundle {
-    fn new(
-        klod: Entity,
-        mass: f32,
-        collider: Collider,
-        transform: Transform,
-        friction: Friction,
-        restitution: Restitution,
-    ) -> Self {
-        Self {
-            elem: KlodElem { klod },
-            collision_group: KLOD_COLLISION_GROUP,
-            collider,
-            mass: ColliderMassProperties::Mass(mass),
-            friction,
-            restitution,
-            transform,
-        }
-    }
+    power: Power,
+) {
+    cmds.spawn_bundle((
+        KlodElem { klod },
+        KLOD_COLLISION_GROUP,
+        collider,
+        ColliderMassProperties::Mass(mass),
+        friction,
+        restitution,
+        transform,
+        power,
+    ));
 }
 
 pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Entity {
@@ -67,7 +58,8 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
     .insert_bundle(SpatialBundle::default())
     .with_children(|cmds| {
         let klod = cmds.parent_entity();
-        cmds.spawn_bundle(KlodElemBundle::new(
+        spawn_klod_elem(
+            cmds,
             klod,
             90.0,
             Collider::ball(3.0),
@@ -80,7 +72,8 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
                 coefficient: 0.4,
                 combine_rule: CoefficientCombineRule::Max,
             },
-        ));
+            Power::None,
+        );
         cmds.spawn_bundle(SceneBundle {
             scene: asset_server.load("klod.glb#Scene0"),
             transform: Transform::from_scale(Vec3::splat(3.2)),
@@ -95,10 +88,6 @@ struct AgglomerateToKlod {
     agglo: Entity,
     agglo_weight: f32,
 }
-
-/// Static physic objects
-#[derive(Component)]
-pub(crate) struct Scenery;
 
 /// Thing that can be klodded.
 #[cfg_attr(feature = "debug", derive(Inspectable))]
@@ -120,6 +109,7 @@ fn agglo_to_klod(
         (
             &Collider,
             &GlobalTransform,
+            &Power,
             Option<&Friction>,
             Option<&Restitution>,
         ),
@@ -130,7 +120,7 @@ fn agglo_to_klod(
 ) {
     for &AgglomerateToKlod { klod, agglo, agglo_weight } in events.iter() {
         let klod_trans = transforms.get(klod).unwrap();
-        let (coll, agglo_trans, friction, restitution) = match agglo_query.get(agglo) {
+        let (coll, agglo_trans, power, friction, restitution) = match agglo_query.get(agglo) {
             Ok(item) => item,
             _ => continue,
         };
@@ -144,14 +134,16 @@ fn agglo_to_klod(
             klod_component.weight += agglo_weight;
 
             cmds.entity(klod).add_children(|cmds| {
-                cmds.spawn_bundle(KlodElemBundle::new(
+                spawn_klod_elem(
+                    cmds,
                     klod,
                     agglo_weight,
                     coll.clone(),
                     trans,
                     friction.cloned().unwrap_or_default(),
                     restitution.cloned().unwrap_or_default(),
-                ));
+                    power.clone(),
+                );
             });
         }
     }
