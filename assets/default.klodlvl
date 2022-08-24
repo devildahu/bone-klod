@@ -12,9 +12,9 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000003565647, 0.89834344, -0.00000005233901, 0.43929386),
+    rotation: (0.00000025573652, 0.89834344, -0.00000017126908, 0.43929386),
     scale: (0.9999999, 1.0, 0.9999999),
-    translation: (9.553538, -18.608774, -72.606155),
+    translation: (9.553541, -18.608772, -72.606155),
    ),
    collider: Cuboid(
     half_extents: (1.1999997, 1.1, 1.199994),
@@ -42,7 +42,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Spawn side 2",
@@ -60,7 +62,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "LPath Right",
@@ -78,7 +82,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Spawn Back",
@@ -87,7 +93,7 @@
     label: None,
    )),
    transform: (
-    rotation: (0.20515265, 0.0, 0.0, 0.97872996),
+    rotation: (0.20515263, 0.0, 0.0, 0.97872996),
     scale: (1.0, 1.0, 1.0),
     translation: (0.0, 7.395424, 25.831985),
    ),
@@ -96,7 +102,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Spawn side 1",
@@ -114,7 +122,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Intersection 1 Floor",
@@ -132,7 +142,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Ramp Right",
@@ -150,7 +162,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Floor",
@@ -168,7 +182,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Intersection 1 Floor visual",
@@ -186,7 +202,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery((
+    weakness: [],
+   )),
   ),
  ],
 )

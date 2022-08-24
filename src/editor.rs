@@ -140,7 +140,7 @@ impl EditorWindow for SceneWindow {
                 ui.set_width(140.0);
                 ui.label("Power");
                 let selected = state.power.to_string();
-                egui::ComboBox::from_id_source(ui.id())
+                let ret = egui::ComboBox::from_id_source(ui.id())
                     .selected_text(&selected)
                     .show_ui(ui, |ui| {
                         macro_rules! select_menu { ($($name: expr => $value: expr,)*) => {
@@ -158,6 +158,10 @@ impl EditorWindow for SceneWindow {
                             "None" => Power::None,
                         }
                     });
+                ret.response.on_hover_text(
+                    "Power granted by Agglomerable OR make a Scenery item destructible, \
+                    use the Inspector to set more powers needed to destroy the item.",
+                );
                 ui.end_row();
                 ui.label("Name");
                 egui::TextEdit::singleline(&mut state.spawn_name)
@@ -230,7 +234,9 @@ fn load_data(
         SystemState::<(Commands, Res<AssetServer>, ResMut<Assets<Mesh>>)>::new(world);
     let (mut cmds, assets, mut meshes) = system_state.get_mut(world);
     let data = if &*spawn_name == "" || *spawn_mass == 0.0 {
-        ObjectType::Scenery(Scenery)
+        let power = *power;
+        let weakness = if power != Power::None { vec![power] } else { Vec::new() };
+        ObjectType::Scenery(Scenery { weakness })
     } else {
         ObjectType::Agglomerable(AggloData::new(*spawn_mass, *power))
     };

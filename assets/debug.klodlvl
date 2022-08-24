@@ -21,7 +21,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
   (
    name: "Cylinder Bump",
@@ -40,7 +40,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
   (
    name: "Floor",
@@ -58,7 +58,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
   (
    name: "wall1",
@@ -76,7 +76,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
   (
    name: "wall2",
@@ -94,7 +94,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
   (
    name: "wall4",
@@ -112,7 +112,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
   (
    name: "wall3",
@@ -130,7 +130,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(()),
+   object: Scenery(Scenery(weakness: [])),
   ),
  ],
 )

@@ -8,7 +8,12 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::{ball::Agglomerable, powers::Power};
+use crate::{
+    ball::Agglomerable,
+    powers::{ElementalObstacle, Power},
+};
+
+const AGGLO_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b1000, !0);
 
 pub(crate) trait Prefab: Serialize + DeserializeOwned {
     type Query: WorldQuery;
@@ -244,15 +249,23 @@ impl From<SerdeCollider> for Collider {
 
 /// Static physic objects
 #[derive(Serialize, Debug, Deserialize, Component)]
-pub(crate) struct Scenery;
+pub(crate) struct Scenery {
+    pub(crate) weakness: Vec<Power>,
+}
 impl Prefab for Scenery {
-    type Query = &'static Scenery;
+    type Query = (&'static Scenery, Option<&'static ElementalObstacle>);
 
-    fn from_query(_: &QueryItem<Self::Query>) -> Self {
-        Self
+    fn from_query((_, powers): &QueryItem<Self::Query>) -> Self {
+        let non_empty = powers.filter(|p| !p.required_powers.is_empty());
+        Scenery {
+            weakness: non_empty.map_or(Vec::new(), |p| p.required_powers.clone()),
+        }
     }
     fn spawn(self, cmds: &mut EntityCommands) {
-        cmds.insert_bundle((RigidBody::Fixed, Scenery));
+        if !self.weakness.is_empty() {
+            cmds.insert(ElementalObstacle { required_powers: self.weakness.clone() });
+        }
+        cmds.insert_bundle((RigidBody::Fixed, self));
     }
 }
 
@@ -282,15 +295,13 @@ impl AggloBundle {
             power,
             agglo: Agglomerable { weight: mass },
             active_events: ActiveEvents::CONTACT_FORCE_EVENTS,
+            contact_threshold: ContactForceEventThreshold(mass * 1000.0),
             mass: ColliderMassProperties::Mass(mass),
             rigid_body: RigidBody::Dynamic,
-            contact_threshold: ContactForceEventThreshold(mass * 1000.0),
             collision_group: AGGLO_COLLISION_GROUP,
         }
     }
 }
-
-const AGGLO_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b1000, !0);
 
 impl Prefab for AggloData {
     type Query = (&'static Agglomerable, &'static Power);

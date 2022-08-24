@@ -37,6 +37,8 @@ fn spawn_klod_elem(
     cmds.spawn_bundle((
         KlodElem { klod },
         KLOD_COLLISION_GROUP,
+        ActiveEvents::CONTACT_FORCE_EVENTS,
+        ContactForceEventThreshold(1000.0),
         collider,
         ColliderMassProperties::Mass(mass),
         friction,
@@ -126,8 +128,9 @@ fn agglo_to_klod(
         };
         let trans = transform_relative_to(agglo_trans, klod_trans);
         cmds.entity(agglo)
-            .insert_bundle((KlodElem { klod }, trans))
-            .remove_bundle::<AggloBundle>();
+            .remove_bundle::<AggloBundle>()
+            .remove_bundle::<(Collider, Friction, Restitution)>()
+            .insert_bundle((KlodElem { klod }, trans, *power));
         cmds.entity(klod).add_child(agglo);
         screen_print!("added {agglo:?} to klod {klod:?}");
         if let Ok(mut klod_component) = klod_query.get_mut(klod) {
@@ -142,7 +145,7 @@ fn agglo_to_klod(
                     trans,
                     friction.cloned().unwrap_or_default(),
                     restitution.cloned().unwrap_or_default(),
-                    power.clone(),
+                    *power,
                 );
             });
         }

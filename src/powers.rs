@@ -39,7 +39,7 @@ impl fmt::Display for Power {
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component, Serialize, Deserialize)]
 pub(crate) struct ElementalObstacle {
-    required_powers: Vec<Power>,
+    pub(crate) required_powers: Vec<Power>,
 }
 
 fn break_elemental_obstacle(

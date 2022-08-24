@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform},
     cam::OrbitCamera,
-    powers::Power,
+    powers::{ElementalObstacle, Power},
     prefabs::{AggloData, Prefab, Scenery, SerdeCollider, SerdeTransform},
 };
 
@@ -156,7 +156,7 @@ pub(crate) enum ObjectType {
     Scenery(Scenery),
     Agglomerable(AggloData),
 }
-impl<'a, 'w> From<&'a &'w Scenery> for ObjectType {
+impl<'a, 'w> From<&'a (&'w Scenery, Option<&'w ElementalObstacle>)> for ObjectType {
     fn from(item: &'a QueryItem<'w, <Scenery as Prefab>::Query>) -> Self {
         ObjectType::Scenery(Prefab::from_query(item))
     }
