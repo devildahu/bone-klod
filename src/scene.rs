@@ -24,8 +24,10 @@ use bevy_rapier3d::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    audio::ImpactSound,
     ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform},
     cam::OrbitCamera,
+    game_audio::NoiseOnHit,
     powers::{ElementalObstacle, Power},
     prefabs::{AggloData, Prefab, Scenery, SerdeCollider, SerdeTransform},
 };
@@ -38,6 +40,7 @@ pub(crate) struct PhysicsObject {
     collider: SerdeCollider,
     friction: f32,
     restitution: f32,
+    sounds: Vec<ImpactSound>,
     object: ObjectType,
 }
 #[derive(WorldQuery)]
@@ -48,6 +51,7 @@ where
     for<'w> <Q as WorldQueryGats<'w>>::Fetch: Clone,
 {
     name: Option<&'static Name>,
+    sounds: &'static NoiseOnHit,
     scene: Option<&'static Handle<Scene>>,
     transform: &'static Transform,
     friction: &'static Friction,
@@ -63,6 +67,7 @@ where
 {
     fn data(&self, assets: &AssetServer) -> PhysicsObject {
         PhysicsObject {
+            sounds: self.sounds.noises.to_vec(),
             asset_path: self
                 .scene
                 .and_then(|h| assets.get_handle_path(h))
@@ -88,10 +93,12 @@ impl PhysicsObject {
         collider: SerdeCollider,
         friction: f32,
         restitution: f32,
+        sounds: Vec<ImpactSound>,
         object: ObjectType,
     ) -> Self {
         Self {
             name,
+            sounds,
             asset_path: Some(AssetPath::from(&asset_path).to_owned()),
             transform: transform.into(),
             object,
@@ -119,6 +126,7 @@ impl PhysicsObject {
         });
         object.insert_bundle((
             Name::new(self.name),
+            NoiseOnHit { noises: self.sounds.iter().cloned().collect() },
             meshes.add(self.collider.clone().into()),
             Collider::from(self.collider),
             Friction {

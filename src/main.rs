@@ -6,6 +6,7 @@ mod cam;
 mod ball;
 #[cfg(feature = "editor")]
 mod editor;
+mod game_audio;
 mod powers;
 mod prefabs;
 mod scene;
@@ -13,6 +14,7 @@ mod state;
 mod system_helper;
 mod ui;
 
+use bevy_debug_text_overlay::screen_print;
 use bevy_rapier3d::{render::RapierDebugRenderPlugin, prelude::{RapierPhysicsPlugin, NoUserData}};
 use scene::KlodScene;
 use state::GameState;
@@ -74,23 +76,29 @@ fn main() {
     app.add_plugin(editor::Plugin);
 
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
-        .add_plugin(bevy_debug_text_overlay::OverlayPlugin::default())
+        .add_plugin(bevy_debug_text_overlay::OverlayPlugin {
+            font_size: 24.0,
+            ..default()
+        })
         .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
         .add_plugin(powers::Plugin)
         .add_plugin(audio::Plugin)
+        .add_plugin(game_audio::Plugin)
         .add_plugin(cam::Plugin)
         .add_plugin(ball::Plugin)
         .add_plugin(ui::Plugin)
         .add_event::<GameOver>()
         .add_system_set(GameState::WaitLoaded.on_exit(cleanup_marked::<WaitRoot>))
+        .add_startup_system(|| {
+            screen_print!(sec: 10_000_000_000.0, "");
+        })
         .add_startup_system(setup.exclusive_system());
 
     app.run();
 }
 
 pub fn cleanup_marked<T: Component>(mut cmds: Commands, query: Query<Entity, With<T>>) {
-    use bevy_debug_text_overlay::screen_print;
     screen_print!(sec: 3.0, "Cleaned up Something (can't show)");
     for entity in query.iter() {
         cmds.entity(entity).despawn_recursive();

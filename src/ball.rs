@@ -11,6 +11,7 @@ use crate::{cam::OrbitCamera, powers::Power, prefabs::AggloBundle, state::GameSt
 
 const INPUT_IMPULSE: f32 = 6.0;
 const KLOD_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b0100, !0b0100);
+pub(crate) const MAX_KLOD_SPEED: f32 = 30.0;
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
@@ -153,20 +154,17 @@ fn agglo_to_klod(
 }
 fn shlurp_agglomerable(
     klod: Query<&KlodElem>,
-    agglo: Query<(&Agglomerable, Option<&Name>)>,
+    agglo: Query<&Agglomerable>,
     mut events: EventWriter<AgglomerateToKlod>,
     mut collisions: EventReader<ContactForceEvent>,
 ) {
     for ContactForceEvent { collider1, collider2, .. } in collisions.iter() {
-        screen_print!(sec: 1.0, "detected collision between {collider1:?} and {collider2:?}");
         let (klod, agglo_entity) = match (klod.get(*collider1), klod.get(*collider2)) {
             (Ok(elem), _) => (elem.klod, *collider2),
             (_, Ok(elem)) => (elem.klod, *collider1),
             _ => continue,
         };
-        if let Ok((agglo, name)) = agglo.get(agglo_entity) {
-            let name = name.map_or("something, certainly".to_owned(), |s| s.to_string());
-            screen_print!("Shlurped {name}");
+        if let Ok(agglo) = agglo.get(agglo_entity) {
             events.send(AgglomerateToKlod {
                 klod,
                 agglo_weight: agglo.weight,
@@ -197,7 +195,7 @@ fn ball_input(
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
     let vel = velocity.linvel;
-    let force = (vel.xz() + force).clamp_length_max(30.0) - vel.xz();
+    let force = (vel.xz() + force).clamp_length_max(MAX_KLOD_SPEED) - vel.xz();
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
     if keys.just_pressed(KeyCode::Space) {

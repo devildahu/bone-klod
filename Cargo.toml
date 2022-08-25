@@ -26,14 +26,13 @@ bevy-debug-text-overlay = { version = "3.0", default-features = false, features 
 bevy-scene-hook = { version = "4.0" , optional = true }
 bevy-ui-navigation = "0.20"
 bevy = { version = "0.8", default-features = false, features = [
-    "bevy_audio",
-    "vorbis",
     "bevy_winit",
     "render",
     "png",
     "jpeg",
     "x11",
 ] }
+bevy_kira_audio = "0.12"
 bevy_rapier3d = { version = "0.16", path = "../../gitimpo/bevy_rapier/bevy_rapier3d" }
 bevy-ui-build-macros = { path = "../bevy-ui-build-macros" }
 bevy_editor_pls = { version = "0.1", optional = true , path = "../../gitimpo/bevy_editor_pls/crates/bevy_editor_pls" }
@@ -46,6 +45,8 @@ bevy_mod_fbx = { version = "0.1.0-dev", path = "../../gitimpo/bevy_fbx" }
 fastrand = "1.8"
 serde = "1"
 ron = "0.7"
+enum-map = "2.4"
+arrayvec = "0.7"
 
 [profile.dev.package."*"]
 opt-level = 1

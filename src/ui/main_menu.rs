@@ -5,8 +5,9 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_ui_build_macros::{build_ui, rect, size, style, unit};
 use bevy_ui_navigation::prelude::*;
 
+use crate::audio::AudioAssets;
 use crate::{
-    audio::{AudioChannel, AudioRequest, AudioRequestSystem, SfxParam},
+    audio::{AudioRequest, AudioRequestSystem, SoundChannel},
     cleanup_marked,
     state::GameState,
 };
@@ -32,7 +33,7 @@ enum MainMenuElem {
     LockMouse,
     ToggleFullScreen,
     Set16_9,
-    AudioSlider(AudioChannel, f32),
+    AudioSlider(SoundChannel, f32),
 }
 
 pub struct MenuAssets {
@@ -71,13 +72,13 @@ fn update_sliders(
             let horizontal_delta: f32 = mouse_motion.iter().map(|m| m.delta.x).sum();
             let new_left = (left / 0.9 + horizontal_delta * 0.40).min(100.0).max(0.0);
             *strength = new_left;
-            audio_requests.send(AudioRequest::SetVolume(*channel, new_left / 100.0));
+            audio_requests.send(AudioRequest::SetVolume(*channel, new_left as f64 / 100.0));
             style.position.left = Val::Percent(new_left * 0.9)
         };
         if mouse_buttons.just_released(MouseButton::Left) {
             mouse_buttons.clear_just_released(MouseButton::Left);
             nav_requests.send(NavRequest::Unlock);
-            audio_requests.send(AudioRequest::StopSfxLoop);
+            audio_requests.send(AudioRequest::StopLoopEffect);
             cmds.entity(entity).remove::<MovingSlider>();
         }
     }
@@ -85,7 +86,7 @@ fn update_sliders(
         let is_volume_slider = matches!(elems.get(entity), Ok(AudioSlider(..)));
         if mouse_buttons.just_pressed(MouseButton::Left) && is_volume_slider {
             nav_requests.send(NavRequest::Action);
-            audio_requests.send(AudioRequest::PlayWoodClink(SfxParam::StartLoop));
+            audio_requests.send(AudioRequest::LoopEffect);
             cmds.entity(entity).insert(MovingSlider);
         }
     }
@@ -101,6 +102,7 @@ fn activate_menu(
     mut game_state: ResMut<State<GameState>>,
     mut credit_overlay: Query<&mut Style, With<CreditOverlay>>,
     mut rules_overlay: Query<&mut Style, (Without<CreditOverlay>, With<RulesOverlay>)>,
+    audio: Res<AudioAssets>,
     elems: Query<&MainMenuElem>,
 ) {
     let window_msg = "There is at least one game window open";
@@ -109,7 +111,7 @@ fn activate_menu(
             MainMenuElem::Exit => exit.send(AppExit),
             MainMenuElem::Start => {
                 screen_print!("Player pressed the start button");
-                audio_requests.send(AudioRequest::PlayWoodClink(SfxParam::PlayOnce));
+                audio_requests.send(AudioRequest::PlayEffect(audio.ui_click(), 1.0));
                 game_state.set(GameState::Playing).unwrap();
             }
             MainMenuElem::LockMouse => {
@@ -190,7 +192,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
         },
         ..Default::default()
     };
-    let mut slider = |name: &str, channel: AudioChannel, strength: f32| {
+    let mut slider = |name: &str, channel: SoundChannel, strength: f32| {
         let volume_name = name.to_string() + " volume";
         let handle_name = Name::new(name.to_string() + " volume slider handle");
         let slider_name = Name::new(name.to_string() + " volume slider");
@@ -224,9 +226,9 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
         }
         .id()
     };
-    let master_slider = slider("Master", AudioChannel::Master, 100.0);
-    let sfx_slider = slider("Sfx", AudioChannel::Sfx, 50.0);
-    let music_slider = slider("Music", AudioChannel::Music, 50.0);
+    let master_slider = slider("Master", SoundChannel::Master, 100.0);
+    let sfx_slider = slider("Sfx", SoundChannel::Effects, 50.0);
+    let music_slider = slider("Music", SoundChannel::Music, 50.0);
     let cursor = MenuCursor::spawn_ui_element(&mut cmds);
 
     build_ui! {
@@ -287,7 +289,8 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                     Name::new("Team name"),
                     style! { size: size!(auto, 30 pct), }
                 ],
-                node[large_text("music, sfx, code: Gibonus");],
+                node[large_text("music, code: Gibonus");],
+                node[large_text("sfx: Kenney (www.kenney.nl)");],
                 node[large_text("graphics: Xolotl");],
                 node[large_text("Thanks to the bevy community <3 <3 <3");],
                 node[text_bundle("(Click anywhere to exit)", 30.0);]

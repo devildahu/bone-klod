@@ -1,2 +1,7 @@
-* editor_pls panel to import models
-* editor_pls panel to give collider to models
+* improve handling of ball
+    * make sure you can't shlur too much away from center
+    * normalize distances
+    * do not slow down too much
+* improve agglo
+    * use actual weight limit ± speed factor to deduce if should shlurp
+  

@@ -12,15 +12,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000003688274, -0.000000024249845, 0.0000005338195, 1.0),
+    rotation: (0.0000010124897, 0.00000000076078455, 0.0000019240067, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (43.438442, -81.22353, -162.38559),
+    translation: (43.438408, -81.22357, -162.38554),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: Fire,
@@ -33,15 +34,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000003767588, -0.000000000042937733, -0.0000004871631, 1.0),
+    rotation: (0.0000005316954, -0.000000000005109389, -0.0000006823826, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (14.221098, -80.77285, -245.2067),
+    translation: (14.221094, -80.77286, -245.2067),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -54,15 +56,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000038510788, -0.00000000011975272, -0.0000004917425, 1.0),
+    rotation: (0.00000046591168, -0.0000000000032837387, -0.00000057661566, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (15.084494, -80.77285, -256.562),
+    translation: (15.084487, -80.77286, -256.562),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -75,15 +78,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000003836514, 0.0000000012314144, -0.000040200834, 1.0),
+    rotation: (0.0000004723937, -0.0000000000042131155, -0.0000005794928, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (38.1775, -80.77279, -249.72296),
+    translation: (38.177517, -80.77286, -249.72296),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -96,15 +100,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021090664, 0.0000000012446643, -0.00003778685, 1.0),
+    rotation: (0.0000004655766, -0.0000000000058530264, -0.00000058925224, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (25.303225, -80.7728, -247.12877),
+    translation: (25.30324, -80.77286, -247.12877),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -117,15 +122,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021154026, 0.0000000012462538, -0.00003775636, 1.0),
+    rotation: (0.00000046810237, -0.000000000007296517, -0.0000005757562, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (2.6545978, -80.7728, -249.87704),
+    translation: (2.6545963, -80.77286, -249.87704),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -138,15 +144,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000216338, 0.0000000012393668, -0.00003775621, 1.0),
+    rotation: (0.0000004771753, -0.0000000000058604, -0.00000056624003, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (63.991673, -80.7728, -273.56155),
+    translation: (63.991688, -80.77286, -273.56155),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -159,15 +166,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021293718, 0.0000000012446563, -0.00003772073, 1.0),
+    rotation: (0.000000464506, -0.0000000000063560476, -0.00000057066694, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (-1.7836148, -80.7728, -256.60175),
+    translation: (-1.7836133, -80.77286, -256.60175),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -180,15 +188,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021331844, 0.0000000012396042, -0.000037713806, 1.0),
+    rotation: (0.00000047582134, -0.000000000008571666, -0.0000005657311, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (9.5548115, -80.7728, -270.2148),
+    translation: (9.55481, -80.77286, -270.2148),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -201,15 +210,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021472974, 0.0000000012328356, -0.0000376955, 1.0),
+    rotation: (0.0000004715016, -0.0000000000052599427, -0.00000057645263, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (52.984005, -80.7728, -276.4016),
+    translation: (52.98402, -80.77286, -276.4016),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -222,15 +232,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021168214, 0.0000000012419846, -0.00003778177, 1.0),
+    rotation: (0.0000004687125, -0.0000000000054701985, -0.0000005887933, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (22.800783, -80.7728, -266.34793),
+    translation: (22.800804, -80.77286, -266.34793),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -243,15 +254,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002145821, 0.0000000012417262, -0.00003775267, 1.0),
+    rotation: (0.00000046854095, -0.00000000000578468, -0.00000057271575, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (3.8429148, -80.7728, -260.87625),
+    translation: (3.8429148, -80.77286, -260.87625),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -264,15 +276,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021214307, 0.0000000012473418, -0.00003778102, 1.0),
+    rotation: (0.00000045999352, -0.000000000008333788, -0.00000057236974, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (29.900656, -80.7728, -262.7442),
+    translation: (29.900675, -80.77286, -262.7442),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -285,15 +298,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002129073, 0.0000000012451031, -0.000037780363, 1.0),
+    rotation: (0.00000045896408, -0.000000000007176151, -0.00000059540747, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (15.020808, -80.7728, -264.2616),
+    translation: (15.020804, -80.77286, -264.2616),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -306,15 +320,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021394085, 0.0000000012387981, -0.000037773305, 1.0),
+    rotation: (0.00000047138644, -0.0000000000046131983, -0.0000005730036, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (61.829575, -80.7728, -252.42926),
+    translation: (61.82959, -80.77286, -252.42926),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -327,15 +342,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000045851175, -0.000000004776112, -0.0000006181991, 1.0),
+    rotation: (0.00000047341433, -0.00000000000850207, -0.00000057533896, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (47.38522, -80.77285, -276.17242),
+    translation: (47.385235, -80.77286, -276.17242),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -348,15 +364,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000038869487, -0.0000000000583869, -0.0000004880409, 1.0),
+    rotation: (0.00000047516565, -0.0000000000052346226, -0.0000005827609, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (32.72868, -80.77285, -278.52307),
+    translation: (32.728695, -80.77286, -278.52307),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -369,15 +386,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021275455, 0.0000000012490342, -0.00003776499, 1.0),
+    rotation: (0.0000004723354, -0.000000000006007675, -0.0000005869613, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (13.103321, -80.7728, -278.67188),
+    translation: (13.103317, -80.77286, -278.67188),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -390,15 +408,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021092592, 0.000000001248365, -0.000037785954, 1.0),
+    rotation: (0.00000047155248, -0.000000000006540443, -0.0000005813455, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (27.005922, -80.7728, -273.8422),
+    translation: (27.005943, -80.77286, -273.8422),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -411,15 +430,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002130527, 0.0000000012428052, -0.00003774751, 1.0),
+    rotation: (0.0000004620049, -0.0000000000057056343, -0.0000005871998, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (36.986008, -80.7728, -263.72125),
+    translation: (36.986023, -80.77286, -263.72125),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -432,15 +452,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021269261, 0.0000000012409147, -0.000037732392, 1.0),
+    rotation: (0.0000004730956, -0.0000000000060973076, -0.0000005676246, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (44.64171, -80.7728, -257.15952),
+    translation: (44.641724, -80.77286, -257.15952),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -453,15 +474,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021108256, 0.0000000012362099, -0.000037733298, 1.0),
+    rotation: (0.00000046918078, -0.0000000000034883832, -0.0000005643054, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (47.947174, -80.7728, -248.04385),
+    translation: (47.94719, -80.77286, -248.04385),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -474,15 +496,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021385765, 0.0000000012378355, -0.000037725724, 1.0),
+    rotation: (0.0000004721043, -0.0000000000054796497, -0.00000057558435, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (41.51953, -80.7728, -242.91995),
+    translation: (41.519547, -80.77286, -242.91995),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -495,15 +518,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021420578, 0.000000001231137, -0.000037701775, 1.0),
+    rotation: (0.00000046234476, -0.0000000000061479446, -0.0000005876441, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (49.97737, -80.7728, -239.98605),
+    translation: (49.977386, -80.77286, -239.98605),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -516,15 +540,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000044155513, -0.0000000000333152, -0.0000005865183, 1.0),
+    rotation: (0.00000046809132, -0.0000000000054101333, -0.0000005731374, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (34.241505, -80.77285, -245.94614),
+    translation: (34.24152, -80.77286, -245.94614),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -537,15 +562,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002114493, 0.000000001239231, -0.00003777609, 1.0),
+    rotation: (0.00000046269116, -0.0000000000053975006, -0.00000058511773, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (28.91989, -80.7728, -255.6076),
+    translation: (28.919907, -80.77286, -255.6076),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -558,15 +584,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002107473, 0.0000000012435044, -0.000037774575, 1.0),
+    rotation: (0.0000004656181, -0.000000000006187754, -0.00000057747496, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (7.443473, -80.7728, -304.7934),
+    translation: (7.443473, -80.77286, -304.7934),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -579,15 +606,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021368194, 0.0000000012403021, -0.000037728136, 1.0),
+    rotation: (0.00000047114855, -0.000000000006384765, -0.00000057142137, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (51.075623, -80.7728, -299.03387),
+    translation: (51.075638, -80.77286, -299.03387),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -600,15 +628,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002127029, 0.0000000012464315, -0.000037818416, 1.0),
+    rotation: (0.00000046409795, -0.0000000000061345104, -0.0000006029317, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (58.08238, -80.7728, -286.44812),
+    translation: (58.082394, -80.77286, -286.44812),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -621,15 +650,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021402802, 0.0000000012452253, -0.000037773803, 1.0),
+    rotation: (0.00000046526506, -0.000000000005269864, -0.0000005867701, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (39.697037, -80.7728, -301.0572),
+    translation: (39.697052, -80.77286, -301.0572),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -642,15 +672,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000020692348, 0.0000000012482998, -0.00003780602, 1.0),
+    rotation: (0.00000047754486, -0.0000000000060428676, -0.0000005655024, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (23.690046, -80.7728, -291.6172),
+    translation: (23.690067, -80.77286, -291.6172),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -663,15 +694,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021169787, 0.0000000012432085, -0.00003772047, 1.0),
+    rotation: (0.00000046745484, -0.0000000000065078303, -0.0000005631685, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (1.8343239, -80.7728, -288.21133),
+    translation: (1.8343269, -80.77286, -288.21133),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -684,15 +716,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000002122769, 0.0000000012446913, -0.00003776429, 1.0),
+    rotation: (0.00000046706586, -0.000000000006637854, -0.0000005753304, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (29.68398, -80.7728, -290.24805),
+    translation: (29.684, -80.77286, -290.24805),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -705,15 +738,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021026651, 0.0000000012447892, -0.00003779931, 1.0),
+    rotation: (0.00000047302058, -0.0000000000061751676, -0.0000005656373, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (43.752094, -80.7728, -282.80414),
+    translation: (43.752113, -80.77286, -282.80414),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -726,15 +760,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000021507603, 0.0000000012467459, -0.000037759433, 1.0),
+    rotation: (0.00000046191337, -0.000000000004717016, -0.0000005720219, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (15.6786, -80.7728, -294.49652),
+    translation: (15.678596, -80.77286, -294.49652),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 20.0,
     power: None,
@@ -747,15 +782,16 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000015927263, -0.000000000000009804491, -0.000000031794926, 1.0),
+    rotation: (0.00000013365376, 0.000000000000026089452, -0.000000026629243, 1.0),
     scale: (5.0, 2.7, 3.5),
-    translation: (24.783386, -78.56286, -310.18576),
+    translation: (24.783834, -78.56286, -310.18567),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Agglomerable((
     mass: 300.0,
     power: None,
@@ -777,6 +813,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -797,6 +834,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -817,6 +855,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -837,6 +876,11 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [
+    Generic,
+    Plank,
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
@@ -857,6 +901,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -877,6 +922,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -897,6 +943,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -917,6 +964,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -937,6 +985,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -957,6 +1006,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -977,6 +1027,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -997,6 +1048,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1017,6 +1069,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1037,6 +1090,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1057,6 +1111,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1077,6 +1132,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1097,6 +1153,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1108,7 +1165,7 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.73676187, 0.0, 0.0, 0.6761523),
+    rotation: (0.73676175, 0.0, 0.0, 0.67615247),
     scale: (2.5, 0.9999999, 0.9999999),
     translation: (4.01001, -21.105934, -146.60251),
    ),
@@ -1117,6 +1174,7 @@
    ),
    friction: 0.0,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [],
    )),
@@ -1137,6 +1195,7 @@
    ),
    friction: 0.8,
    restitution: 0.0,
+   sounds: [GenericMetal],
    object: Scenery((
     weakness: [
      Fire,

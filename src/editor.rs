@@ -22,6 +22,7 @@ use bevy_transform_gizmo::{
 };
 
 use crate::{
+    audio::ImpactSound,
     cam::OrbitCamera,
     powers::Power,
     prefabs::{AggloData, Scenery, SerdeCollider},
@@ -247,6 +248,7 @@ fn load_data(
         SerdeCollider::Cuboid { half_extents: Vec3::splat(10.0) },
         *spawn_friction,
         *spawn_restitution,
+        vec![ImpactSound::GenericMetal],
         data,
     );
     data.spawn(&mut cmds, &assets, &mut *meshes, true);
