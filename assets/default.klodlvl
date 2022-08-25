@@ -12,16 +12,18 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000010124897, 0.00000000076078455, 0.0000019240067, 1.0),
+    rotation: (0.0000015590947, 0.00000000080236395, 0.0000024495928, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (43.438408, -81.22357, -162.38554),
+    translation: (43.438385, -81.22359, -162.38553),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: Fire,
@@ -34,51 +36,55 @@
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000005316954, -0.000000000005109389, -0.0000006823826, 1.0),
+    rotation: (0.0000006123317, -0.000000000010831208, -0.00000077730635, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (14.221094, -80.77286, -245.2067),
+    translation: (14.221102, -80.77286, -245.2067),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of prop",
+   name: "prop1",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046591168, -0.0000000000032837387, -0.00000057661566, 1.0),
+    rotation: (0.0000006218349, -0.000000000009956079, -0.0000008004521, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (15.084487, -80.77286, -256.562),
+    translation: (15.084498, -80.77286, -256.562),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop2",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004723937, -0.0000000000042131155, -0.0000005794928, 1.0),
+    rotation: (0.0000006156515, -0.000000000009317115, -0.0000007770422, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (38.177517, -80.77286, -249.72296),
    ),
@@ -87,64 +93,70 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop3",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004655766, -0.0000000000058530264, -0.00000058925224, 1.0),
+    rotation: (0.0000006142317, -0.000000000008879294, -0.0000007709042, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (25.30324, -80.77286, -247.12877),
+    translation: (25.30325, -80.77286, -247.12877),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop4",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046810237, -0.000000000007296517, -0.0000005757562, 1.0),
+    rotation: (0.00000062952734, -0.000000000009916581, -0.00000082801716, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (2.6545963, -80.77286, -249.87704),
+    translation: (2.6545982, -80.77286, -249.87704),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop5",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004771753, -0.0000000000058604, -0.00000056624003, 1.0),
+    rotation: (0.0000006180559, -0.000000000007928694, -0.00000077930895, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (63.991688, -80.77286, -273.56155),
    ),
@@ -153,64 +165,70 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop6",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.000000464506, -0.0000000000063560476, -0.00000057066694, 1.0),
+    rotation: (0.0000006221506, -0.000000000012275579, -0.000000780566, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (-1.7836133, -80.77286, -256.60175),
+    translation: (-1.7836126, -80.77286, -256.60175),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop7",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047582134, -0.000000000008571666, -0.0000005657311, 1.0),
+    rotation: (0.00000061775285, -0.000000000008727837, -0.0000007824974, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (9.55481, -80.77286, -270.2148),
+    translation: (9.554819, -80.77286, -270.2148),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop8",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004715016, -0.0000000000052599427, -0.00000057645263, 1.0),
+    rotation: (0.0000006146025, -0.0000000000083905044, -0.0000007799855, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (52.98402, -80.77286, -276.4016),
    ),
@@ -219,108 +237,118 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop9",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004687125, -0.0000000000054701985, -0.0000005887933, 1.0),
+    rotation: (0.0000006178679, -0.00000000001258221, -0.0000007760594, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (22.800804, -80.77286, -266.34793),
+    translation: (22.800814, -80.77286, -266.34793),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop10",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046854095, -0.00000000000578468, -0.00000057271575, 1.0),
+    rotation: (0.0000006116359, -0.000000000007941963, -0.0000007922115, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (3.8429148, -80.77286, -260.87625),
+    translation: (3.8429182, -80.77286, -260.87625),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop11",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000045999352, -0.000000000008333788, -0.00000057236974, 1.0),
+    rotation: (0.00000061730884, -0.000000000010548862, -0.0000007730803, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (29.900675, -80.77286, -262.7442),
+    translation: (29.900686, -80.77286, -262.7442),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop12",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000045896408, -0.000000000007176151, -0.00000059540747, 1.0),
+    rotation: (0.00000061333594, -0.000000000009292654, -0.00000077764025, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (15.020804, -80.77286, -264.2616),
+    translation: (15.020813, -80.77286, -264.2616),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop13",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047138644, -0.0000000000046131983, -0.0000005730036, 1.0),
+    rotation: (0.00000062156835, -0.000000000009254424, -0.0000007679851, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (61.82959, -80.77286, -252.42926),
    ),
@@ -329,20 +357,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop14",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047341433, -0.00000000000850207, -0.00000057533896, 1.0),
+    rotation: (0.0000006292072, -0.000000000008759864, -0.00000078975154, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (47.385235, -80.77286, -276.17242),
    ),
@@ -351,20 +381,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop15",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047516565, -0.0000000000052346226, -0.0000005827609, 1.0),
+    rotation: (0.00000061925675, -0.0000000000067859026, -0.00000078844073, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (32.728695, -80.77286, -278.52307),
    ),
@@ -373,64 +405,70 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop16",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004723354, -0.000000000006007675, -0.0000005869613, 1.0),
+    rotation: (0.00000063921095, -0.000000000009622546, -0.00000081708663, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (13.103317, -80.77286, -278.67188),
+    translation: (13.103322, -80.77286, -278.67188),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop17",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047155248, -0.000000000006540443, -0.0000005813455, 1.0),
+    rotation: (0.00000061805906, -0.0000000000109336845, -0.0000007794189, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (27.005943, -80.77286, -273.8422),
+    translation: (27.005953, -80.77286, -273.8422),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop18",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004620049, -0.0000000000057056343, -0.0000005871998, 1.0),
+    rotation: (0.00000061877057, -0.000000000010875475, -0.00000077306845, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (36.986023, -80.77286, -263.72125),
    ),
@@ -439,20 +477,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop19",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004730956, -0.0000000000060973076, -0.0000005676246, 1.0),
+    rotation: (0.0000006223926, -0.000000000009025919, -0.0000007896244, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (44.641724, -80.77286, -257.15952),
    ),
@@ -461,20 +501,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop20",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046918078, -0.0000000000034883832, -0.0000005643054, 1.0),
+    rotation: (0.0000006124461, -0.000000000010802158, -0.000000786439, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (47.94719, -80.77286, -248.04385),
    ),
@@ -483,20 +525,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop21",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004721043, -0.0000000000054796497, -0.00000057558435, 1.0),
+    rotation: (0.0000006117494, -0.000000000009650955, -0.00000076639134, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (41.519547, -80.77286, -242.91995),
    ),
@@ -505,20 +549,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop22",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046234476, -0.0000000000061479446, -0.0000005876441, 1.0),
+    rotation: (0.00000060861964, -0.000000000010529666, -0.0000007996729, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (49.977386, -80.77286, -239.98605),
    ),
@@ -527,20 +573,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of prop",
+   name: "prop23",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046809132, -0.0000000000054101333, -0.0000005731374, 1.0),
+    rotation: (0.00000061345963, -0.000000000010237308, -0.0000007873721, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (34.24152, -80.77286, -245.94614),
    ),
@@ -549,42 +597,46 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of prop",
+   name: "prop24",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046269116, -0.0000000000053975006, -0.00000058511773, 1.0),
+    rotation: (0.00000061484525, -0.000000000011134113, -0.0000007783608, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (28.919907, -80.77286, -255.6076),
+    translation: (28.919916, -80.77286, -255.6076),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop25",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0000004656181, -0.000000000006187754, -0.00000057747496, 1.0),
+    rotation: (0.0000006099782, -0.00000000001042949, -0.0000007785943, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (7.443473, -80.77286, -304.7934),
    ),
@@ -593,20 +645,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop26",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047114855, -0.000000000006384765, -0.00000057142137, 1.0),
+    rotation: (0.0000006133205, -0.000000000011560128, -0.000000791812, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (51.075638, -80.77286, -299.03387),
    ),
@@ -615,20 +669,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop27",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046409795, -0.0000000000061345104, -0.0000006029317, 1.0),
+    rotation: (0.00000061201285, -0.000000000009614311, -0.00000079957704, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (58.082394, -80.77286, -286.44812),
    ),
@@ -637,20 +693,22 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop28",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046526506, -0.000000000005269864, -0.0000005867701, 1.0),
+    rotation: (0.00000063833284, -0.000000000008829586, -0.0000008082918, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (39.697052, -80.77286, -301.0572),
    ),
@@ -659,86 +717,94 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop29",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047754486, -0.0000000000060428676, -0.0000005655024, 1.0),
+    rotation: (0.0000006182351, -0.000000000008742974, -0.00000078457595, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (23.690067, -80.77286, -291.6172),
+    translation: (23.690079, -80.77286, -291.6172),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop30",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046745484, -0.0000000000065078303, -0.0000005631685, 1.0),
+    rotation: (0.00000061402216, -0.000000000008590395, -0.0000007741422, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (1.8343269, -80.77286, -288.21133),
+    translation: (1.8343275, -80.77286, -288.21133),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop31",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046706586, -0.000000000006637854, -0.0000005753304, 1.0),
+    rotation: (0.00000061717515, -0.000000000011622765, -0.00000076974464, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (29.684, -80.77286, -290.24805),
+    translation: (29.684013, -80.77286, -290.24805),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop32",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000047302058, -0.0000000000061751676, -0.0000005656373, 1.0),
+    rotation: (0.0000006213308, -0.000000000011596287, -0.00000077066784, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (43.752113, -80.77286, -282.80414),
    ),
@@ -747,58 +813,64 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop33",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000046191337, -0.000000000004717016, -0.0000005720219, 1.0),
+    rotation: (0.0000006162801, -0.0000000000100118846, -0.0000007925821, 1.0),
     scale: (1.0, 1.0, 1.0),
-    translation: (15.678596, -80.77286, -294.49652),
+    translation: (15.678607, -80.77286, -294.49652),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 20.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of prop",
+   name: "prop34",
    asset_path: Some((
     path: "untitled.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.00000013365376, 0.000000000000026089452, -0.000000026629243, 1.0),
+    rotation: (0.0000001799527, 0.000000000000043226954, -0.000000035969542, 1.0),
     scale: (5.0, 2.7, 3.5),
-    translation: (24.783834, -78.56286, -310.18567),
+    translation: (24.784061, -78.56286, -310.18558),
    ),
    collider: Cuboid(
     half_extents: (0.8, 1.3, 1.1),
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Agglomerable((
     mass: 300.0,
     power: None,
    )),
   ),
   (
-   name: "Copy of Floor",
+   name: "floor1",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -813,19 +885,21 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Floor",
+   name: "floor2",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.0, 0.0, 0.7495817, -0.66191185),
+    rotation: (0.0, 0.0, 0.7495819, -0.66191167),
     scale: (0.60000026, 0.49999997, 1.0),
     translation: (25.738388, 12.032377, 0.0),
    ),
@@ -834,13 +908,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Floor",
+   name: "floor3",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -855,13 +931,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Floor",
+   name: "floor4",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -886,7 +964,7 @@
    )),
   ),
   (
-   name: "Copy of Floor",
+   name: "floor5",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -901,13 +979,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of Copy of Floor",
+   name: "floor6",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -922,19 +1002,21 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Floor",
+   name: "floor7",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.7080148, 0.0, 0.0, 0.70619756),
+    rotation: (0.70801485, 0.0, 0.0, 0.70619756),
     scale: (1.0, 1.0000001, 1.0000001),
     translation: (34.72462, -62.279663, -148.01093),
    ),
@@ -943,13 +1025,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Floor",
+   name: "floor8",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -964,13 +1048,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Floor",
+   name: "floor9",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -985,13 +1071,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Floor",
+   name: "floor10",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1006,13 +1094,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of Floor",
+   name: "floor11",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1027,19 +1117,21 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Floor",
+   name: "floor12",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.7080148, 0.0, 0.0, 0.70619756),
+    rotation: (0.70801485, 0.0, 0.0, 0.70619756),
     scale: (1.0, 1.0000001, 1.0000001),
     translation: (-26.381077, -62.213993, -148.01093),
    ),
@@ -1048,19 +1140,21 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Floor",
+   name: "floor13",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
    )),
    transform: (
-    rotation: (0.7080148, 0.0, 0.0, 0.70619756),
+    rotation: (0.70801485, 0.0, 0.0, 0.70619756),
     scale: (2.0, 1.0000001, 1.0),
     translation: (14.277149, -62.279663, -188.8011),
    ),
@@ -1069,13 +1163,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Floor",
+   name: "floor14",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1090,13 +1186,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Floor",
+   name: "floor15",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1111,13 +1209,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Floor",
+   name: "floor16",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1132,13 +1232,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of Floor",
+   name: "floor17",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1153,13 +1255,15 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
   ),
   (
-   name: "Copy of Copy of Copy of Copy of Floor",
+   name: "floor18",
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -1174,7 +1278,9 @@
    ),
    friction: 0.0,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [],
    )),
@@ -1195,12 +1301,31 @@
    ),
    friction: 0.8,
    restitution: 0.0,
-   sounds: [GenericMetal],
+   sounds: [
+    GenericMetal,
+   ],
    object: Scenery((
     weakness: [
      Fire,
     ],
    )),
+  ),
+ ],
+ music_triggers: [
+  (
+   name: "Chill music",
+   trigger: (
+    intro: None,
+    track: Chill,
+   ),
+   collider: Cuboid(
+    half_extents: (30.0, 30.0, 30.0),
+   ),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (0.0, 0.0, -95.96837),
+   ),
   ),
  ],
 )

@@ -4,21 +4,23 @@ use bevy::{
     ecs::query::{QueryItem, WorldQuery},
     ecs::system::EntityCommands,
     prelude::*,
+    ui::FocusPolicy,
 };
+use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use crate::{
     ball::Agglomerable,
+    collision_groups as groups,
+    game_audio::MusicTrigger,
     powers::{ElementalObstacle, Power},
 };
-
-const AGGLO_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b1000, !0);
 
 pub(crate) trait Prefab: Serialize + DeserializeOwned {
     type Query: WorldQuery;
 
-    fn from_query(item: &QueryItem<Self::Query>) -> Self;
+    fn from_query(item: QueryItem<Self::Query>) -> Self;
 
     fn spawn(self, cmds: &mut EntityCommands);
 }
@@ -28,6 +30,15 @@ pub(crate) struct SerdeTransform {
     pub(crate) rotation: Quat,
     pub(crate) scale: Vec3,
     pub(crate) translation: Vec3,
+}
+impl Default for SerdeTransform {
+    fn default() -> Self {
+        SerdeTransform {
+            rotation: Quat::IDENTITY,
+            scale: Vec3::ONE,
+            translation: Vec3::ZERO,
+        }
+    }
 }
 impl From<Transform> for SerdeTransform {
     fn from(item: Transform) -> Self {
@@ -255,7 +266,7 @@ pub(crate) struct Scenery {
 impl Prefab for Scenery {
     type Query = (&'static Scenery, Option<&'static ElementalObstacle>);
 
-    fn from_query((_, powers): &QueryItem<Self::Query>) -> Self {
+    fn from_query((_, powers): QueryItem<Self::Query>) -> Self {
         let non_empty = powers.filter(|p| !p.required_powers.is_empty());
         Scenery {
             weakness: non_empty.map_or(Vec::new(), |p| p.required_powers.clone()),
@@ -298,7 +309,7 @@ impl AggloBundle {
             contact_threshold: ContactForceEventThreshold(mass * 1000.0),
             mass: ColliderMassProperties::Mass(mass),
             rigid_body: RigidBody::Dynamic,
-            collision_group: AGGLO_COLLISION_GROUP,
+            collision_group: groups::AGGLO,
         }
     }
 }
@@ -306,12 +317,68 @@ impl AggloBundle {
 impl Prefab for AggloData {
     type Query = (&'static Agglomerable, &'static Power);
 
-    fn from_query((agglo, power): &QueryItem<Self::Query>) -> Self {
-        AggloData { mass: agglo.weight, power: **power }
+    fn from_query((agglo, power): QueryItem<Self::Query>) -> Self {
+        AggloData { mass: agglo.weight, power: *power }
     }
 
     fn spawn(self, cmds: &mut EntityCommands) {
         let Self { mass, power } = self;
         cmds.insert_bundle(AggloBundle::new(mass, power));
+    }
+}
+
+#[derive(Serialize, Debug, Deserialize)]
+pub(crate) struct MusicTriggerData {
+    name: String,
+    trigger: MusicTrigger,
+    pub(crate) collider: SerdeCollider,
+    transform: SerdeTransform,
+}
+impl MusicTriggerData {
+    pub(crate) fn new(name: String, trigger: MusicTrigger, collider: &Collider) -> Self {
+        Self {
+            name,
+            trigger,
+            collider: collider.into(),
+            transform: default(),
+        }
+    }
+}
+impl Prefab for MusicTriggerData {
+    type Query = (
+        &'static MusicTrigger,
+        &'static Collider,
+        &'static Transform,
+        &'static Name,
+    );
+
+    fn from_query((trigger, collider, transform, name): QueryItem<Self::Query>) -> Self {
+        MusicTriggerData {
+            name: name.to_string(),
+            trigger: *trigger,
+            collider: collider.into(),
+            transform: (*transform).into(),
+        }
+    }
+    fn spawn(self, cmds: &mut EntityCommands) {
+        cmds.insert_bundle((
+            Name::new(self.name),
+            self.trigger,
+            Sensor,
+            groups::MUSIC,
+            Transform::from(self.transform),
+            GlobalTransform::default(),
+            Collider::from(self.collider),
+        ));
+        #[cfg(feature = "editor")]
+        cmds.insert_bundle((
+            Visibility::default(),
+            ComputedVisibility::default(),
+            PickableMesh::default(),
+            Interaction::default(),
+            FocusPolicy::default(),
+            Selection::default(),
+            bevy_transform_gizmo::GizmoTransformable,
+        ));
     }
 }

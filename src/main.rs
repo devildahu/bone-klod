@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, log::{LogSettings, Level}};
 
 mod animate;
 mod audio;
@@ -45,6 +45,10 @@ fn main() {
     };
 
     app.insert_resource(Msaa { samples: 4 })
+        .insert_resource(LogSettings {
+            level: Level::INFO,
+            filter: "wgpu_core::device=warn,wgpu_hal=warn,symphonia_core=warn,symphonia_format_ogg=warn".to_owned(),
+        })
         .insert_resource(WindowDescriptor {
             #[cfg(target_os = "linux")]
             // workaround for https://github.com/bevyengine/bevy/issues/1908 (seems to be Mesa bug with X11 + Vulkan)
@@ -113,4 +117,13 @@ fn setup(
     ambiant_light.brightness = 1.0;
     let root = scene::get_base_path();
     KlodScene::load(world, root.join("default.klodlvl")).unwrap();
+}
+
+pub(crate) mod collision_groups {
+    use bevy_rapier3d::prelude::CollisionGroups;
+
+    pub(crate) const KLOD: CollisionGroups = CollisionGroups::new(0b00000001, 0b110110);
+    pub(crate) const AGGLO: CollisionGroups = CollisionGroups::new(0b0000010, 0b001011);
+    pub(crate) const MUSIC: CollisionGroups = CollisionGroups::new(0b0000100, 0b000001);
+    pub(crate) const CAM: CollisionGroups = CollisionGroups::new(0b000001000, 0b000011);
 }

@@ -80,11 +80,13 @@ impl NoiseOnHit {
 
 // TODO
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Component)]
-struct MusicTrigger {
-    intro: Option<IntroTrack>,
-    track: MusicTrack,
+#[derive(Serialize, Deserialize, Debug, Clone, Component, Copy)]
+pub(crate) struct MusicTrigger {
+    pub(crate) intro: Option<IntroTrack>,
+    pub(crate) track: MusicTrack,
 }
+
+fn trigger_music(mut audio_requests: EventWriter<AudioRequest>) {}
 
 fn play_impact_sound(
     effects: Query<&NoiseOnHit>,

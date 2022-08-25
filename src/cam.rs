@@ -14,7 +14,8 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
 
-const CAM_COLLISION_GROUP: InteractionGroups = InteractionGroups::new(0b0100, !0b0100);
+use crate::collision_groups as groups;
+
 const CAM_SPEED: f32 = 0.01;
 const CAM_DIST: f32 = 20.0;
 const CAM_Y_MAX: f32 = TAU / 4.0;
@@ -78,7 +79,7 @@ fn update_camera_transform(
         cam_offset,
         &shape,
         1.0,
-        QueryFilter::default().groups(CAM_COLLISION_GROUP),
+        QueryFilter::default().groups(groups::CAM.into()),
     );
     transform.translation = if let Some((_, toi)) = collision {
         followed_pos + toi.toi * cam_offset

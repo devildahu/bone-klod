@@ -27,9 +27,9 @@ use crate::{
     audio::ImpactSound,
     ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform},
     cam::OrbitCamera,
-    game_audio::NoiseOnHit,
+    game_audio::{MusicTrigger, NoiseOnHit},
     powers::{ElementalObstacle, Power},
-    prefabs::{AggloData, Prefab, Scenery, SerdeCollider, SerdeTransform},
+    prefabs::{AggloData, MusicTriggerData, Prefab, Scenery, SerdeCollider, SerdeTransform},
 };
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -47,7 +47,7 @@ pub(crate) struct PhysicsObject {
 struct ObjectQuery<Q>
 where
     Q: ReadOnlyWorldQuery,
-    for<'a, 'w> &'a QueryItem<'w, Q>: Into<ObjectType>,
+    for<'w> QueryItem<'w, Q>: Into<ObjectType>,
     for<'w> <Q as WorldQueryGats<'w>>::Fetch: Clone,
 {
     name: Option<&'static Name>,
@@ -62,10 +62,10 @@ where
 impl<'w, Q> ObjectQueryItem<'w, Q>
 where
     Q: ReadOnlyWorldQuery,
-    for<'a, 'ww> &'a QueryItem<'ww, Q>: Into<ObjectType>,
+    for<'ww> QueryItem<'ww, Q>: Into<ObjectType>,
     for<'ww> <Q as WorldQueryGats<'ww>>::Fetch: Clone,
 {
-    fn data(&self, assets: &AssetServer) -> PhysicsObject {
+    fn data(self, assets: &AssetServer) -> PhysicsObject {
         PhysicsObject {
             sounds: self.sounds.noises.to_vec(),
             asset_path: self
@@ -73,7 +73,7 @@ where
                 .and_then(|h| assets.get_handle_path(h))
                 .map(|t| t.to_owned()),
             transform: (*self.transform).into(),
-            object: (&self.object).into(),
+            object: self.object.into(),
             name: self
                 .name
                 .and_then(|name| (name.as_str() != "").then(|| name.to_string()))
@@ -127,8 +127,7 @@ impl PhysicsObject {
         object.insert_bundle((
             Name::new(self.name),
             NoiseOnHit { noises: self.sounds.iter().cloned().collect() },
-            meshes.add(self.collider.clone().into()),
-            Collider::from(self.collider),
+            Collider::from(self.collider.clone()),
             Friction {
                 coefficient: self.friction,
                 combine_rule: CoefficientCombineRule::Max,
@@ -143,6 +142,7 @@ impl PhysicsObject {
         }
         #[cfg(feature = "editor")]
         object.insert_bundle((
+            meshes.add(self.collider.into()),
             bevy_scene_hook::SceneHook::new(|_, cmds| {
                 cmds.insert(IgnoreEditorRayCast);
             }),
@@ -164,14 +164,14 @@ pub(crate) enum ObjectType {
     Scenery(Scenery),
     Agglomerable(AggloData),
 }
-impl<'a, 'w> From<&'a (&'w Scenery, Option<&'w ElementalObstacle>)> for ObjectType {
-    fn from(item: &'a QueryItem<'w, <Scenery as Prefab>::Query>) -> Self {
+impl<'w> From<(&'w Scenery, Option<&'w ElementalObstacle>)> for ObjectType {
+    fn from(item: QueryItem<'w, <Scenery as Prefab>::Query>) -> Self {
         ObjectType::Scenery(Prefab::from_query(item))
     }
 }
 
-impl<'a, 'w> From<&'a (&'w Agglomerable, &'w Power)> for ObjectType {
-    fn from(item: &'a QueryItem<'w, <AggloData as Prefab>::Query>) -> Self {
+impl<'w> From<(&'w Agglomerable, &'w Power)> for ObjectType {
+    fn from(item: QueryItem<'w, <AggloData as Prefab>::Query>) -> Self {
         ObjectType::Agglomerable(Prefab::from_query(item))
     }
 }
@@ -181,11 +181,12 @@ struct KlodSceneQuery<'w, 's> {
     assets: Res<'w, AssetServer>,
     agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
     scenery: Query<'w, 's, ObjectQuery<<Scenery as Prefab>::Query>>,
+    music: Query<'w, 's, <MusicTriggerData as Prefab>::Query>,
     klod_spawn: Res<'w, KlodSpawnTransform>,
 }
 #[derive(SystemParam)]
 struct KlodSweepQuery<'w, 's> {
-    query: Query<'w, 's, Entity, Or<(With<Scenery>, With<Agglomerable>)>>,
+    query: Query<'w, 's, Entity, Or<(With<Scenery>, With<Agglomerable>, With<MusicTrigger>)>>,
 }
 impl<'w, 's> KlodSweepQuery<'w, 's> {
     pub(crate) fn to_sweep(&self) -> Vec<Entity> {
@@ -204,6 +205,7 @@ struct KlodSpawnQuery<'w, 's> {
 pub(crate) struct KlodScene {
     klod_spawn_transform: SerdeTransform,
     objects: Vec<PhysicsObject>,
+    music_triggers: Vec<MusicTriggerData>,
 }
 #[derive(SystemParam)]
 struct KlodCopyQuery<'w, 's> {
@@ -235,7 +237,6 @@ impl KlodScene {
         query.apply(world);
     }
     fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod_spawn, klod }: &mut KlodSpawnQuery) {
-        println!("Adding back entities from serialized scene: {:?}", &self);
         klod_spawn.0 = self.klod_spawn_transform.into();
 
         let klod = if let Ok(klod) = klod.get_single() {
@@ -254,14 +255,25 @@ impl KlodScene {
         for object in self.objects.into_iter() {
             object.spawn(cmds, assets, meshes, false);
         }
+        for music in self.music_triggers.into_iter() {
+            let mut cmds = cmds.spawn();
+            #[cfg(feature = "editor")]
+            cmds.insert(meshes.add(music.collider.clone().into()));
+            music.spawn(&mut cmds);
+        }
     }
     fn read(
-        KlodSceneQuery { assets, agglomerables, scenery, klod_spawn }: &KlodSceneQuery,
+        KlodSceneQuery { assets, agglomerables, scenery, klod_spawn, music }: &KlodSceneQuery,
     ) -> Self {
         let mut objects = Vec::with_capacity(agglomerables.iter().len() + scenery.iter().len());
         objects.extend(agglomerables.iter().map(|item| item.data(assets)));
         objects.extend(scenery.iter().map(|item| item.data(assets)));
-        KlodScene { objects, klod_spawn_transform: klod_spawn.0.into() }
+        let music_triggers = music.iter().map(|t| Prefab::from_query(t)).collect();
+        KlodScene {
+            objects,
+            klod_spawn_transform: klod_spawn.0.into(),
+            music_triggers,
+        }
     }
 
     pub(crate) fn load(

@@ -7,7 +7,6 @@
  objects: [
   (
    name: "Bump",
-sounds: [],
    asset_path: Some((
     path: "",
     label: None,
@@ -22,11 +21,13 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Cylinder Bump",
-sounds: [],
    asset_path: Some((
     path: "",
     label: None,
@@ -42,11 +43,13 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "Floor",
-sounds: [],
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -61,11 +64,13 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "wall1",
-sounds: [],
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -80,11 +85,13 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "wall2",
-sounds: [],
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -99,11 +106,13 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "wall4",
-sounds: [],
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -118,11 +127,13 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
   (
    name: "wall3",
-sounds: [],
    asset_path: Some((
     path: "floor.glb",
     label: Some("Scene0"),
@@ -137,7 +148,11 @@ sounds: [],
    ),
    friction: 0.0,
    restitution: 0.0,
-   object: Scenery(Scenery(weakness: [])),
+   sounds: [],
+   object: Scenery((
+    weakness: [],
+   )),
   ),
  ],
+ music_triggers: [],
 )

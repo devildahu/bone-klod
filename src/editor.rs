@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use bevy::{
     ecs::system::SystemState,
     prelude::{Plugin as BevyPlugin, *},
+    ui::FocusPolicy,
 };
 
 use bevy_editor_pls::{
@@ -14,16 +15,18 @@ use bevy_editor_pls_default_windows::{
     cameras::ActiveEditorCamera,
     hierarchy::{picking::IgnoreEditorRayCast, HideInEditor, HierarchyState, HierarchyWindow},
 };
-use bevy_inspector_egui::egui;
-use bevy_mod_picking::{DefaultPickingPlugins, PickingCameraBundle};
-use bevy_rapier3d::prelude::{DebugLinesMesh, RapierConfiguration};
+use bevy_inspector_egui::{egui, Inspectable};
+use bevy_mod_picking::{DefaultPickingPlugins, PickableMesh, PickingCameraBundle, Selection};
+use bevy_rapier3d::prelude::{Collider, DebugLinesMesh, RapierConfiguration, Sensor};
 use bevy_transform_gizmo::{
     GizmoPickSource, InternalGizmoCamera, PickableGizmo, TransformGizmoPlugin,
 };
 
 use crate::{
-    audio::ImpactSound,
+    audio::{ImpactSound, IntroTrack, MusicTrack},
     cam::OrbitCamera,
+    collision_groups as groups,
+    game_audio::MusicTrigger,
     powers::Power,
     prefabs::{AggloData, Scenery, SerdeCollider},
     scene::{KlodScene, ObjectType, PhysicsObject},
@@ -81,10 +84,12 @@ macro_rules! err_sys {
 pub struct SceneWindowState {
     filename: String,
     scene: String,
-    spawn_name: String,
+    name: String,
     spawn_mass: f32,
     spawn_restitution: f32,
     spawn_friction: f32,
+    music: MusicTrack,
+    music_start: Option<IntroTrack>,
     power: Power,
     scene_save_result: Option<Result<(), Box<dyn std::error::Error + Send + Sync>>>,
 }
@@ -165,7 +170,7 @@ impl EditorWindow for SceneWindow {
                 );
                 ui.end_row();
                 ui.label("Name");
-                egui::TextEdit::singleline(&mut state.spawn_name)
+                egui::TextEdit::singleline(&mut state.name)
                     .hint_text("Physical Object")
                     .desired_width(120.0)
                     .show(ui);
@@ -196,14 +201,55 @@ impl EditorWindow for SceneWindow {
                 res.on_hover_text("Should end with #Scene0, leave empty to load an empty");
 
                 if ui.button("Add new prop").clicked() {
-                    load_data(world, &state);
+                    spawn_object(world, &state);
                 }
                 if ui.button("Copy selected").clicked() {
                     copy_selected(world, hierarchy_state);
                 }
             });
+            ui.vertical(|ui| {
+                ui.set_width(160.0);
+                state.music.ui_raw(ui, ());
+                state.music_start.ui_raw(ui, default());
+                if ui.button("Spawn music trigger area").clicked() {
+                    spawn_music_trigger(world, state.music, state.music_start, state.name.clone());
+                }
+            });
         });
     }
+}
+
+fn spawn_music_trigger(
+    world: &mut World,
+    track: MusicTrack,
+    intro: Option<IntroTrack>,
+    name: String,
+) {
+    let name = if name.is_empty() {
+        "Music trigger".to_owned()
+    } else {
+        name
+    };
+    let collider = SerdeCollider::Cuboid { half_extents: Vec3::splat(30.0) };
+    world.resource_scope(|world, mut meshes: Mut<Assets<Mesh>>| {
+        world.spawn().insert_bundle((
+            Name::new(name),
+            MusicTrigger { intro, track },
+            Sensor,
+            groups::MUSIC,
+            Transform::default(),
+            GlobalTransform::default(),
+            Visibility::default(),
+            ComputedVisibility::default(),
+            Collider::from(collider.clone()),
+            meshes.add(collider.into()),
+            PickableMesh::default(),
+            Interaction::default(),
+            FocusPolicy::default(),
+            Selection::default(),
+            bevy_transform_gizmo::GizmoTransformable,
+        ));
+    });
 }
 
 fn file_name(filename: &str) -> PathBuf {
@@ -219,11 +265,11 @@ fn copy_selected(world: &mut World, hierarchy: &HierarchyState) {
     let to_copy: Vec<_> = hierarchy.selected.iter().collect();
     KlodScene::copy_objects(&to_copy, world);
 }
-fn load_data(
+fn spawn_object(
     world: &mut World,
     SceneWindowState {
         scene,
-        spawn_name,
+        name,
         spawn_mass,
         spawn_restitution,
         spawn_friction,
@@ -234,7 +280,7 @@ fn load_data(
     let mut system_state =
         SystemState::<(Commands, Res<AssetServer>, ResMut<Assets<Mesh>>)>::new(world);
     let (mut cmds, assets, mut meshes) = system_state.get_mut(world);
-    let data = if &*spawn_name == "" || *spawn_mass == 0.0 {
+    let data = if &*name == "" || *spawn_mass == 0.0 {
         let power = *power;
         let weakness = if power != Power::None { vec![power] } else { Vec::new() };
         ObjectType::Scenery(Scenery { weakness })
@@ -242,7 +288,7 @@ fn load_data(
         ObjectType::Agglomerable(AggloData::new(*spawn_mass, *power))
     };
     let data = PhysicsObject::new(
-        spawn_name.clone(),
+        name.clone(),
         scene.clone(),
         default(),
         SerdeCollider::Cuboid { half_extents: Vec3::splat(10.0) },

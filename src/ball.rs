@@ -7,10 +7,12 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
 
-use crate::{cam::OrbitCamera, powers::Power, prefabs::AggloBundle, state::GameState};
+use crate::{
+    cam::OrbitCamera, collision_groups as groups, powers::Power, prefabs::AggloBundle,
+    state::GameState,
+};
 
-const INPUT_IMPULSE: f32 = 6.0;
-const KLOD_COLLISION_GROUP: CollisionGroups = CollisionGroups::new(0b0100, !0b0100);
+const INPUT_IMPULSE: f32 = 5.0;
 pub(crate) const MAX_KLOD_SPEED: f32 = 30.0;
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
@@ -37,7 +39,7 @@ fn spawn_klod_elem(
 ) {
     cmds.spawn_bundle((
         KlodElem { klod },
-        KLOD_COLLISION_GROUP,
+        groups::KLOD,
         ActiveEvents::CONTACT_FORCE_EVENTS,
         ContactForceEventThreshold(1000.0),
         collider,
@@ -56,7 +58,7 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
         ExternalImpulse::default(),
         Velocity::default(),
         Name::new("Klod"),
-        KLOD_COLLISION_GROUP,
+        groups::KLOD,
     ))
     .insert_bundle(SpatialBundle::default())
     .with_children(|cmds| {
@@ -190,12 +192,13 @@ fn ball_input(
         }
     };
     let cam_rot = camera.single();
+    let vel = velocity.linvel;
     let force = INPUT_IMPULSE;
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
-    let vel = velocity.linvel;
-    let force = (vel.xz() + force).clamp_length_max(MAX_KLOD_SPEED) - vel.xz();
+    let max_more_force = MAX_KLOD_SPEED - vel.y * 2.0;
+    let force = (vel.xz() + force).clamp_length_max(max_more_force) - vel.xz();
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
     if keys.just_pressed(KeyCode::Space) {

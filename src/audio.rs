@@ -104,7 +104,7 @@ fn handle_requests(
             AudioRequest::StopLoopEffect => state.stop_loop_effect = false,
             AudioRequest::Roll(roll_speed) => {
                 let volume = state.volumes.master * state.volumes.effect * roll_speed;
-                let pitch = 1.0 + *roll_speed;
+                let pitch = 1.0 + *roll_speed * 0.6;
                 roll_channel.set_volume(volume);
                 roll_channel.set_playback_rate(pitch);
                 if !roll_channel.is_playing_sound() {
@@ -296,7 +296,7 @@ impl FromWorld for AudioAssets {
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Copy)]
 pub(crate) enum MusicTrack {
     Theremin,
     #[default]
@@ -306,7 +306,7 @@ pub(crate) enum MusicTrack {
     Chorus,
 }
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub(crate) enum IntroTrack {
     Theremin,
     Orchestral,
