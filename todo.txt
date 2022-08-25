@@ -1,7 +1,6 @@
 * improve handling of ball
-    * make sure you can't shlur too much away from center
+    * make sure you can't shlurp too much away from center
     * normalize distances
     * do not slow down too much
 * improve agglo
     * use actual weight limit ± speed factor to deduce if should shlurp
-  

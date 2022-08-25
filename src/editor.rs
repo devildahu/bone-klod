@@ -101,8 +101,8 @@ impl EditorWindow for SceneWindow {
     type State = SceneWindowState;
     const NAME: &'static str = "Level Management";
 
-    fn ui(world: &mut World, mut cx: EditorWindowContext, ui: &mut egui::Ui) {
-        let (state, hierarchy_state) = match cx.state_mut_pair::<SceneWindow, HierarchyWindow>() {
+    fn ui(world: &mut World, mut ctx: EditorWindowContext, ui: &mut egui::Ui) {
+        let (state, hierarchy_state) = match ctx.state_mut_pair::<SceneWindow, HierarchyWindow>() {
             (Some(state), Some(hierarchy)) => (state, hierarchy),
             _ => return,
         };

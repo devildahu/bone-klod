@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     audio::{AudioAssets, AudioRequest, AudioRequestSystem, ImpactSound, IntroTrack, MusicTrack},
-    ball::{Klod, KlodElem, MAX_KLOD_SPEED},
+    ball::{Klod, KlodBall, KlodElem, MAX_KLOD_SPEED},
 };
 
 #[cfg(feature = "debug")]
@@ -80,13 +80,11 @@ impl NoiseOnHit {
 
 // TODO
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Component, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Component, Copy, PartialEq, Eq)]
 pub(crate) struct MusicTrigger {
     pub(crate) intro: Option<IntroTrack>,
     pub(crate) track: MusicTrack,
 }
-
-fn trigger_music(mut audio_requests: EventWriter<AudioRequest>) {}
 
 fn play_impact_sound(
     effects: Query<&NoiseOnHit>,
@@ -153,6 +151,42 @@ fn play_roll(
     }
 }
 
+fn trigger_music(
+    ball: Query<Entity, With<KlodBall>>,
+    triggers: Query<&MusicTrigger>,
+    rapier_context: Res<RapierContext>,
+    audio: Res<AudioAssets>,
+    mut audio_requests: EventWriter<AudioRequest>,
+    mut current_trigger: Local<Option<MusicTrigger>>,
+    time: Res<Time>,
+) {
+    let delta = time.delta_seconds_f64();
+    let current_time = time.seconds_since_startup();
+    let once_every = |t: f64| current_time % t < delta;
+
+    if !once_every(0.8) {
+        return;
+    }
+    let ball = match ball.get_single() {
+        Ok(ball) => ball,
+        Err(_) => return,
+    };
+    let trigger = rapier_context
+        .intersections_with(ball)
+        .filter_map(|c| c.2.then(|| c.1))
+        .find_map(|t| triggers.get(t).ok());
+    if let Some(trigger) = trigger {
+        if Some(*trigger) != *current_trigger {
+            screen_print!(sec: 1.0, col: Color::LIME_GREEN, "trigger_music: {trigger:?}");
+            *current_trigger = Some(*trigger);
+            if let Some(intro) = trigger.intro {
+                audio_requests.send(AudioRequest::QueueMusic(audio.track(intro)));
+            }
+            audio_requests.send(AudioRequest::QueueMusic(audio.track(trigger.track)));
+        }
+    }
+}
+
 pub struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
@@ -161,6 +195,7 @@ impl BevyPlugin for Plugin {
             .register_inspectable::<MusicTrigger>();
 
         app.add_system(play_impact_sound.before(AudioRequestSystem))
+            .add_system(trigger_music.before(AudioRequestSystem))
             .add_system(play_roll.before(AudioRequestSystem));
     }
 }

@@ -126,13 +126,13 @@ fn play_music(
         .playing
         .as_ref()
         .map(|playing| music_channel.state(playing));
-    if let Some(PlaybackState::Stopped) = playback_state {
+    if let Some(PlaybackState::Stopped) | None = playback_state {
         if let Some(to_play) = state.queue.front() {
             let to_play = to_play.clone_weak();
             if state.queue.len() > 1 {
                 state.queue.pop_front();
             }
-            music_channel.play(to_play);
+            state.playing = Some(music_channel.play(to_play).handle());
         }
     }
     if state.stop_loop_effect {
@@ -142,7 +142,8 @@ fn play_music(
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Default, Copy)]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug, Clone, Default, Copy)]
 pub(crate) enum Pitch {
     High,
     #[default]
@@ -150,7 +151,8 @@ pub(crate) enum Pitch {
     Low,
 }
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Default, Copy)]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug, Clone, Default, Copy)]
 pub(crate) enum ImpactSound {
     Explosion,
     Bell,
@@ -160,11 +162,12 @@ pub(crate) enum ImpactSound {
     Plank,
     PunchHeavy,
     PunchMedium,
+    SoftHeavy,
+    SoftMedium,
     GenericMetal,
     Metal(Pitch),
     Glass(Pitch),
     Plate(Pitch),
-    Soft(Pitch),
     Wood(Pitch),
 }
 
@@ -173,7 +176,6 @@ enum FullImpactType {
     Metal,
     Glass,
     Plate,
-    Soft,
     Wood,
 }
 #[derive(Debug, Enum)]
@@ -185,6 +187,8 @@ enum PartialImpactType {
     Plank,
     PunchHeavy,
     PunchMedium,
+    SoftHeavy,
+    SoftMedium,
 }
 struct FullImpact {
     hight: Impact,
@@ -241,77 +245,113 @@ pub(crate) struct AudioAssets {
     impacts: EnumMap<PartialImpactType, Impact>,
     explosion: Sfxs,
     roll: Sfx,
+    music: EnumMap<MusicTrack, Sfx>,
+    intros: EnumMap<IntroTrack, Sfx>,
 }
 impl AudioAssets {
     pub(crate) fn ui_click(&self) -> Sfx {
         self.wood_clink.clone_weak()
+    }
+    pub(crate) fn track(&self, track: impl Into<Track>) -> Sfx {
+        match track.into() {
+            Track::Music(music) => self.music[music].clone_weak(),
+            Track::Intro(intro) => self.intros[intro].clone_weak(),
+        }
     }
     pub(crate) fn impact(&self, sound: ImpactSound) -> Sfx {
         use FullImpactType as Full;
         use PartialImpactType as Partial;
         match sound {
             ImpactSound::Bell => self.impacts[Partial::Bell].pick(),
-            ImpactSound::Generic => self.impacts[Partial::Generic].pick(),
-            ImpactSound::GenericMetal => self.impacts[Partial::GenericMetal].pick(),
-            ImpactSound::Mining => self.impacts[Partial::Mining].pick(),
             ImpactSound::Plank => self.impacts[Partial::Plank].pick(),
+            ImpactSound::Mining => self.impacts[Partial::Mining].pick(),
+            ImpactSound::Generic => self.impacts[Partial::Generic].pick(),
+            ImpactSound::Explosion => self.explosion.pick(),
+            ImpactSound::SoftHeavy => self.impacts[Partial::SoftHeavy].pick(),
+            ImpactSound::SoftMedium => self.impacts[Partial::SoftMedium].pick(),
             ImpactSound::PunchHeavy => self.impacts[Partial::PunchHeavy].pick(),
             ImpactSound::PunchMedium => self.impacts[Partial::PunchMedium].pick(),
+            ImpactSound::GenericMetal => self.impacts[Partial::GenericMetal].pick(),
+            ImpactSound::Wood(weight) => self.full_impacts[Full::Wood].of_weight(weight).pick(),
             ImpactSound::Metal(weight) => self.full_impacts[Full::Metal].of_weight(weight).pick(),
             ImpactSound::Glass(weight) => self.full_impacts[Full::Glass].of_weight(weight).pick(),
             ImpactSound::Plate(weight) => self.full_impacts[Full::Plate].of_weight(weight).pick(),
-            ImpactSound::Soft(weight) => self.full_impacts[Full::Soft].of_weight(weight).pick(),
-            ImpactSound::Wood(weight) => self.full_impacts[Full::Wood].of_weight(weight).pick(),
-            ImpactSound::Explosion => self.explosion.pick(),
         }
     }
 }
 impl FromWorld for AudioAssets {
     fn from_world(world: &mut World) -> Self {
         use FullImpactType::*;
+        use IntroTrack as In;
+        use MusicTrack as Mu;
         use PartialImpactType::*;
         let assets = world.resource::<AssetServer>();
         AudioAssets {
             wood_clink: assets.load("sfx/wood_clink.ogg"),
             roll: assets.load("sfx/roll.ogg"),
             full_impacts: enum_map! {
+                Wood => FullImpact::from_name(&assets, "Wood"),
                 Metal => FullImpact::from_name(&assets, "Metal"),
                 Glass => FullImpact::from_name(&assets, "Glass"),
                 Plate => FullImpact::from_name(&assets, "Plate"),
-                Soft => FullImpact::from_name(&assets, "Soft"),
-                Wood => FullImpact::from_name(&assets, "Wood"),
             },
             impacts: enum_map! {
                 Bell => Impact::from_name(&assets, "Bell_heavy"),
-                Generic => Impact::from_name(&assets, "Generic_light"),
-                GenericMetal => Impact::from_name(&assets, "Metal"),
-                Mining => Impact::from_name(&assets, "Mining"),
                 Plank => Impact::from_name(&assets, "Plank_medium"),
+                Mining => Impact::from_name(&assets, "Mining"),
+                Generic => Impact::from_name(&assets, "Generic_light"),
                 PunchHeavy => Impact::from_name(&assets, "Punch_heavy"),
                 PunchMedium => Impact::from_name(&assets, "Punch_medium"),
+                SoftHeavy => Impact::from_name(&assets, "Soft_heavy"),
+                SoftMedium => Impact::from_name(&assets, "Soft_medium"),
+                GenericMetal => Impact::from_name(&assets, "Metal"),
             },
             explosion: Sfxs::from_name(&assets, "explosionCrunch"),
+            music: enum_map! {
+                Mu::Chill => assets.load("music/chill.ogg"),
+                Mu::Theremin => assets.load("music/theremin.ogg"),
+                Mu::Orchestral => assets.load("music/orchestral.ogg"),
+                Mu::OrchestralFinale => assets.load("music/orchestralFinale.ogg"),
+            },
+            intros: enum_map! {
+                In::Chill => assets.load("music/introChill.ogg"),
+                In::Theremin => assets.load("music/introTheremin.ogg"),
+            },
         }
     }
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Default, Copy)]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug, Clone, Default, Copy, PartialEq, Eq, Enum)]
 pub(crate) enum MusicTrack {
-    Theremin,
     #[default]
     Chill,
-    Orchestral,
-    OrchestralFinale,
-    Chorus,
-}
-#[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, Default)]
-pub(crate) enum IntroTrack {
-    #[default]
     Theremin,
     Orchestral,
-    Chorus,
+    OrchestralFinale,
+}
+#[cfg_attr(feature = "debug", derive(Inspectable))]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, Enum)]
+pub(crate) enum IntroTrack {
+    #[default]
+    Chill,
+    Theremin,
+}
+pub(crate) enum Track {
+    Intro(IntroTrack),
+    Music(MusicTrack),
+}
+impl From<MusicTrack> for Track {
+    fn from(track: MusicTrack) -> Self {
+        Track::Music(track)
+    }
+}
+impl From<IntroTrack> for Track {
+    fn from(track: IntroTrack) -> Self {
+        Track::Intro(track)
+    }
 }
 
 pub struct Plugin;

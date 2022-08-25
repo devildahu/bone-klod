@@ -32,7 +32,8 @@ use crate::{
     prefabs::{AggloData, MusicTriggerData, Prefab, Scenery, SerdeCollider, SerdeTransform},
 };
 
-#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug)]
 pub(crate) struct PhysicsObject {
     name: String,
     asset_path: Option<AssetPath<'static>>,
@@ -159,7 +160,8 @@ impl PhysicsObject {
     }
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Debug, Deserialize)]
 pub(crate) enum ObjectType {
     Scenery(Scenery),
     Agglomerable(AggloData),
@@ -201,7 +203,8 @@ struct KlodSpawnQuery<'w, 's> {
     klod_spawn: ResMut<'w, KlodSpawnTransform>,
     klod: Query<'w, 's, Entity, With<Klod>>,
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug)]
 pub(crate) struct KlodScene {
     klod_spawn_transform: SerdeTransform,
     objects: Vec<PhysicsObject>,

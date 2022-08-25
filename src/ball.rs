@@ -1,4 +1,5 @@
 use bevy::{
+    ecs::system::EntityCommands,
     math::Vec3Swizzles,
     prelude::{Plugin as BevyPlugin, *},
 };
@@ -20,6 +21,9 @@ pub(crate) const MAX_KLOD_SPEED: f32 = 30.0;
 pub(crate) struct Klod {
     weight: f32,
 }
+#[cfg_attr(feature = "debug", derive(Inspectable))]
+#[derive(Component)]
+pub(crate) struct KlodBall;
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
@@ -27,8 +31,9 @@ pub(crate) struct KlodElem {
     klod: Entity,
 }
 
-fn spawn_klod_elem(
-    cmds: &mut ChildBuilder,
+fn spawn_klod_elem<'w, 's, 'a>(
+    cmds: &'a mut ChildBuilder<'w, 's, '_>,
+    name: String,
     klod: Entity,
     mass: f32,
     collider: Collider,
@@ -36,9 +41,10 @@ fn spawn_klod_elem(
     friction: Friction,
     restitution: Restitution,
     power: Power,
-) {
+) -> EntityCommands<'w, 's, 'a> {
     cmds.spawn_bundle((
         KlodElem { klod },
+        Name::new(name),
         groups::KLOD,
         ActiveEvents::CONTACT_FORCE_EVENTS,
         ContactForceEventThreshold(1000.0),
@@ -48,7 +54,7 @@ fn spawn_klod_elem(
         restitution,
         transform,
         power,
-    ));
+    ))
 }
 
 pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Entity {
@@ -63,8 +69,9 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
     .insert_bundle(SpatialBundle::default())
     .with_children(|cmds| {
         let klod = cmds.parent_entity();
-        spawn_klod_elem(
+        let mut ball = spawn_klod_elem(
             cmds,
+            "Klod ball".to_owned(),
             klod,
             90.0,
             Collider::ball(3.0),
@@ -79,6 +86,7 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
             },
             Power::None,
         );
+        ball.insert(KlodBall);
         cmds.spawn_bundle(SceneBundle {
             scene: asset_server.load("klod.glb#Scene0"),
             transform: Transform::from_scale(Vec3::splat(3.2)),
@@ -115,8 +123,9 @@ fn agglo_to_klod(
             &Collider,
             &GlobalTransform,
             &Power,
-            Option<&Friction>,
-            Option<&Restitution>,
+            &Friction,
+            &Restitution,
+            Option<&Name>,
         ),
         With<Agglomerable>,
     >,
@@ -125,7 +134,7 @@ fn agglo_to_klod(
 ) {
     for &AgglomerateToKlod { klod, agglo, agglo_weight } in events.iter() {
         let klod_trans = transforms.get(klod).unwrap();
-        let (coll, agglo_trans, power, friction, restitution) = match agglo_query.get(agglo) {
+        let (coll, agglo_trans, power, friction, restitution, name) = match agglo_query.get(agglo) {
             Ok(item) => item,
             _ => continue,
         };
@@ -135,19 +144,21 @@ fn agglo_to_klod(
             .remove_bundle::<(Collider, Friction, Restitution)>()
             .insert_bundle((KlodElem { klod }, trans, *power));
         cmds.entity(klod).add_child(agglo);
-        screen_print!("added {agglo:?} to klod {klod:?}");
         if let Ok(mut klod_component) = klod_query.get_mut(klod) {
             klod_component.weight += agglo_weight;
 
+            let name = name.map_or("Klod elem".to_owned(), |name| name.to_string() + " elem");
+            screen_print!("added {name} to klod {klod:?}");
             cmds.entity(klod).add_children(|cmds| {
                 spawn_klod_elem(
                     cmds,
+                    name,
                     klod,
                     agglo_weight,
                     coll.clone(),
                     trans,
-                    friction.cloned().unwrap_or_default(),
-                    restitution.cloned().unwrap_or_default(),
+                    *friction,
+                    *restitution,
                     *power,
                 );
             });
