@@ -15,7 +15,7 @@ use bevy_editor_pls_default_windows::{
     cameras::ActiveEditorCamera,
     hierarchy::{picking::IgnoreEditorRayCast, HideInEditor, HierarchyState, HierarchyWindow},
 };
-use bevy_inspector_egui::{egui, Inspectable};
+use bevy_inspector_egui::{egui, options::OptionAttributes, Inspectable};
 use bevy_mod_picking::{DefaultPickingPlugins, PickableMesh, PickingCameraBundle, Selection};
 use bevy_rapier3d::prelude::{Collider, DebugLinesMesh, RapierConfiguration, Sensor};
 use bevy_transform_gizmo::{
@@ -210,7 +210,16 @@ impl EditorWindow for SceneWindow {
             ui.vertical(|ui| {
                 ui.set_width(160.0);
                 state.music.ui_raw(ui, ());
-                state.music_start.ui_raw(ui, default());
+                ui.horizontal(|ui| {
+                    ui.label("Intro");
+                    state.music_start.ui_raw(
+                        ui,
+                        OptionAttributes {
+                            replacement: Some(IntroTrack::default),
+                            ..default()
+                        },
+                    );
+                });
                 if ui.button("Spawn music trigger area").clicked() {
                     spawn_music_trigger(world, state.music, state.music_start, state.name.clone());
                 }

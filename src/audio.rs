@@ -306,8 +306,9 @@ pub(crate) enum MusicTrack {
     Chorus,
 }
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Default)]
 pub(crate) enum IntroTrack {
+    #[default]
     Theremin,
     Orchestral,
     Chorus,
