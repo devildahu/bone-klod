@@ -13,8 +13,15 @@ use crate::{
     state::GameState,
 };
 
-const INPUT_IMPULSE: f32 = 5.0;
-pub(crate) const MAX_KLOD_SPEED: f32 = 30.0;
+const INPUT_IMPULSE: f32 = 0.5;
+const KLOD_INITIAL_WEIGHT: f32 = 4.2;
+const KLOD_INITIAL_RADIUS: f32 = 1.0;
+pub(crate) const MAX_KLOD_SPEED: f32 = 28.0;
+
+#[derive(SystemLabel)]
+pub(crate) enum BallSystems {
+    FreeFallUpdate,
+}
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
@@ -30,6 +37,13 @@ pub(crate) struct KlodBall;
 pub(crate) struct KlodElem {
     klod: Entity,
 }
+
+#[cfg_attr(feature = "debug", derive(Inspectable))]
+#[derive(Component)]
+pub(crate) struct FreeFall(pub(crate) bool);
+
+#[derive(Default)]
+pub(crate) struct KlodSpawnTransform(pub(crate) Transform);
 
 fn spawn_klod_elem<'w, 's, 'a>(
     cmds: &'a mut ChildBuilder<'w, 's, '_>,
@@ -59,7 +73,8 @@ fn spawn_klod_elem<'w, 's, 'a>(
 
 pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Entity {
     cmds.spawn_bundle((
-        Klod { weight: 10.0 },
+        Klod { weight: KLOD_INITIAL_WEIGHT },
+        FreeFall(true),
         RigidBody::Dynamic,
         ExternalImpulse::default(),
         Velocity::default(),
@@ -73,15 +88,15 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
             cmds,
             "Klod ball".to_owned(),
             klod,
-            90.0,
-            Collider::ball(3.0),
+            KLOD_INITIAL_WEIGHT,
+            Collider::ball(KLOD_INITIAL_RADIUS),
             default(),
             Friction {
-                coefficient: 0.9,
+                coefficient: 0.0,
                 combine_rule: CoefficientCombineRule::Max,
             },
             Restitution {
-                coefficient: 0.4,
+                coefficient: 0.0,
                 combine_rule: CoefficientCombineRule::Max,
             },
             Power::None,
@@ -89,7 +104,7 @@ pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Ent
         ball.insert(KlodBall);
         cmds.spawn_bundle(SceneBundle {
             scene: asset_server.load("klod.glb#Scene0"),
-            transform: Transform::from_scale(Vec3::splat(3.2)),
+            transform: Transform::from_scale(Vec3::splat(KLOD_INITIAL_RADIUS * 1.1)),
             ..Default::default()
         });
     })
@@ -208,7 +223,7 @@ fn ball_input(
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
-    let max_more_force = MAX_KLOD_SPEED - vel.y * 2.0;
+    let max_more_force = MAX_KLOD_SPEED - vel.y;
     let force = (vel.xz() + force).clamp_length_max(max_more_force) - vel.xz();
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
@@ -218,8 +233,25 @@ fn ball_input(
     }
 }
 
-#[derive(Default)]
-pub(crate) struct KlodSpawnTransform(pub(crate) Transform);
+fn set_freefall(
+    klod_elems: Query<Entity, With<KlodElem>>,
+    mut klod: Query<&mut FreeFall, With<Klod>>,
+    rapier_context: Res<RapierContext>,
+) {
+    let free_falling = |elem| {
+        rapier_context
+            .contacts_with(elem)
+            .filter(|c| c.has_any_active_contacts())
+            .next()
+            .is_none()
+    };
+    let free_falling = klod_elems.iter().all(free_falling);
+    if let Ok(mut component) = klod.get_single_mut() {
+        if component.0 != free_falling {
+            component.0 = free_falling;
+        }
+    }
+}
 
 pub struct Plugin;
 impl BevyPlugin for Plugin {
@@ -234,6 +266,7 @@ impl BevyPlugin for Plugin {
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
                     .with_system(ball_input)
+                    .with_system(set_freefall.label(BallSystems::FreeFallUpdate))
                     .with_system(shlurp_agglomerable)
                     .with_system(agglo_to_klod.after(shlurp_agglomerable)),
             );

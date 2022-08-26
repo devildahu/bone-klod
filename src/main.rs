@@ -1,5 +1,3 @@
-use bevy::{prelude::*, log::{LogSettings, Level}};
-
 mod animate;
 mod audio;
 mod cam;
@@ -14,6 +12,7 @@ mod state;
 mod system_helper;
 mod ui;
 
+use bevy::{prelude::*, log::{LogSettings, Level}};
 use bevy_debug_text_overlay::screen_print;
 use bevy_rapier3d::{render::RapierDebugRenderPlugin, prelude::{RapierPhysicsPlugin, NoUserData}};
 use scene::KlodScene;
@@ -60,10 +59,6 @@ fn main() {
 
     app.add_plugin(RapierPhysicsPlugin::<NoUserData>::default());
 
-    #[cfg(feature = "editor")]
-        app.add_plugin(bevy_scene_hook::HookPlugin)
-        .add_plugin(scene::Plugin);
-    
     #[cfg(all(feature = "debug", not(feature = "editor")))]
     app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
 
@@ -77,13 +72,15 @@ fn main() {
         });
     
     #[cfg(feature="editor")]
-    app.add_plugin(editor::Plugin);
+    app.add_plugin(bevy_scene_hook::HookPlugin)
+        .add_plugin(editor::Plugin);
 
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin {
             font_size: 24.0,
             ..default()
         })
+        .add_plugin(scene::Plugin)
         .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
         .add_plugin(powers::Plugin)
@@ -124,6 +121,7 @@ pub(crate) mod collision_groups {
 
     pub(crate) const KLOD: CollisionGroups = CollisionGroups::new(0b00000001, 0b110110);
     pub(crate) const AGGLO: CollisionGroups = CollisionGroups::new(0b0000010, 0b001011);
+    pub(crate) const SEEAG: CollisionGroups = CollisionGroups::new(0b0000010, 0b000011);
     pub(crate) const MUSIC: CollisionGroups = CollisionGroups::new(0b0000100, 0b000001);
     pub(crate) const CAM: CollisionGroups = CollisionGroups::new(0b000001000, 0b000011);
 }

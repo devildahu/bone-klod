@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     audio::{AudioAssets, AudioRequest, AudioRequestSystem, ImpactSound, IntroTrack, MusicTrack},
-    ball::{Klod, KlodBall, KlodElem, MAX_KLOD_SPEED},
+    ball::{BallSystems::FreeFallUpdate, FreeFall, Klod, KlodBall, MAX_KLOD_SPEED},
 };
 
 #[cfg(feature = "debug")]
@@ -99,7 +99,7 @@ fn play_impact_sound(
             _ => continue,
         };
         if let Some(to_play) = effects.impact() {
-            let magnitude = *total_force_magnitude as f64 / 100000.0;
+            let magnitude = *total_force_magnitude as f64 / 1000.0;
             let strength = (-1.0 / magnitude) + 1.0;
             if strength >= 0.0 {
                 screen_print!(
@@ -114,31 +114,21 @@ fn play_impact_sound(
 }
 fn play_roll(
     mut audio_requests: EventWriter<AudioRequest>,
-    mut off: Local<bool>,
+    free_fall: Query<(&FreeFall, ChangeTrackers<FreeFall>), With<Klod>>,
     klod: Query<&Velocity, With<Klod>>,
-    klod_elems: Query<Entity, With<KlodElem>>,
-    rapier_context: Res<RapierContext>,
     time: Res<Time>,
 ) {
     let delta = time.delta_seconds_f64();
     let current_time = time.seconds_since_startup();
     let once_every = |t: f64| current_time % t < delta;
 
-    let free_falling = |elem| {
-        rapier_context
-            .contacts_with(elem)
-            .filter(|c| c.has_any_active_contacts())
-            .next()
-            .is_none()
+    let (free_falling, must_update) = match free_fall.get_single() {
+        Ok((free_falling, changed)) => (free_falling.0, changed.is_changed()),
+        Err(_) => return,
     };
-    let free_falling = klod_elems.iter().all(free_falling);
-    *off = !free_falling;
-
-    let must_update = free_falling ^ !*off;
     if !once_every(0.3) && !must_update {
         return;
     }
-
     if let Ok(velocity) = klod.get_single() {
         let magnitude = velocity.linvel.length();
         if magnitude > 1.0 && !free_falling {
@@ -164,7 +154,7 @@ fn trigger_music(
     let current_time = time.seconds_since_startup();
     let once_every = |t: f64| current_time % t < delta;
 
-    if !once_every(0.8) {
+    if !once_every(0.8) || triggers.is_empty() {
         return;
     }
     let ball = match ball.get_single() {
@@ -196,6 +186,6 @@ impl BevyPlugin for Plugin {
 
         app.add_system(play_impact_sound.before(AudioRequestSystem))
             .add_system(trigger_music.before(AudioRequestSystem))
-            .add_system(play_roll.before(AudioRequestSystem));
+            .add_system(play_roll.before(AudioRequestSystem).after(FreeFallUpdate));
     }
 }

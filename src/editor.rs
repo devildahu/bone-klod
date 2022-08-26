@@ -1,3 +1,5 @@
+mod trans;
+
 use std::path::PathBuf;
 
 use bevy::{
@@ -32,14 +34,6 @@ use crate::{
     scene::{KlodScene, ObjectType, PhysicsObject},
 };
 
-fn _count_active_cameras(cams: Query<(&Camera, &Name)>) {
-    let cams: Vec<_> = cams
-        .iter()
-        .filter_map(|t| t.0.is_active.then(|| t.1))
-        .collect();
-    println!("{cams:?} active cameras");
-}
-
 fn toggle_editor_active(
     mut cmds: Commands,
     mut events: EventReader<EditorEvent>,
@@ -51,7 +45,6 @@ fn toggle_editor_active(
     for event in events.iter() {
         match event {
             EditorEvent::Toggle { now_active } => {
-                println!("toggle {now_active}");
                 let mut orbit_cam = orbit_cam.get_single_mut().ok()?;
                 orbit_cam.locked = *now_active;
                 let cam = editor_cam.get_single().ok()?;
@@ -80,7 +73,6 @@ macro_rules! err_sys {
     };
 }
 
-#[derive(Default)]
 pub struct SceneWindowState {
     filename: String,
     scene: String,
@@ -92,6 +84,22 @@ pub struct SceneWindowState {
     music_start: Option<IntroTrack>,
     power: Power,
     scene_save_result: Option<Result<(), Box<dyn std::error::Error + Send + Sync>>>,
+}
+impl Default for SceneWindowState {
+    fn default() -> Self {
+        SceneWindowState {
+            filename: default(),
+            scene: default(),
+            name: default(),
+            spawn_mass: 0.5,
+            spawn_restitution: 0.4,
+            spawn_friction: 0.8,
+            music: default(),
+            music_start: default(),
+            power: default(),
+            scene_save_result: default(),
+        }
+    }
 }
 
 const DEFAULT_FILENAME: &str = "default.klodlvl";
@@ -332,6 +340,7 @@ impl BevyPlugin for Plugin {
         app.add_plugins(DefaultPickingPlugins)
             .add_plugin(TransformGizmoPlugin::default())
             .add_plugin(EditorPlugin)
+            .add_plugin(trans::Plugin)
             .add_editor_window::<SceneWindow>()
             .set_default_panels::<ControlsWindow, SceneWindow, InspectorWindow>()
             .add_system_to_stage(CoreStage::PostUpdate, ignore_transform_gizmo)

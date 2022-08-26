@@ -1,0 +1,1376 @@
+(
+ klod_spawn_transform: (
+  rotation: (0.0, 0.0, 0.0, 1.0),
+  scale: (1.0, 1.0, 1.0),
+  translation: (0.0, 9.0, 0.0),
+ ),
+ objects: [
+  (
+   name: "Fire Agglo",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000011567726, 0.0000000008105243, 0.0000023766959, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (43.438324, -81.22358, -162.38548),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: Fire,
+   )),
+  ),
+  (
+   name: "prop",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005589135, -0.0000000000055883093, -0.0000006783074, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (14.221095, -80.77286, -245.2067),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop1",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005488646, -0.000000000008536998, -0.0000006709271, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (15.084494, -80.77286, -256.562),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop2",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005589647, -0.000000000006491922, -0.0000006858334, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (38.17753, -80.77286, -249.72296),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop3",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005486432, -0.0000000000058295673, -0.00000067312357, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (25.303278, -80.77286, -247.12877),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop4",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000054327654, -0.000000000008402292, -0.0000006814794, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (2.6546004, -80.77286, -249.87704),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop5",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005412904, -0.000000000006491192, -0.00000068295645, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (63.9917, -80.77286, -273.56155),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop6",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000055370066, -0.0000000000071408972, -0.0000006943787, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (-1.7836083, -80.77286, -256.60175),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop7",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.000000555973, -0.000000000007134951, -0.0000006907501, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (9.554811, -80.77286, -270.2148),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop8",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000055438164, -0.0000000000069536256, -0.0000006778513, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (52.98403, -80.77286, -276.4016),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop9",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005487009, -0.000000000007997154, -0.00000068488697, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (22.800846, -80.77286, -266.34793),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop10",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005474825, -0.00000000000675726, -0.0000006711914, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (3.8429193, -80.77286, -260.87625),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop11",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005546409, -0.0000000000046328115, -0.00000067916073, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (29.900707, -80.77286, -262.7442),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop12",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000054838375, -0.0000000000057753546, -0.0000006846793, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (15.020809, -80.77286, -264.2616),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop13",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005489856, -0.0000000000065043886, -0.0000006841303, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (61.8296, -80.77286, -252.42926),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop14",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005541259, -0.0000000000060771665, -0.0000006716384, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (47.385246, -80.77286, -276.17242),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop15",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005549078, -0.000000000005968055, -0.0000006798348, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (32.728706, -80.77286, -278.52307),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop16",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000055791935, -0.000000000007334839, -0.0000006873453, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (13.103318, -80.77286, -278.67188),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop17",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005393214, -0.000000000005839475, -0.00000066905716, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (27.005983, -80.77286, -273.8422),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop18",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005502259, -0.000000000006090384, -0.0000006986132, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (36.986034, -80.77286, -263.72125),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop19",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005474504, -0.0000000000063467196, -0.00000067132476, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (44.641735, -80.77286, -257.15952),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop20",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.000000542089, -0.000000000007500927, -0.000000679035, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (47.9472, -80.77286, -248.04385),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop21",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005503206, -0.000000000005233246, -0.0000006813941, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (41.519558, -80.77286, -242.91995),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop22",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005521419, -0.0000000000068472025, -0.00000067392546, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (49.977398, -80.77286, -239.98605),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop23",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000054424083, -0.0000000000053219603, -0.00000066544146, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (34.24153, -80.77286, -245.94614),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop24",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005541993, -0.0000000000074152975, -0.0000006790089, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (28.919947, -80.77286, -255.6076),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop25",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005535231, -0.000000000008753047, -0.00000067186295, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (7.4434814, -80.77286, -304.7934),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop26",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005435793, -0.0000000000064498155, -0.00000067229604, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (51.07565, -80.77286, -299.03387),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop27",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005419769, -0.0000000000063437263, -0.00000067891335, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (58.082405, -80.77286, -286.44812),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop28",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005443143, -0.0000000000061832458, -0.00000068851256, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (39.697063, -80.77286, -301.0572),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop29",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000055838933, -0.000000000004286222, -0.0000006828678, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (23.690107, -80.77286, -291.6172),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop30",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005523348, -0.0000000000066850006, -0.0000006866164, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (1.834332, -80.77286, -288.21133),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop31",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000054359344, -0.000000000008490754, -0.000000681748, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (29.68404, -80.77286, -290.24805),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop32",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000005490558, -0.0000000000066675315, -0.0000006834482, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (43.752125, -80.77286, -282.80414),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop33",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.00000054436737, -0.0000000000067146154, -0.0000006891261, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (15.678599, -80.77286, -294.49652),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 20.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "prop34",
+   asset_path: Some((
+    path: "untitled.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0000004947754, -0.000000000000012504535, -0.00000009875577, 1.0),
+    scale: (5.0, 2.7, 3.5),
+    translation: (24.784603, -78.56287, -310.1855),
+   ),
+   collider: Cuboid(
+    half_extents: (0.8, 1.3, 1.1),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Agglomerable((
+    mass: 300.0,
+    power: None,
+   )),
+  ),
+  (
+   name: "floor1",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (-0.7029069, 0.0, 0.0, 0.71128184),
+    scale: (1.5, 1.0000004, 0.6000003),
+    translation: (4.818552, 12.289261, 20.605505),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor2",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.7495817, -0.66191185),
+    scale: (0.60000026, 0.49999997, 1.0),
+    translation: (25.738388, 12.032377, 0.0),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor3",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, -0.59304637, 0.80516833),
+    scale: (0.6000001, 0.9999995, 1.0),
+    translation: (-20.383354, 11.405861, 0.0),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor4",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (3.884035, -0.21428967, 0.0),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    Generic,
+    Plank,
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor5",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (-0.28431767, 0.0, 0.0, 0.95873016),
+    scale: (0.5, 1.0, 3.7),
+    translation: (3.884035, -41.56527, -83.85499),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor6",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.50204784, 0.49795097, -0.49923226, 0.5007594),
+    scale: (1.0000001, 1.0000001, 0.99999994),
+    translation: (55.23964, -62.279648, -168.32538),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor7",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.7080148, 0.0, 0.0, 0.70619756),
+    scale: (1.0, 1.0000001, 1.0000001),
+    translation: (34.72462, -62.279663, -148.01093),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor8",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.5, 1.0, 1.0),
+    translation: (4.01001, -82.72251, -168.6106),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor9",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.5, 1.0, 1.0),
+    translation: (4.01001, -41.63187, -168.28146),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor10",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.5, 1.0, 1.0),
+    translation: (4.01001, -41.63187, -168.28146),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor11",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.50204784, 0.49795097, -0.49923226, 0.5007594),
+    scale: (1.0000001, 1.0000001, 0.99999994),
+    translation: (-47.056618, -62.279648, -168.32538),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor12",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.7080148, 0.0, 0.0, 0.70619756),
+    scale: (1.0, 1.0000001, 1.0000001),
+    translation: (-26.381077, -62.213993, -148.01093),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor13",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.7080148, 0.0, 0.0, 0.70619756),
+    scale: (2.0, 1.0000001, 1.0),
+    translation: (14.277149, -62.279663, -188.8011),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor14",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.005210949, 0.4869138, 0.0029049716, 0.87342966),
+    scale: (1.5999999, 1.0, 0.6000001),
+    translation: (-19.269623, -82.72253, -210.93486),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor15",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.5, 1.0, 2.5),
+    translation: (34.290497, -82.27185, -284.1455),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor16",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.5, 1.0, 2.5),
+    translation: (34.290497, -82.27185, -284.1455),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor17",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.5, 1.0, 2.5),
+    translation: (34.290497, -82.27185, -284.1455),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "floor18",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.73676175, 0.0, 0.0, 0.67615247),
+    scale: (2.5, 0.9999999, 0.9999999),
+    translation: (4.01001, -21.105934, -146.60251),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.0,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Fire Door",
+   asset_path: Some((
+    path: "floor.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.7143559, 0.0, 0.0, -0.6997825),
+    scale: (0.4, 1.0000001, 0.6),
+    translation: (-36.867043, -69.04648, -188.99161),
+   ),
+   collider: Cuboid(
+    half_extents: (20.7, 0.2, 20.7),
+   ),
+   friction: 0.8,
+   restitution: 0.0,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [
+     Fire,
+    ],
+   )),
+  ),
+ ],
+ music_triggers: [
+  (
+   name: "Start Music",
+   trigger: (
+    intro: Some(Chill),
+    track: Chill,
+   ),
+   collider: Cuboid(
+    half_extents: (30.0, 30.0, 30.0),
+   ),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (0.0, 17.792448, 0.0),
+   ),
+  ),
+  (
+   name: "Theremin",
+   trigger: (
+    intro: Some(Theremin),
+    track: Theremin,
+   ),
+   collider: Cuboid(
+    half_extents: (26.7, 21.6, 22.4),
+   ),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (0.0, -57.10026, -163.37253),
+   ),
+  ),
+  (
+   name: "Orchestral",
+   trigger: (
+    intro: None,
+    track: Orchestral,
+   ),
+   collider: Cuboid(
+    half_extents: (30.0, 30.0, 30.0),
+   ),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (0.0, -61.817787, -244.9139),
+   ),
+  ),
+  (
+   name: "Finale",
+   trigger: (
+    intro: None,
+    track: OrchestralFinale,
+   ),
+   collider: Cuboid(
+    half_extents: (30.0, 30.0, 30.0),
+   ),
+   transform: (
+    rotation: (0.00094628736, 0.043808013, -0.021575004, 0.9988065),
+    scale: (0.9999999, 1.0, 0.9999998),
+    translation: (55.98356, -66.51965, -344.65134),
+   ),
+  ),
+ ],
+)

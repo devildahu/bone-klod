@@ -234,7 +234,15 @@ impl KlodScene {
         to_copy.extend(scenery.iter_many(o).map(|item| item.data(&assets)));
 
         for mut object in to_copy.into_iter() {
-            object.name = format!("Copy of {}", object.name);
+            let prefix = object.name.trim_end_matches(char::is_numeric);
+            // unwrap: prefix is always the prefix
+            let suffix = object.name.strip_prefix(prefix).unwrap();
+
+            object.name = if let Ok(number) = suffix.parse::<usize>() {
+                format!("{prefix}{}", number + 1)
+            } else {
+                format!("Copy of {}", object.name)
+            };
             object.spawn(&mut cmds, &assets, &mut meshes, false);
         }
         query.apply(world);
