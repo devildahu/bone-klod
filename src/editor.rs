@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use bevy::{
     ecs::system::SystemState,
+    hierarchy::despawn_with_children_recursive,
     prelude::{Plugin as BevyPlugin, *},
     ui::FocusPolicy,
 };
@@ -114,7 +115,15 @@ impl EditorWindow for SceneWindow {
             (Some(state), Some(hierarchy)) => (state, hierarchy),
             _ => return,
         };
-
+        {
+            let input = ui.input();
+            if input.key_pressed(egui::Key::D) && input.modifiers.ctrl {
+                copy_selected(world, hierarchy_state);
+            }
+            if input.key_pressed(egui::Key::X) && input.modifiers.ctrl {
+                despawn_selected(world, hierarchy_state);
+            }
+        }
         ui.horizontal_wrapped(|ui| {
             ui.vertical(|ui| {
                 ui.set_width(140.0);
@@ -278,6 +287,11 @@ fn file_name(filename: &str) -> PathBuf {
     };
     root.join(filename)
 }
+fn despawn_selected(world: &mut World, hierarchy: &HierarchyState) {
+    for selected in hierarchy.selected.iter() {
+        despawn_with_children_recursive(world, selected);
+    }
+}
 fn copy_selected(world: &mut World, hierarchy: &HierarchyState) {
     let to_copy: Vec<_> = hierarchy.selected.iter().collect();
     KlodScene::copy_objects(&to_copy, world);
@@ -332,6 +346,7 @@ fn ignore_rapier_wireframes(
         cmds.entity(entity).insert(HideInEditor);
     });
 }
+
 pub struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
