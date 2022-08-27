@@ -13,7 +13,7 @@ use crate::{
     state::GameState,
 };
 
-const INPUT_IMPULSE: f32 = 0.5;
+const INPUT_IMPULSE: f32 = 1.5;
 const KLOD_INITIAL_WEIGHT: f32 = 4.2;
 const KLOD_INITIAL_RADIUS: f32 = 1.0;
 pub(crate) const MAX_KLOD_SPEED: f32 = 28.0;
@@ -204,7 +204,7 @@ fn shlurp_agglomerable(
 
 fn ball_input(
     keys: Res<Input<KeyCode>>,
-    default_klod_position: Res<KlodSpawnTransform>,
+    mut default_klod_position: ResMut<KlodSpawnTransform>,
     mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity), With<Klod>>,
     camera: Query<&OrbitCamera>,
 ) {
@@ -230,6 +230,9 @@ fn ball_input(
     if keys.just_pressed(KeyCode::Space) {
         *transform = default_klod_position.0;
         *velocity = Velocity::default();
+    }
+    if keys.just_pressed(KeyCode::R) {
+        default_klod_position.0 = *transform;
     }
 }
 

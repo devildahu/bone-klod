@@ -306,7 +306,7 @@ impl AggloBundle {
             power,
             agglo: Agglomerable { weight: mass },
             active_events: ActiveEvents::CONTACT_FORCE_EVENTS,
-            contact_threshold: ContactForceEventThreshold(mass * 1000.0),
+            contact_threshold: ContactForceEventThreshold(mass * 10.0),
             mass: ColliderMassProperties::Mass(mass),
             rigid_body: RigidBody::Dynamic,
             collision_group: groups::AGGLO,

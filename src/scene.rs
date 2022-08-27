@@ -7,7 +7,7 @@ use bevy::{
     asset::AssetPath,
     ecs::{
         query::{QueryItem, ReadOnlyWorldQuery, WorldQuery, WorldQueryGats},
-        system::{SystemParam, SystemState},
+        system::{EntityCommands, SystemParam, SystemState},
     },
     math::Vec3A,
     prelude::{Plugin as BevyPlugin, *},
@@ -89,7 +89,7 @@ where
 impl PhysicsObject {
     pub(crate) fn new(
         name: String,
-        asset_path: String,
+        asset_path: Option<String>,
         transform: Transform,
         collider: SerdeCollider,
         friction: f32,
@@ -100,7 +100,7 @@ impl PhysicsObject {
         Self {
             name,
             sounds,
-            asset_path: Some(AssetPath::from(&asset_path).to_owned()),
+            asset_path: asset_path.map(|p| AssetPath::from(&p).to_owned()),
             transform: transform.into(),
             object,
             collider,
@@ -109,6 +109,34 @@ impl PhysicsObject {
         }
     }
 
+    pub(crate) fn spawn_light(self, object: &mut EntityCommands) {
+        object
+            .insert_bundle(SpatialBundle::from_transform(self.transform.into()))
+            .insert_bundle((
+                NoiseOnHit { noises: self.sounds.iter().cloned().collect() },
+                Collider::from(self.collider.clone()),
+                Friction {
+                    coefficient: self.friction,
+                    combine_rule: CoefficientCombineRule::Max,
+                },
+                Restitution {
+                    coefficient: self.restitution,
+                    combine_rule: CoefficientCombineRule::Max,
+                },
+            ));
+        #[cfg(feature = "editor")]
+        object.insert_bundle((
+            PickableMesh::default(),
+            Interaction::default(),
+            FocusPolicy::default(),
+            Selection::default(),
+            bevy_transform_gizmo::GizmoTransformable,
+        ));
+        match self.object {
+            ObjectType::Scenery(scenery_data) => scenery_data.spawn(object),
+            ObjectType::Agglomerable(agglo_data) => agglo_data.spawn(object),
+        };
+    }
     pub(crate) fn spawn(
         self,
         cmds: &mut Commands,
@@ -116,15 +144,14 @@ impl PhysicsObject {
         meshes: &mut Assets<Mesh>,
         compute_aabb: bool,
     ) {
-        let asset_path = match self.asset_path {
-            Some(path) => path,
-            None => return,
+        let mut object = match self.asset_path {
+            Some(path) => cmds.spawn_bundle(SceneBundle {
+                scene: assets.load(path),
+                transform: self.transform.into(),
+                ..default()
+            }),
+            None => cmds.spawn_bundle(SpatialBundle::from_transform(self.transform.into())),
         };
-        let mut object = cmds.spawn_bundle(SceneBundle {
-            scene: assets.load(asset_path),
-            transform: self.transform.into(),
-            ..default()
-        });
         object.insert_bundle((
             Name::new(self.name),
             NoiseOnHit { noises: self.sounds.iter().cloned().collect() },

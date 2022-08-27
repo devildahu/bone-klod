@@ -91,7 +91,7 @@ fn handle_trans_mod(
         edit.component = Component::None;
         events.send(EditModEvent::Cancel);
     }
-    if mouse.just_pressed(MouseButton::Left) && was_active {
+    if mouse.just_pressed(MouseButton::Right) && was_active {
         events.send(EditModEvent::Apply);
         edit.component = Component::None;
     }

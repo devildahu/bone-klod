@@ -1,7 +1,9 @@
 mod animate;
 mod audio;
-mod cam;
 mod ball;
+#[cfg(feature = "editor")]
+mod box_scene;
+mod cam;
 #[cfg(feature = "editor")]
 mod editor;
 mod game_audio;
@@ -12,9 +14,15 @@ mod state;
 mod system_helper;
 mod ui;
 
-use bevy::{prelude::*, log::{LogSettings, Level}};
+use bevy::{
+    log::{Level, LogSettings},
+    prelude::*,
+};
 use bevy_debug_text_overlay::screen_print;
-use bevy_rapier3d::{render::RapierDebugRenderPlugin, prelude::{RapierPhysicsPlugin, NoUserData}};
+use bevy_rapier3d::{
+    prelude::{NoUserData, RapierPhysicsPlugin},
+    render::RapierDebugRenderPlugin,
+};
 use scene::KlodScene;
 use state::GameState;
 
@@ -36,7 +44,7 @@ fn main() {
     use system_helper::EasySystemSetCtor;
 
     let mut app = App::new();
-    
+
     let initial_state = if cfg!(feature = "editor") {
         GameState::Playing
     } else {
@@ -46,14 +54,16 @@ fn main() {
     app.insert_resource(Msaa { samples: 4 })
         .insert_resource(LogSettings {
             level: Level::INFO,
-            filter: "wgpu_core::device=warn,wgpu_hal=warn,symphonia_core=warn,symphonia_format_ogg=warn".to_owned(),
+            filter:
+                "wgpu_core::device=warn,wgpu_hal=warn,symphonia_core=warn,symphonia_format_ogg=warn"
+                    .to_owned(),
         })
-        .insert_resource(WindowDescriptor {
-            #[cfg(target_os = "linux")]
-            // workaround for https://github.com/bevyengine/bevy/issues/1908 (seems to be Mesa bug with X11 + Vulkan)
-            present_mode: bevy::window::PresentMode::Immediate, 
-            ..default()
-        })
+        // .insert_resource(WindowDescriptor {
+        //     #[cfg(target_os = "linux")]
+        //     // workaround for https://github.com/bevyengine/bevy/issues/1908 (seems to be Mesa bug with X11 + Vulkan)
+        //     present_mode: bevy::window::PresentMode::Immediate,
+        //     ..default()
+        // })
         .add_state(initial_state)
         .add_plugins(DefaultPlugins);
 
@@ -70,16 +80,13 @@ fn main() {
             features: bevy::render::render_resource::WgpuFeatures::POLYGON_MODE_LINE,
             ..default()
         });
-    
-    #[cfg(feature="editor")]
+
+    #[cfg(feature = "editor")]
     app.add_plugin(bevy_scene_hook::HookPlugin)
         .add_plugin(editor::Plugin);
 
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
-        .add_plugin(bevy_debug_text_overlay::OverlayPlugin {
-            font_size: 24.0,
-            ..default()
-        })
+        .add_plugin(bevy_debug_text_overlay::OverlayPlugin { font_size: 24.0, ..default() })
         .add_plugin(scene::Plugin)
         .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
@@ -91,6 +98,7 @@ fn main() {
         .add_plugin(ui::Plugin)
         .add_event::<GameOver>()
         .add_system_set(GameState::WaitLoaded.on_exit(cleanup_marked::<WaitRoot>))
+        // .add_startup_system(box_scene::load_box_level)
         .add_startup_system(|| {
             screen_print!(sec: 10_000_000_000.0, "");
         })
@@ -106,9 +114,7 @@ pub fn cleanup_marked<T: Component>(mut cmds: Commands, query: Query<Entity, Wit
     }
 }
 
-fn setup(
-    world: &mut World,
-) {
+fn setup(world: &mut World) {
     let mut ambiant_light = world.resource_mut::<AmbientLight>();
     ambiant_light.color = Color::WHITE;
     ambiant_light.brightness = 1.0;
