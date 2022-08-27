@@ -32,7 +32,7 @@ impl FromWorld for UiAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.get_resource::<AssetServer>().unwrap();
         Self {
-            font: assets.load("tmp_font.ttf"),
+            font: assets.load("Alice-Regular.ttf"),
             background_image: assets.load("main_menu_background.png"),
         }
     }
@@ -46,15 +46,7 @@ impl UiAssets {
         TextBundle { text, ..Default::default() }
     }
     pub fn large_text(&self, content: &str) -> TextBundle {
-        self.text_bundle(content, 60.)
-    }
-    pub fn background(&self) -> ImageBundle {
-        use PositionType::Absolute;
-        ImageBundle {
-            image: self.background_image.clone().into(),
-            style: style! { position_type: Absolute, size: size!(auto, 100 pct), },
-            ..Default::default()
-        }
+        self.text_bundle(content, 45.0)
     }
 }
 

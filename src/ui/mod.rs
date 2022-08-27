@@ -2,6 +2,7 @@
 mod common;
 mod main_menu;
 
+pub use common::MenuCursor;
 pub use common::UiAssets as Assets;
 
 use bevy::prelude::{Plugin as BevyPlugin, *};

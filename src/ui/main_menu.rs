@@ -243,7 +243,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
             entity[
                 image(&menu_assets.title_image);
                 Name::new("Title card"),
-                style! { size: size!(auto, 20 pct), }
+                style! { size: size!(60 pct, auto), }
             ],
             node{ flex_direction: FD::Row }[; Name::new("Menu columns")](
                 node[; Name::new("Menu node")](

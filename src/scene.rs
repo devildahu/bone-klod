@@ -1,3 +1,6 @@
+#[cfg(feature = "editor")]
+mod migration;
+
 use std::{
     error::Error,
     path::{Path, PathBuf},
@@ -25,11 +28,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     audio::ImpactSound,
-    ball::{spawn_klod, Agglomerable, Klod, KlodSpawnTransform},
-    cam::OrbitCamera,
+    ball::{Agglomerable, Klod, KlodSpawnTransform},
+    collision_groups as groups,
     game_audio::{MusicTrigger, NoiseOnHit},
     powers::{ElementalObstacle, Power},
     prefabs::{AggloData, MusicTriggerData, Prefab, Scenery, SerdeCollider, SerdeTransform},
+    score::{FinishLine, GameTimer},
 };
 
 #[cfg_attr(feature = "editor", derive(Serialize))]
@@ -208,10 +212,12 @@ impl<'w> From<(&'w Agglomerable, &'w Power)> for ObjectType {
 #[derive(SystemParam)]
 struct KlodSceneQuery<'w, 's> {
     assets: Res<'w, AssetServer>,
+    timer: Res<'w, GameTimer>,
     agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
     scenery: Query<'w, 's, ObjectQuery<<Scenery as Prefab>::Query>>,
     music: Query<'w, 's, <MusicTriggerData as Prefab>::Query>,
     klod_spawn: Res<'w, KlodSpawnTransform>,
+    finish_zone: Query<'w, 's, (&'static Collider, &'static Transform), With<FinishLine>>,
 }
 #[derive(SystemParam)]
 struct KlodSweepQuery<'w, 's> {
@@ -222,6 +228,21 @@ impl<'w, 's> KlodSweepQuery<'w, 's> {
         self.query.iter().collect()
     }
 }
+#[cfg_attr(feature = "editor", derive(Serialize))]
+#[derive(Deserialize, Debug)]
+struct FinishZone {
+    collider: SerdeCollider,
+    transform: SerdeTransform,
+}
+impl<'a> From<(&'a Collider, &'a Transform)> for FinishZone {
+    fn from((collider, transform): (&'a Collider, &'a Transform)) -> Self {
+        FinishZone {
+            collider: collider.into(),
+            transform: (*transform).into(),
+        }
+    }
+}
+
 #[derive(SystemParam)]
 struct KlodSpawnQuery<'w, 's> {
     cmds: Commands<'w, 's>,
@@ -234,6 +255,8 @@ struct KlodSpawnQuery<'w, 's> {
 #[derive(Deserialize, Debug)]
 pub(crate) struct KlodScene {
     klod_spawn_transform: SerdeTransform,
+    finish_zone: FinishZone,
+    game_timer_seconds: f32,
     objects: Vec<PhysicsObject>,
     music_triggers: Vec<MusicTriggerData>,
 }
@@ -277,18 +300,16 @@ impl KlodScene {
     fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod_spawn, klod }: &mut KlodSpawnQuery) {
         klod_spawn.0 = self.klod_spawn_transform.into();
 
-        let klod = if let Ok(klod) = klod.get_single() {
-            klod
-        } else {
-            let klod = spawn_klod(cmds, assets);
-            cmds.spawn_bundle(Camera3dBundle {
-                transform: Transform::from_xyz(-10.0, 2.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
-                ..default()
-            })
-            .insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
-            klod
-        };
-        cmds.entity(klod).insert(klod_spawn.0);
+        cmds.insert_resource(GameTimer::new(self.game_timer_seconds));
+        cmds.spawn_bundle((
+            Name::new("Finish Zone"),
+            FinishLine,
+            Sensor,
+            groups::MUSIC,
+            Transform::from(self.finish_zone.transform),
+            GlobalTransform::default(),
+            Collider::from(self.finish_zone.collider),
+        ));
 
         for object in self.objects.into_iter() {
             object.spawn(cmds, assets, meshes, false);
@@ -299,22 +320,54 @@ impl KlodScene {
             cmds.insert(meshes.add(music.collider.clone().into()));
             music.spawn(&mut cmds);
         }
+
+        let klod = match klod.get_single() {
+            Ok(klod) => klod,
+            Err(_) => return,
+        };
+        cmds.entity(klod).insert(klod_spawn.0);
     }
     fn read(
-        KlodSceneQuery { assets, agglomerables, scenery, klod_spawn, music }: &KlodSceneQuery,
+        KlodSceneQuery {
+            assets,
+            agglomerables,
+            scenery,
+            klod_spawn,
+            music,
+            timer,
+            finish_zone,
+        }: &KlodSceneQuery,
     ) -> Self {
         let mut objects = Vec::with_capacity(agglomerables.iter().len() + scenery.iter().len());
         objects.extend(agglomerables.iter().map(|item| item.data(assets)));
         objects.extend(scenery.iter().map(|item| item.data(assets)));
         let music_triggers = music.iter().map(|t| Prefab::from_query(t)).collect();
         KlodScene {
+            game_timer_seconds: timer.time,
             objects,
             klod_spawn_transform: klod_spawn.0.into(),
             music_triggers,
+            finish_zone: finish_zone.get_single().unwrap().into(),
         }
     }
 
     pub(crate) fn load(
+        world: &mut World,
+        scene_path: impl AsRef<Path>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        #[cfg(feature = "editor")]
+        {
+            Self::file_load(world, &scene_path).or_else(|_| {
+                migration::migrate(&scene_path)?;
+                Self::file_load(world, scene_path)
+            })
+        }
+        #[cfg(not(feature = "editor"))]
+        {
+            Self::file_load(world, scene_path)
+        }
+    }
+    fn file_load(
         world: &mut World,
         scene_path: impl AsRef<Path>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {

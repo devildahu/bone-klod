@@ -10,6 +10,7 @@ mod game_audio;
 mod powers;
 mod prefabs;
 mod scene;
+mod score;
 mod state;
 mod system_helper;
 mod ui;
@@ -41,8 +42,6 @@ pub enum EndReason {
 struct WaitRoot;
 
 fn main() {
-    use system_helper::EasySystemSetCtor;
-
     let mut app = App::new();
 
     let initial_state = if cfg!(feature = "editor") {
@@ -91,13 +90,14 @@ fn main() {
         .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
         .add_plugin(powers::Plugin)
+        .add_plugin(score::Plugin)
         .add_plugin(audio::Plugin)
         .add_plugin(game_audio::Plugin)
         .add_plugin(cam::Plugin)
         .add_plugin(ball::Plugin)
         .add_plugin(ui::Plugin)
         .add_event::<GameOver>()
-        .add_system_set(GameState::WaitLoaded.on_exit(cleanup_marked::<WaitRoot>))
+        // .add_system_set(GameState::WaitLoaded.on_exit(cleanup_marked::<WaitRoot>))
         // .add_startup_system(box_scene::load_box_level)
         .add_startup_system(|| {
             screen_print!(sec: 10_000_000_000.0, "");
@@ -119,7 +119,7 @@ fn setup(world: &mut World) {
     ambiant_light.color = Color::WHITE;
     ambiant_light.brightness = 1.0;
     let root = scene::get_base_path();
-    KlodScene::load(world, root.join("default.klodlvl")).unwrap();
+    KlodScene::load(world, root.join("default.klodlvl"));
 }
 
 pub(crate) mod collision_groups {

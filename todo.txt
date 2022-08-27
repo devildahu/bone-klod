@@ -1,6 +1,4 @@
-* improve handling of ball
-    * make sure you can't shlurp too much away from center
-    * normalize distances
-    * do not slow down too much
-* improve agglo
-    * use actual weight limit ± speed factor to deduce if should shlurp
+* Make intro/outro animation
+* Place more bones
+* Animate death of KlodElem
+* allow restarts

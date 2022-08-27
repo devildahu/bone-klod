@@ -161,18 +161,21 @@ fn trigger_music(
         Ok(ball) => ball,
         Err(_) => return,
     };
+    let not_ball = |e1, e2| (e1 == ball).then(|| e2).unwrap_or(e1);
     let trigger = rapier_context
         .intersections_with(ball)
-        .filter_map(|c| c.2.then(|| c.1))
+        .filter_map(|c| c.2.then(|| not_ball(c.0, c.1)))
         .find_map(|t| triggers.get(t).ok());
     if let Some(trigger) = trigger {
         if Some(*trigger) != *current_trigger {
-            screen_print!(sec: 1.0, col: Color::LIME_GREEN, "trigger_music: {trigger:?}");
+            screen_print!(sec: 3.0, col: Color::LIME_GREEN, "trigger_music: {trigger:?}");
             *current_trigger = Some(*trigger);
             if let Some(intro) = trigger.intro {
-                audio_requests.send(AudioRequest::QueueMusic(audio.track(intro)));
+                audio_requests.send(AudioRequest::QueueNewTrack(audio.track(intro)));
+                audio_requests.send(AudioRequest::QueueMusic(audio.track(trigger.track)));
+            } else {
+                audio_requests.send(AudioRequest::QueueNewTrack(audio.track(trigger.track)));
             }
-            audio_requests.send(AudioRequest::QueueMusic(audio.track(trigger.track)));
         }
     }
 }

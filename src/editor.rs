@@ -33,6 +33,7 @@ use crate::{
     powers::Power,
     prefabs::{AggloData, Scenery, SerdeCollider},
     scene::{KlodScene, ObjectType, PhysicsObject},
+    state::GameState,
 };
 
 fn toggle_editor_active(
@@ -42,6 +43,7 @@ fn toggle_editor_active(
     mut orbit_cam: Query<&mut OrbitCamera>,
     editor_cam: Query<Entity, With<ActiveEditorCamera>>,
     mut gizmo_camera: Query<&mut Camera, With<InternalGizmoCamera>>,
+    mut game_state: ResMut<State<GameState>>,
 ) -> Option<()> {
     for event in events.iter() {
         match event {
@@ -50,11 +52,13 @@ fn toggle_editor_active(
                 orbit_cam.locked = *now_active;
                 let cam = editor_cam.get_single().ok()?;
                 if *now_active {
+                    game_state.push(GameState::Editor).unwrap();
                     rapier_config.physics_pipeline_active = false;
                     cmds.entity(cam)
                         .insert_bundle(PickingCameraBundle::default())
                         .insert(GizmoPickSource::default());
                 } else {
+                    game_state.pop().unwrap();
                     rapier_config.physics_pipeline_active = true;
                     cmds.entity(cam)
                         .remove_bundle::<PickingCameraBundle>()

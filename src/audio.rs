@@ -5,6 +5,7 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::{Plugin as BevyPlugin, *};
+use bevy_debug_text_overlay::screen_print;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_kira_audio::prelude::*;
@@ -30,6 +31,7 @@ struct AudioState {
     queue: VecDeque<Sfx>,
     volumes: ChannelVolumes,
     playing: Option<Handle<AudioInstance>>,
+    stop_current_track: bool,
     stop_loop_effect: bool,
 }
 struct ChannelVolumes {
@@ -43,6 +45,7 @@ impl Default for AudioState {
             queue: VecDeque::new(),
             volumes: ChannelVolumes { master: 1.0, effect: 0.5, music: 0.5 },
             playing: None,
+            stop_current_track: false,
             stop_loop_effect: false,
         }
     }
@@ -51,6 +54,8 @@ impl Default for AudioState {
 pub(crate) enum AudioRequest {
     PlayEffect(Sfx, f64),
     QueueMusic(Sfx),
+    QueueNewTrack(Sfx),
+    StopMusic,
     SetVolume(SoundChannel, f64),
     Roll(f64),
     StopRoll,
@@ -97,6 +102,11 @@ fn handle_requests(
                         .with_volume(*volume);
                 }
             }
+            AudioRequest::QueueNewTrack(music) => {
+                state.queue.clear();
+                state.queue.push_back(music.clone_weak());
+                state.stop_current_track = true;
+            }
             AudioRequest::QueueMusic(music) => state.queue.push_back(music.clone_weak()),
             AudioRequest::LoopEffect => {
                 effect_channel.play(assets.wood_clink.clone_weak()).looped();
@@ -114,6 +124,10 @@ fn handle_requests(
             AudioRequest::StopRoll => {
                 roll_channel.stop();
             }
+            AudioRequest::StopMusic => {
+                state.stop_current_track = true;
+                state.queue.clear();
+            }
         }
     }
 }
@@ -121,12 +135,20 @@ fn play_music(
     mut state: ResMut<AudioState>,
     music_channel: Res<Audio>,
     effect_channel: Res<AudioChannel<Effects>>,
+    mut instances: ResMut<Assets<AudioInstance>>,
 ) {
+    if state.stop_current_track {
+        screen_print!("Stopping audoi");
+        state.stop_current_track = false;
+        if let Some(current) = state.playing.as_ref().and_then(|h| instances.get_mut(h)) {
+            current.stop(AudioTween::default());
+        }
+    }
     let playback_state = state
         .playing
         .as_ref()
         .map(|playing| music_channel.state(playing));
-    if let Some(PlaybackState::Stopped) | None = playback_state {
+    if matches!(playback_state, Some(PlaybackState::Stopped) | None) {
         if let Some(to_play) = state.queue.front() {
             let to_play = to_play.clone_weak();
             if state.queue.len() > 1 {
@@ -245,6 +267,7 @@ pub(crate) struct AudioAssets {
     impacts: EnumMap<PartialImpactType, Impact>,
     explosion: Sfxs,
     roll: Sfx,
+    tada: Sfx,
     music: EnumMap<MusicTrack, Sfx>,
     intros: EnumMap<IntroTrack, Sfx>,
 }
@@ -277,6 +300,10 @@ impl AudioAssets {
             ImpactSound::Glass(weight) => self.full_impacts[Full::Glass].of_weight(weight).pick(),
             ImpactSound::Plate(weight) => self.full_impacts[Full::Plate].of_weight(weight).pick(),
         }
+    }
+
+    pub(crate) fn tada(&self) -> Sfx {
+        self.tada.clone_weak()
     }
 }
 impl FromWorld for AudioAssets {
@@ -317,6 +344,7 @@ impl FromWorld for AudioAssets {
                 In::Chill => assets.load("music/introChill.ogg"),
                 In::Theremin => assets.load("music/introTheremin.ogg"),
             },
+            tada: assets.load("sfx/tada.ogg"),
         }
     }
 }

@@ -1,3 +1,5 @@
+pub(crate) mod anim;
+
 use bevy::{
     ecs::system::EntityCommands,
     math::Vec3Swizzles,
@@ -10,10 +12,10 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{
     cam::OrbitCamera, collision_groups as groups, powers::Power, prefabs::AggloBundle,
-    state::GameState,
+    state::GameState, system_helper::EasySystemSetCtor,
 };
 
-const INPUT_IMPULSE: f32 = 1.5;
+const BASE_INPUT_IMPULSE: f32 = 1.0;
 const KLOD_INITIAL_WEIGHT: f32 = 4.2;
 const KLOD_INITIAL_RADIUS: f32 = 1.0;
 pub(crate) const MAX_KLOD_SPEED: f32 = 28.0;
@@ -21,12 +23,37 @@ pub(crate) const MAX_KLOD_SPEED: f32 = 28.0;
 #[derive(SystemLabel)]
 pub(crate) enum BallSystems {
     FreeFallUpdate,
+    DestroyKlod,
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
 pub(crate) struct Klod {
     weight: f32,
+}
+impl Klod {
+    fn within_radius(&self, distance: f32) -> bool {
+        let max_distance = self.weight / KLOD_INITIAL_WEIGHT;
+        let can_slurp = distance < max_distance;
+        let color = if can_slurp { Color::GREEN } else { Color::RED };
+        screen_print!(col: color, "slurp dist: {distance:.3} <? {max_distance:.3}");
+        can_slurp
+    }
+    fn can_slurp(&self, weight: f32, velocity: Vec3) -> bool {
+        let speed_bonus = (velocity.length() * 1.2 / MAX_KLOD_SPEED).max(0.5);
+        let weight_limit = self.weight / 10.0;
+        let can_slurp = weight < speed_bonus * weight_limit;
+        let color = if can_slurp { Color::GREEN } else { Color::RED };
+        screen_print!(
+            col: color,
+            "slurp: {weight:.3} <? {speed_bonus:.3} * {weight_limit:.3}"
+        );
+        can_slurp
+    }
+
+    pub(crate) fn weight(&self) -> f32 {
+        (self.weight - KLOD_INITIAL_WEIGHT) * 10.0
+    }
 }
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
@@ -71,44 +98,54 @@ fn spawn_klod_elem<'w, 's, 'a>(
     ))
 }
 
-pub(crate) fn spawn_klod(cmds: &mut Commands, asset_server: &AssetServer) -> Entity {
-    cmds.spawn_bundle((
-        Klod { weight: KLOD_INITIAL_WEIGHT },
-        FreeFall(true),
-        RigidBody::Dynamic,
-        ExternalImpulse::default(),
-        Velocity::default(),
-        Name::new("Klod"),
-        groups::KLOD,
-    ))
-    .insert_bundle(SpatialBundle::default())
-    .with_children(|cmds| {
-        let klod = cmds.parent_entity();
-        let mut ball = spawn_klod_elem(
-            cmds,
-            "Klod ball".to_owned(),
-            klod,
-            KLOD_INITIAL_WEIGHT,
-            Collider::ball(KLOD_INITIAL_RADIUS),
-            default(),
-            Friction {
-                coefficient: 0.0,
-                combine_rule: CoefficientCombineRule::Max,
-            },
-            Restitution {
-                coefficient: 0.0,
-                combine_rule: CoefficientCombineRule::Max,
-            },
-            Power::None,
-        );
-        ball.insert(KlodBall);
-        cmds.spawn_bundle(SceneBundle {
-            scene: asset_server.load("klod.glb#Scene0"),
-            transform: Transform::from_scale(Vec3::splat(KLOD_INITIAL_RADIUS * 1.1)),
-            ..Default::default()
-        });
+pub(crate) fn spawn_klod(
+    mut cmds: Commands,
+    klod_exists: Query<(), With<Klod>>,
+    asset_server: Res<AssetServer>,
+    spawn_point: Res<KlodSpawnTransform>,
+) {
+    if !klod_exists.is_empty() {
+        return;
+    }
+    let klod = cmds
+        .spawn_bundle((
+            Klod { weight: KLOD_INITIAL_WEIGHT },
+            FreeFall(true),
+            RigidBody::Dynamic,
+            ExternalImpulse::default(),
+            Velocity::default(),
+            Name::new("Klod"),
+            groups::KLOD,
+        ))
+        .insert_bundle(SpatialBundle::from_transform(spawn_point.0))
+        .with_children(|cmds| {
+            let klod = cmds.parent_entity();
+            let mut ball = spawn_klod_elem(
+                cmds,
+                "Klod ball".to_owned(),
+                klod,
+                KLOD_INITIAL_WEIGHT,
+                Collider::ball(KLOD_INITIAL_RADIUS),
+                default(),
+                Friction {
+                    coefficient: 0.0,
+                    combine_rule: CoefficientCombineRule::Max,
+                },
+                Restitution {
+                    coefficient: 0.0,
+                    combine_rule: CoefficientCombineRule::Max,
+                },
+                Power::None,
+            );
+            ball.insert(KlodBall);
+            anim::spawn_klod_visuals(cmds, &asset_server);
+        })
+        .id();
+    cmds.spawn_bundle(Camera3dBundle {
+        transform: Transform::from_xyz(-10.0, 2.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
     })
-    .id()
+    .insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
 }
 
 struct AgglomerateToKlod {
@@ -144,23 +181,33 @@ fn agglo_to_klod(
         ),
         With<Agglomerable>,
     >,
-    mut klod_query: Query<&mut Klod>,
+    mut klod_query: Query<(&mut Klod, &Velocity)>,
     transforms: Query<&GlobalTransform>,
 ) {
     for &AgglomerateToKlod { klod, agglo, agglo_weight } in events.iter() {
-        let klod_trans = transforms.get(klod).unwrap();
-        let (coll, agglo_trans, power, friction, restitution, name) = match agglo_query.get(agglo) {
-            Ok(item) => item,
-            _ => continue,
-        };
-        let trans = transform_relative_to(agglo_trans, klod_trans);
-        cmds.entity(agglo)
-            .remove_bundle::<AggloBundle>()
-            .remove_bundle::<(Collider, Friction, Restitution)>()
-            .insert_bundle((KlodElem { klod }, trans, *power));
-        cmds.entity(klod).add_child(agglo);
-        if let Ok(mut klod_component) = klod_query.get_mut(klod) {
-            klod_component.weight += agglo_weight;
+        if let Ok((mut klod_data, klod_velocity)) = klod_query.get_mut(klod) {
+            let klod_trans = transforms.get(klod).unwrap();
+            let (coll, agglo_trans, power, friction, restitution, name) =
+                match agglo_query.get(agglo) {
+                    Ok(item) => item,
+                    _ => continue,
+                };
+            let mut trans = transform_relative_to(agglo_trans, klod_trans);
+            trans.translation = trans.translation * 0.8;
+            let within_radius = || {
+                let distance_to_center = trans.translation.length();
+                klod_data.within_radius(distance_to_center)
+            };
+            let can_slurp = || klod_data.can_slurp(agglo_weight, klod_velocity.linvel);
+            if !within_radius() || !can_slurp() {
+                continue;
+            }
+            cmds.entity(agglo)
+                .remove_bundle::<AggloBundle>()
+                .remove_bundle::<(Collider, Friction, Restitution)>()
+                .insert_bundle((KlodElem { klod }, trans, *power));
+            cmds.entity(klod).add_child(agglo);
+            klod_data.weight += agglo_weight;
 
             let name = name.map_or("Klod elem".to_owned(), |name| name.to_string() + " elem");
             screen_print!("added {name} to klod {klod:?}");
@@ -205,12 +252,12 @@ fn shlurp_agglomerable(
 fn ball_input(
     keys: Res<Input<KeyCode>>,
     mut default_klod_position: ResMut<KlodSpawnTransform>,
-    mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity), With<Klod>>,
+    mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity, &Klod)>,
     camera: Query<&OrbitCamera>,
 ) {
     use KeyCode::{A, D, S, W};
 
-    let (mut transform, mut impulse, mut velocity) = match klod.get_single_mut() {
+    let (mut transform, mut impulse, mut velocity, klod) = match klod.get_single_mut() {
         Ok(impulse) => impulse,
         Err(_) => {
             screen_print!(col: Color::RED, "BAD!!!!!!");
@@ -219,7 +266,8 @@ fn ball_input(
     };
     let cam_rot = camera.single();
     let vel = velocity.linvel;
-    let force = INPUT_IMPULSE;
+    let additional_weight = klod.weight - KLOD_INITIAL_WEIGHT;
+    let force = BASE_INPUT_IMPULSE + additional_weight * 0.1;
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
@@ -256,7 +304,18 @@ fn set_freefall(
     }
 }
 
-pub struct Plugin;
+fn lock_camera(mut query: Query<&mut OrbitCamera>) {
+    for mut cam in &mut query {
+        cam.locked = true;
+    }
+}
+fn unlock_camera(mut query: Query<&mut OrbitCamera>) {
+    for mut cam in &mut query {
+        cam.locked = false;
+    }
+}
+
+pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
         #[cfg(feature = "debug")]
@@ -266,9 +325,14 @@ impl BevyPlugin for Plugin {
 
         app.init_resource::<KlodSpawnTransform>()
             .add_event::<AgglomerateToKlod>()
+            .add_event::<anim::DestroyKlodEvent>()
+            .add_system_set(GameState::Playing.on_exit(lock_camera))
+            .add_system_set(GameState::Playing.on_enter(unlock_camera))
+            .add_system_set(GameState::Playing.on_enter(spawn_klod))
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
                     .with_system(ball_input)
+                    .with_system(anim::destroy_klod.label(BallSystems::DestroyKlod))
                     .with_system(set_freefall.label(BallSystems::FreeFallUpdate))
                     .with_system(shlurp_agglomerable)
                     .with_system(agglo_to_klod.after(shlurp_agglomerable)),
