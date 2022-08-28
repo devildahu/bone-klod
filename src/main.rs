@@ -15,6 +15,8 @@ mod state;
 mod system_helper;
 mod ui;
 
+use std::env;
+
 use bevy::{
     log::{Level, LogSettings},
     prelude::*,
@@ -84,6 +86,10 @@ fn main() {
     app.add_plugin(bevy_scene_hook::HookPlugin)
         .add_plugin(editor::Plugin);
 
+    #[cfg(feature = "editor")]
+    if env::args().nth(1).as_deref() == Some("--load-greybox") {
+        app.add_startup_system(box_scene::load_box_level);
+    }
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin { font_size: 24.0, ..default() })
         .add_plugin(scene::Plugin)
@@ -97,12 +103,10 @@ fn main() {
         .add_plugin(ball::Plugin)
         .add_plugin(ui::Plugin)
         .add_event::<GameOver>()
-        // .add_system_set(GameState::WaitLoaded.on_exit(cleanup_marked::<WaitRoot>))
-        // .add_startup_system(box_scene::load_box_level)
         .add_startup_system(|| {
             screen_print!(sec: 10_000_000_000.0, "");
         })
-        .add_startup_system(setup.exclusive_system());
+        .add_startup_system(setup.exclusive_system().at_start());
 
     app.run();
 }

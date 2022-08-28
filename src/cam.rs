@@ -9,7 +9,6 @@ use std::f32::consts::TAU;
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::{Plugin as BevyPlugin, *};
 use bevy::transform::TransformSystem;
-use bevy_debug_text_overlay::screen_print;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
@@ -29,6 +28,7 @@ pub(crate) struct OrbitCamera {
     x_rot: f32,
     /// In radians, the vertical angle of the camera
     y_rot: f32,
+    #[cfg_attr(feature = "debug", inspectable(ignore))]
     follows: Entity,
     /// Prevent camera from moving with mouse.
     pub locked: bool,
@@ -40,8 +40,8 @@ impl OrbitCamera {
     }
     pub(crate) fn follows(entity: Entity) -> Self {
         OrbitCamera {
-            x_rot: 0.0,
-            y_rot: std::f32::consts::FRAC_PI_2,
+            x_rot: 1.48,
+            y_rot: 1.101,
             locked: false,
             distance: CAM_DIST,
             follows: entity,
@@ -94,10 +94,7 @@ fn camera_movement(
 ) {
     let mut camera = match query.get_single_mut() {
         Ok(cam) => cam,
-        Err(msg) => {
-            screen_print!("error: {msg:?}");
-            return;
-        }
+        Err(_) => return,
     };
     if camera.locked {
         return;

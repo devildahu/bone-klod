@@ -26,6 +26,9 @@ pub(crate) enum BallSystems {
     DestroyKlod,
 }
 
+#[derive(Component)]
+pub(crate) struct KlodCamera;
+
 #[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
 pub(crate) struct Klod {
@@ -55,14 +58,13 @@ impl Klod {
         (self.weight - KLOD_INITIAL_WEIGHT) * 10.0
     }
 }
-#[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
 pub(crate) struct KlodBall;
 
-#[cfg_attr(feature = "debug", derive(Inspectable))]
 #[derive(Component)]
 pub(crate) struct KlodElem {
     klod: Entity,
+    scene: Option<Entity>,
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
@@ -75,7 +77,7 @@ pub(crate) struct KlodSpawnTransform(pub(crate) Transform);
 fn spawn_klod_elem<'w, 's, 'a>(
     cmds: &'a mut ChildBuilder<'w, 's, '_>,
     name: String,
-    klod: Entity,
+    klod_elem: KlodElem,
     mass: f32,
     collider: Collider,
     transform: Transform,
@@ -84,7 +86,7 @@ fn spawn_klod_elem<'w, 's, 'a>(
     power: Power,
 ) -> EntityCommands<'w, 's, 'a> {
     cmds.spawn_bundle((
-        KlodElem { klod },
+        klod_elem,
         Name::new(name),
         groups::KLOD,
         ActiveEvents::CONTACT_FORCE_EVENTS,
@@ -94,6 +96,7 @@ fn spawn_klod_elem<'w, 's, 'a>(
         friction,
         restitution,
         transform,
+        GlobalTransform::default(),
         power,
     ))
 }
@@ -101,12 +104,17 @@ fn spawn_klod_elem<'w, 's, 'a>(
 pub(crate) fn spawn_klod(
     mut cmds: Commands,
     klod_exists: Query<(), With<Klod>>,
+    cam: Query<Entity, With<KlodCamera>>,
     asset_server: Res<AssetServer>,
     spawn_point: Res<KlodSpawnTransform>,
 ) {
     if !klod_exists.is_empty() {
         return;
     }
+    let cam = match cam.get_single() {
+        Ok(cam) => cam,
+        Err(_) => return,
+    };
     let klod = cmds
         .spawn_bundle((
             Klod { weight: KLOD_INITIAL_WEIGHT },
@@ -123,7 +131,7 @@ pub(crate) fn spawn_klod(
             let mut ball = spawn_klod_elem(
                 cmds,
                 "Klod ball".to_owned(),
-                klod,
+                KlodElem { klod, scene: None },
                 KLOD_INITIAL_WEIGHT,
                 Collider::ball(KLOD_INITIAL_RADIUS),
                 default(),
@@ -141,11 +149,7 @@ pub(crate) fn spawn_klod(
             anim::spawn_klod_visuals(cmds, &asset_server);
         })
         .id();
-    cmds.spawn_bundle(Camera3dBundle {
-        transform: Transform::from_xyz(-10.0, 2.5, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    })
-    .insert_bundle((OrbitCamera::follows(klod), Name::new("Klod Camera")));
+    cmds.entity(cam).insert(OrbitCamera::follows(klod));
 }
 
 struct AgglomerateToKlod {
@@ -205,7 +209,7 @@ fn agglo_to_klod(
             cmds.entity(agglo)
                 .remove_bundle::<AggloBundle>()
                 .remove_bundle::<(Collider, Friction, Restitution)>()
-                .insert_bundle((KlodElem { klod }, trans, *power));
+                .insert(trans);
             cmds.entity(klod).add_child(agglo);
             klod_data.weight += agglo_weight;
 
@@ -215,7 +219,7 @@ fn agglo_to_klod(
                 spawn_klod_elem(
                     cmds,
                     name,
-                    klod,
+                    KlodElem { klod, scene: Some(agglo) },
                     agglo_weight,
                     coll.clone(),
                     trans,
@@ -314,18 +318,37 @@ fn unlock_camera(mut query: Query<&mut OrbitCamera>) {
         cam.locked = false;
     }
 }
+fn spawn_camera(
+    klod_spawn: Res<KlodSpawnTransform>,
+    mut cmds: Commands,
+    existing_cam: Query<(), With<KlodCamera>>,
+) {
+    use bevy::math::EulerRot::XYZ;
+    if !existing_cam.is_empty() {
+        return;
+    }
+    cmds.spawn_bundle(Camera3dBundle {
+        transform: Transform {
+            translation: klod_spawn.0.translation + Vec3::new(-12.713, 6.149, -0.646),
+            rotation: Quat::from_euler(XYZ, -1.676, -1.118, -1.687),
+            scale: Vec3::ONE,
+        },
+        ..default()
+    })
+    .insert_bundle((Name::new("Klod Camera"), KlodCamera));
+}
 
 pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
         #[cfg(feature = "debug")]
         app.register_inspectable::<Klod>()
-            .register_inspectable::<KlodElem>()
             .register_inspectable::<Agglomerable>();
 
         app.init_resource::<KlodSpawnTransform>()
             .add_event::<AgglomerateToKlod>()
             .add_event::<anim::DestroyKlodEvent>()
+            .add_startup_system(spawn_camera)
             .add_system_set(GameState::Playing.on_exit(lock_camera))
             .add_system_set(GameState::Playing.on_enter(unlock_camera))
             .add_system_set(GameState::Playing.on_enter(spawn_klod))

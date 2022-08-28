@@ -5,7 +5,7 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_ui_build_macros::{build_ui, rect, size, style, unit};
 use bevy_ui_navigation::prelude::*;
 
-use crate::audio::AudioAssets;
+use crate::audio::{AudioAssets, IntroTrack, MusicTrack};
 use crate::{
     audio::{AudioRequest, AudioRequestSystem, SoundChannel},
     cleanup_marked,
@@ -216,7 +216,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                         MainMenuElem::AudioSlider(channel, strength),
                         handle_name,
                         style! {
-                            size: size!( 40 px, 40 px),
+                            size: size!( 20 px, 40 px),
                             position_type: PT::Absolute,
                             position: position,
                         }
@@ -270,12 +270,25 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
             node{
                 position_type: PT::Absolute,
                 position: rect!(10 pct),
+                padding: rect!(10 pct),
                 display: Display::None,
-                align_items: AlignItems::Center,
+                align_items: AlignItems::FlexStart,
                 justify_content: JustifyContent::Center
             }[; UiColor(Color::rgb(0.1, 0.1, 0.1)), Name::new("Rules overlay"), RulesOverlay](
-                node[large_text("Rules");],
-                node[text_bundle("lul, game doesn't exist yet", 30.0);],
+                node[large_text("Story");],
+                node[text_bundle("The infamous warlock Hieronymous Bonechill", 30.0);],
+                node[text_bundle("has started the ritual of bones! You are his minion", 30.0);],
+                node[text_bundle("and serve him... until the end of the ritual.", 30.0);],
+                node[large_text("Game");],
+                node[text_bundle("Collect as many bones as possible and get to the end!", 30.0);],
+                node[text_bundle("You have one and an half minute until the end of the", 30.0);],
+                node[text_bundle("ritual. You must collect 1000 mana to win the game.", 30.0);],
+                node[text_bundle("Mana is equal to remaining time × bones collected.", 30.0);],
+                node[text_bundle("Heavier bones yield more mana, but make it harder", 30.0);],
+                node[text_bundle("to navigate the level.", 30.0);],
+                node[large_text("Doors");],
+                node[text_bundle("You can collect more than just bones, some items", 30.0);],
+                node[text_bundle("let you open doors to secret rooms.", 30.0);],
             ),
             node{
                 position_type: PT::Absolute,
@@ -299,12 +312,18 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
     };
 }
 
+fn play_chill_music(mut requests: EventWriter<AudioRequest>, audio: Res<AudioAssets>) {
+    requests.send(AudioRequest::QueueNewTrack(audio.track(IntroTrack::Chill)));
+    requests.send(AudioRequest::QueueMusic(audio.track(MusicTrack::Chill)));
+}
+
 pub struct Plugin(pub GameState);
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
         use crate::system_helper::EasySystemSetCtor;
         app.init_resource::<MenuAssets>()
             .add_system_set(self.0.on_enter(setup_main_menu))
+            .add_system_set(self.0.on_enter(play_chill_music.before(AudioRequestSystem)))
             .add_system_set(self.0.on_exit(cleanup_marked::<MainMenuRoot>))
             .add_system_set(
                 SystemSet::on_update(self.0)

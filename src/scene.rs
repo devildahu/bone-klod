@@ -33,7 +33,7 @@ use crate::{
     game_audio::{MusicTrigger, NoiseOnHit},
     powers::{ElementalObstacle, Power},
     prefabs::{AggloData, MusicTriggerData, Prefab, Scenery, SerdeCollider, SerdeTransform},
-    score::{FinishLine, GameTimer},
+    score::{FinishLine, GameData},
 };
 
 #[cfg_attr(feature = "editor", derive(Serialize))]
@@ -212,7 +212,7 @@ impl<'w> From<(&'w Agglomerable, &'w Power)> for ObjectType {
 #[derive(SystemParam)]
 struct KlodSceneQuery<'w, 's> {
     assets: Res<'w, AssetServer>,
-    timer: Res<'w, GameTimer>,
+    timer: Res<'w, GameData>,
     agglomerables: Query<'w, 's, ObjectQuery<<AggloData as Prefab>::Query>>,
     scenery: Query<'w, 's, ObjectQuery<<Scenery as Prefab>::Query>>,
     music: Query<'w, 's, <MusicTriggerData as Prefab>::Query>,
@@ -259,6 +259,7 @@ pub(crate) struct KlodScene {
     game_timer_seconds: f32,
     objects: Vec<PhysicsObject>,
     music_triggers: Vec<MusicTriggerData>,
+    required_score: f32,
 }
 #[derive(SystemParam)]
 struct KlodCopyQuery<'w, 's> {
@@ -269,6 +270,7 @@ struct KlodCopyQuery<'w, 's> {
     scenery: Query<'w, 's, ObjectQuery<<Scenery as Prefab>::Query>>,
 }
 impl KlodScene {
+    #[cfg(feature = "editor")]
     pub(crate) fn copy_objects(objects: &[Entity], world: &mut World) {
         let mut query = SystemState::<KlodCopyQuery>::new(world);
         let KlodCopyQuery {
@@ -300,7 +302,7 @@ impl KlodScene {
     fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod_spawn, klod }: &mut KlodSpawnQuery) {
         klod_spawn.0 = self.klod_spawn_transform.into();
 
-        cmds.insert_resource(GameTimer::new(self.game_timer_seconds));
+        cmds.insert_resource(GameData::new(self.game_timer_seconds, self.required_score));
         cmds.spawn_bundle((
             Name::new("Finish Zone"),
             FinishLine,
@@ -348,6 +350,7 @@ impl KlodScene {
             klod_spawn_transform: klod_spawn.0.into(),
             music_triggers,
             finish_zone: finish_zone.get_single().unwrap().into(),
+            required_score: timer.required_score,
         }
     }
 
@@ -384,6 +387,7 @@ impl KlodScene {
         system_state.apply(world);
         Ok(())
     }
+    #[cfg(feature = "editor")]
     pub(crate) fn save(
         world: &mut World,
         scene_path: impl AsRef<Path>,

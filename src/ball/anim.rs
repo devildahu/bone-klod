@@ -1,10 +1,9 @@
-use std::f32::consts::TAU;
-
-use bevy::math::EulerRot::XYZ;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::{animate::Animate, collision_groups as groups};
+
+use super::{KlodBall, KlodElem};
 
 #[derive(Component)]
 pub(super) struct KlodVisualElem;
@@ -40,10 +39,18 @@ pub(super) fn spawn_klod_visuals(cmds: &mut ChildBuilder, assets: &AssetServer) 
     }
 }
 
+// TODO: deparent the camera as well
 pub(super) fn destroy_klod(
     mut cmds: Commands,
     klod_visuals: Query<(Entity, &Transform, &GlobalTransform, &Parent), With<KlodVisualElem>>,
-    // klod_elems: Query<(Entity, &Transform, &GlobalTransform, &Parent), With<KlodVisualElem>>,
+    klod_elems: Query<(
+        Entity,
+        &Collider,
+        &Transform,
+        &GlobalTransform,
+        &Parent,
+        &KlodElem,
+    )>,
     mut destroy_events: EventReader<DestroyKlodEvent>,
 ) {
     if destroy_events.iter().next().is_none() {
@@ -58,5 +65,18 @@ pub(super) fn destroy_klod(
             Velocity { linvel: transform.translation * 3.0, ..default() },
             RigidBody::Dynamic,
         ));
+    }
+    for (entity, collider, transform, global_transform, parent, elem) in &klod_elems {
+        cmds.entity(entity).despawn();
+        if let Some(entity) = elem.scene {
+            cmds.entity(parent.get()).remove_children(&[entity]);
+            cmds.entity(entity).insert_bundle((
+                groups::KLOD,
+                global_transform.compute_transform(),
+                Velocity { linvel: transform.translation * 10.0, ..default() },
+                RigidBody::Dynamic,
+                collider.clone(),
+            ));
+        }
     }
 }

@@ -5,7 +5,7 @@ use bevy_ui_build_macros::{build_ui, rect, size, style, unit};
 use bevy_ui_navigation::prelude::{Focusable, NavEvent, NavEventReaderExt};
 
 use crate::{
-    audio::{AudioAssets, AudioRequest},
+    audio::{AudioAssets, AudioRequest, AudioRequestSystem},
     ball::{anim::DestroyKlodEvent, BallSystems, Klod, KlodBall},
     cleanup_marked,
     state::GameState,
@@ -16,13 +16,14 @@ use crate::{
 struct Score {
     bone_mass: f32,
     time_remaining: f32,
+    required_mana: f32,
 }
 impl Score {
     fn mana(&self) -> f32 {
         self.bone_mass * self.time_remaining
     }
     fn won(&self) -> bool {
-        self.mana() > 100.0
+        self.mana() > self.required_mana
     }
 
     fn hint(&self) -> &'static str {
@@ -43,13 +44,18 @@ impl Score {
     }
 }
 
-pub(crate) struct GameTimer {
+pub(crate) struct GameData {
     main_timer: Timer,
     pub(crate) time: f32,
+    pub(crate) required_score: f32,
 }
-impl GameTimer {
-    pub(crate) fn new(time: f32) -> Self {
-        Self { time, main_timer: Timer::from_seconds(time, false) }
+impl GameData {
+    pub(crate) fn new(time: f32, required_score: f32) -> Self {
+        Self {
+            time,
+            main_timer: Timer::from_seconds(time, false),
+            required_score,
+        }
     }
     fn remaining(&self) -> f32 {
         self.time - self.main_timer.elapsed_secs()
@@ -59,7 +65,7 @@ impl GameTimer {
 #[derive(Component)]
 pub(crate) struct FinishLine;
 
-fn init_timer(mut timer: ResMut<GameTimer>) {
+fn init_timer(mut timer: ResMut<GameData>) {
     timer.main_timer = Timer::from_seconds(timer.time, false);
 }
 
@@ -67,7 +73,7 @@ fn init_timer(mut timer: ResMut<GameTimer>) {
 /// handling its state.
 fn countdown(
     time: Res<Time>,
-    mut timer: ResMut<GameTimer>,
+    mut timer: ResMut<GameData>,
     mut destroy: EventWriter<DestroyKlodEvent>,
     mut state: ResMut<State<GameState>>,
 ) {
@@ -109,7 +115,7 @@ enum ScoreboardElem {
     Retry,
 }
 fn setup_scoreboard(
-    timer: Res<GameTimer>,
+    timer: Res<GameData>,
     klod: Query<&Klod>,
     mut cmds: Commands,
     ui_assets: Res<ui::Assets>,
@@ -121,7 +127,11 @@ fn setup_scoreboard(
         Ok(klod) => klod.weight(),
         Err(_) => return,
     };
-    let score = Score { bone_mass, time_remaining: timer.remaining() };
+    let score = Score {
+        bone_mass,
+        time_remaining: timer.remaining(),
+        required_mana: timer.required_score,
+    };
 
     let text_bundle = |content: &str, color: Color, font_size: f32| {
         let style = TextStyle {
@@ -192,12 +202,14 @@ fn activate_scoreboard(
 }
 
 fn tada(mut requests: EventWriter<AudioRequest>, audio: Res<AudioAssets>) {
+    screen_print!("Tada!");
     requests.send(AudioRequest::StopMusic);
     requests.send(AudioRequest::PlayEffect(audio.tada(), 1.0));
 }
 fn times_up(mut state: ResMut<State<GameState>>) {
     state.set(GameState::GameComplete).unwrap();
 }
+
 pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
@@ -209,7 +221,7 @@ impl BevyPlugin for Plugin {
             )
             .add_system_set(GameState::TimeUp.on_update(times_up))
             .add_system_set(GameState::GameComplete.on_enter(setup_scoreboard))
-            .add_system_set(GameState::GameComplete.on_enter(tada))
+            .add_system_set(GameState::GameComplete.on_enter(tada.before(AudioRequestSystem)))
             .add_system_set(GameState::GameComplete.on_update(activate_scoreboard))
             .add_system_set(GameState::GameComplete.on_exit(cleanup_marked::<ScoreboardUi>))
         // This comment is here to prevent rustfmt from putting the semicolon up there

@@ -13,11 +13,9 @@ use crate::{
 
 pub(crate) fn load_box_level(
     mut cmds: Commands,
-    assets: Res<AssetServer>,
-    // mut rapier_config: ResMut<RapierConfiguration>,
     mut meshes: ResMut<Assets<Mesh>>,
+    assets: Res<AssetServer>,
 ) {
-    // rapier_config.physics_pipeline_active = false;
     cmds.spawn_bundle(HookedSceneBundle {
         scene: SceneBundle {
             scene: assets.load("import/hitboxes.glb#Scene0"),

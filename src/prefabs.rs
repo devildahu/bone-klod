@@ -6,9 +6,8 @@ use bevy::{
     prelude::*,
     ui::FocusPolicy,
 };
-use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::{
     ball::Agglomerable,
@@ -17,7 +16,7 @@ use crate::{
     powers::{ElementalObstacle, Power},
 };
 
-pub(crate) trait Prefab: Serialize + DeserializeOwned {
+pub(crate) trait Prefab {
     type Query: WorldQuery;
 
     fn from_query(item: QueryItem<Self::Query>) -> Self;
@@ -25,7 +24,8 @@ pub(crate) trait Prefab: Serialize + DeserializeOwned {
     fn spawn(self, cmds: &mut EntityCommands);
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Debug, Deserialize)]
 pub(crate) struct SerdeTransform {
     pub(crate) rotation: Quat,
     pub(crate) scale: Vec3,
@@ -59,7 +59,8 @@ impl From<SerdeTransform> for Transform {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Deserialize, Debug, Clone)]
 pub(crate) enum SerdeCollider {
     Ball {
         radius: f32,
@@ -259,7 +260,8 @@ impl From<SerdeCollider> for Collider {
 }
 
 /// Static physic objects
-#[derive(Serialize, Debug, Deserialize, Component)]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Debug, Deserialize, Component)]
 pub(crate) struct Scenery {
     pub(crate) weakness: Vec<Power>,
 }
@@ -280,7 +282,8 @@ impl Prefab for Scenery {
     }
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Debug, Deserialize)]
 pub(crate) struct AggloData {
     mass: f32,
     power: Power,
@@ -327,7 +330,8 @@ impl Prefab for AggloData {
     }
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Debug, Deserialize)]
 pub(crate) struct MusicTriggerData {
     name: String,
     trigger: MusicTrigger,
@@ -374,10 +378,10 @@ impl Prefab for MusicTriggerData {
         cmds.insert_bundle((
             Visibility::default(),
             ComputedVisibility::default(),
-            PickableMesh::default(),
+            bevy_mod_picking::PickableMesh::default(),
             Interaction::default(),
             FocusPolicy::default(),
-            Selection::default(),
+            bevy_mod_picking::Selection::default(),
             bevy_transform_gizmo::GizmoTransformable,
         ));
     }

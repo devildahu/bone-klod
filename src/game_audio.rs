@@ -5,7 +5,7 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_inspector_egui::{egui, Context, Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::{ContactForceEvent, RapierContext, Velocity};
 use fastrand::usize as rand_usize;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::{
     audio::{AudioAssets, AudioRequest, AudioRequestSystem, ImpactSound, IntroTrack, MusicTrack},
@@ -80,7 +80,8 @@ impl NoiseOnHit {
 
 // TODO
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[derive(Serialize, Deserialize, Debug, Clone, Component, Copy, PartialEq, Eq)]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Deserialize, Debug, Clone, Component, Copy, PartialEq, Eq)]
 pub(crate) struct MusicTrigger {
     pub(crate) intro: Option<IntroTrack>,
     pub(crate) track: MusicTrack,
