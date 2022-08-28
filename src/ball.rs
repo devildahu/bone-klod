@@ -291,32 +291,47 @@ fn shlurp_agglomerable(
 
 fn ball_input(
     keys: Res<Input<KeyCode>>,
-    mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity, &Klod)>,
+    gp_axis: Res<Axis<GamepadAxis>>,
+    gp_buttons: Res<Input<GamepadButton>>,
+    mut klod: Query<(&mut ExternalImpulse, &mut Velocity, &Klod)>,
     camera: Query<&OrbitCamera>,
     time: Res<Time>,
     mut pound_timeout: Local<f64>,
 ) {
     use KeyCode::{A, D, S, W};
 
-    let (mut transform, mut impulse, mut velocity, klod) = match klod.get_single_mut() {
+    let (mut impulse, mut velocity, klod) = match klod.get_single_mut() {
         Ok(impulse) => impulse,
         Err(_) => {
             screen_print!(col: Color::RED, "BAD!!!!!!");
             return;
         }
     };
+    let gp_axis_kind = |axis_type| GamepadAxis { gamepad: Gamepad { id: 0 }, axis_type };
+    let gp_button = |button_type| GamepadButton { gamepad: Gamepad { id: 0 }, button_type };
+    let axis_x = gp_axis_kind(GamepadAxisType::LeftStickX);
+    let axis_y = gp_axis_kind(GamepadAxisType::LeftStickY);
+    let gp_y_force = gp_axis.get(axis_y).map_or(default(), |y| Vec2::Y * y);
+    let gp_x_force = gp_axis.get(axis_x).map_or(default(), |x| -Vec2::X * x);
+    let gp_force = gp_x_force + gp_y_force;
     let cam_rot = camera.single();
     let vel = velocity.linvel;
     let additional_weight = klod.weight - KLOD_INITIAL_WEIGHT;
     let force = BASE_INPUT_IMPULSE + additional_weight * INPUT_WEIGHT_COMP;
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
-    let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
+    let force = if gp_force.length_squared() < 0.01 {
+        force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X)
+    } else {
+        gp_force * 1.2
+    };
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
     let max_more_force = MAX_KLOD_SPEED - vel.y;
     let force = (vel.xz() + force).clamp_length_max(max_more_force) - vel.xz();
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
-    if keys.just_pressed(KeyCode::Space) && time.seconds_since_startup() > *pound_timeout {
+    let gp_a = gp_button(GamepadButtonType::South);
+    let ground_pound = keys.just_pressed(KeyCode::Space) || gp_buttons.just_pressed(gp_a);
+    if ground_pound && time.seconds_since_startup() > *pound_timeout {
         *pound_timeout = time.seconds_since_startup() + 3.0;
         velocity.linvel.y -= 50.0;
     }

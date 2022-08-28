@@ -305,6 +305,9 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                     node[large_text("Doors");],
                     node[text_bundle("You can collect more than just bones, some items", 30.0);],
                     node[text_bundle("let you open doors to secret rooms.", 30.0);],
+                    node[large_text("Ground pound");],
+                    node[text_bundle("Press SPACE or gampead A to execute a ground pound,", 30.0);],
+                    node[text_bundle("it has a 3 seconds cooldown.", 30.0);],
                 )
             ),
             node{

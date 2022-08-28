@@ -26,6 +26,7 @@ bevy-debug-text-overlay = { version = "3.0", default-features = false, features 
 bevy-scene-hook = { version = "4.0" , optional = true }
 bevy-ui-navigation = "0.20"
 bevy = { version = "0.8", default-features = false, features = [
+    "bevy_gilrs",
     "bevy_winit",
     "render",
     "png",

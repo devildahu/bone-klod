@@ -90,6 +90,7 @@ fn update_camera_transform(
 
 fn camera_movement(
     mut events: EventReader<MouseMotion>,
+    gp_axis: Res<Axis<GamepadAxis>>,
     mut query: Query<&mut OrbitCamera, With<Camera>>,
 ) {
     let mut camera = match query.get_single_mut() {
@@ -99,7 +100,17 @@ fn camera_movement(
     if camera.locked {
         return;
     }
-    let delta = events.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta);
+    let gp_axis_kind = |axis_type| GamepadAxis { gamepad: Gamepad { id: 0 }, axis_type };
+    let axis_x = gp_axis_kind(GamepadAxisType::RightStickX);
+    let axis_y = gp_axis_kind(GamepadAxisType::RightStickY);
+    let gp_y_delta = gp_axis.get(axis_y).map_or(default(), |y| -Vec2::Y * y);
+    let gp_x_delta = gp_axis.get(axis_x).map_or(default(), |x| Vec2::X * x);
+    let gp_delta = gp_x_delta + gp_y_delta;
+    let delta = if gp_delta.length_squared() < 0.01 {
+        events.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta)
+    } else {
+        gp_delta * 2.1
+    };
     if delta != Vec2::ZERO {
         let xy = delta * CAM_SPEED;
         camera.x_rot -= xy.x;
