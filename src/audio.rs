@@ -138,7 +138,6 @@ fn play_music(
     mut instances: ResMut<Assets<AudioInstance>>,
 ) {
     if state.stop_current_track {
-        screen_print!("Stopping audoi");
         state.stop_current_track = false;
         if let Some(current) = state.playing.as_ref().and_then(|h| instances.get_mut(h)) {
             current.stop(AudioTween::default());

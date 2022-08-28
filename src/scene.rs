@@ -21,6 +21,8 @@ use bevy::{
 };
 #[cfg(feature = "editor")]
 use bevy_editor_pls_default_windows::hierarchy::picking::IgnoreEditorRayCast;
+#[cfg(feature = "debug")]
+use bevy_inspector_egui::RegisterInspectable;
 #[cfg(feature = "editor")]
 use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
@@ -36,8 +38,10 @@ use crate::{
     score::{FinishLine, GameData},
 };
 
+pub(crate) struct CurrentScene(pub(crate) KlodScene);
+
 #[cfg_attr(feature = "editor", derive(Serialize))]
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub(crate) struct PhysicsObject {
     name: String,
     asset_path: Option<AssetPath<'static>>,
@@ -192,7 +196,7 @@ impl PhysicsObject {
 }
 
 #[cfg_attr(feature = "editor", derive(Serialize))]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub(crate) enum ObjectType {
     Scenery(Scenery),
     Agglomerable(AggloData),
@@ -221,7 +225,17 @@ struct KlodSceneQuery<'w, 's> {
 }
 #[derive(SystemParam)]
 struct KlodSweepQuery<'w, 's> {
-    query: Query<'w, 's, Entity, Or<(With<Scenery>, With<Agglomerable>, With<MusicTrigger>)>>,
+    query: Query<
+        'w,
+        's,
+        Entity,
+        Or<(
+            With<Scenery>,
+            With<Agglomerable>,
+            With<MusicTrigger>,
+            With<FinishLine>,
+        )>,
+    >,
 }
 impl<'w, 's> KlodSweepQuery<'w, 's> {
     pub(crate) fn to_sweep(&self) -> Vec<Entity> {
@@ -229,7 +243,7 @@ impl<'w, 's> KlodSweepQuery<'w, 's> {
     }
 }
 #[cfg_attr(feature = "editor", derive(Serialize))]
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 struct FinishZone {
     collider: SerdeCollider,
     transform: SerdeTransform,
@@ -248,11 +262,10 @@ struct KlodSpawnQuery<'w, 's> {
     cmds: Commands<'w, 's>,
     assets: Res<'w, AssetServer>,
     meshes: ResMut<'w, Assets<Mesh>>,
-    klod_spawn: ResMut<'w, KlodSpawnTransform>,
     klod: Query<'w, 's, Entity, With<Klod>>,
 }
 #[cfg_attr(feature = "editor", derive(Serialize))]
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub(crate) struct KlodScene {
     klod_spawn_transform: SerdeTransform,
     finish_zone: FinishZone,
@@ -299,10 +312,13 @@ impl KlodScene {
         }
         query.apply(world);
     }
-    fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod_spawn, klod }: &mut KlodSpawnQuery) {
-        klod_spawn.0 = self.klod_spawn_transform.into();
+    fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod }: &mut KlodSpawnQuery) {
+        let klod_spawn = self.klod_spawn_transform.into();
 
+        cmds.insert_resource(CurrentScene(self.clone()));
         cmds.insert_resource(GameData::new(self.game_timer_seconds, self.required_score));
+        cmds.insert_resource(KlodSpawnTransform(klod_spawn));
+
         cmds.spawn_bundle((
             Name::new("Finish Zone"),
             FinishLine,
@@ -327,7 +343,11 @@ impl KlodScene {
             Ok(klod) => klod,
             Err(_) => return,
         };
-        cmds.entity(klod).insert(klod_spawn.0);
+        cmds.entity(klod).insert(klod_spawn);
+    }
+    pub(crate) fn from_world(world: &mut World) -> Self {
+        let mut system_state = SystemState::<KlodSceneQuery>::new(world);
+        KlodScene::read(&system_state.get_mut(world))
     }
     fn read(
         KlodSceneQuery {
@@ -360,40 +380,55 @@ impl KlodScene {
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         #[cfg(feature = "editor")]
         {
-            Self::file_load(world, &scene_path).or_else(|_| {
+            Self::load_inner(world, &scene_path).or_else(|_| {
                 migration::migrate(&scene_path)?;
-                Self::file_load(world, scene_path)
+                Self::load_inner(world, scene_path)
             })
         }
         #[cfg(not(feature = "editor"))]
         {
-            Self::file_load(world, scene_path)
+            Self::load_inner(world, scene_path)
         }
     }
-    fn file_load(
-        world: &mut World,
-        scene_path: impl AsRef<Path>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let file = std::fs::File::open(scene_path)?;
+
+    fn delete_current_scene(world: &mut World) {
         let mut system_state = SystemState::<KlodSweepQuery>::new(world);
         let to_sweep = system_state.get(world).to_sweep();
         for entity in to_sweep.into_iter() {
             world.entity_mut(entity).despawn_recursive();
         }
-        let mut system_state = SystemState::<KlodSpawnQuery>::new(world);
+    }
+
+    fn load_inner(
+        world: &mut World,
+        scene_path: impl AsRef<Path>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let file = std::fs::File::open(scene_path)?;
         let scene: KlodScene = ron::de::from_reader(file)?;
+
+        Self::delete_current_scene(world);
+        let mut system_state = SystemState::<KlodSpawnQuery>::new(world);
         let mut query = system_state.get_mut(world);
         scene.spawn(&mut query);
         system_state.apply(world);
         Ok(())
     }
+
+    pub(crate) fn reset(&self, world: &mut World) {
+        Self::delete_current_scene(world);
+
+        let mut system_state = SystemState::<KlodSpawnQuery>::new(world);
+        let mut query = system_state.get_mut(world);
+        self.clone().spawn(&mut query);
+        system_state.apply(world);
+    }
+
     #[cfg(feature = "editor")]
     pub(crate) fn save(
         world: &mut World,
         scene_path: impl AsRef<Path>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let mut system_state = SystemState::<KlodSceneQuery>::new(world);
-        let scene = KlodScene::read(&system_state.get_mut(world));
+        let scene = KlodScene::from_world(world);
         let serialized = ron::ser::to_string_pretty(
             &scene,
             ron::ser::PrettyConfig::new()
@@ -476,6 +511,20 @@ fn fit_pickbox_to_collider(
     }
 }
 
+pub(crate) fn save_scene(world: &mut World) {
+    world.resource_scope(|world, mut current_scene: Mut<CurrentScene>| {
+        current_scene.0 = KlodScene::from_world(world);
+    });
+}
+
+pub(crate) fn reset_scene(world: &mut World) {
+    let current_scene = match world.get_resource::<CurrentScene>() {
+        Some(scene) => scene,
+        None => return,
+    };
+    current_scene.0.clone().reset(world);
+}
+
 /// Returns the base path of the assets directory, which is normally the executable's parent
 /// directory.
 ///
@@ -494,6 +543,9 @@ pub(crate) fn get_base_path() -> PathBuf {
 pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
+        #[cfg(feature = "debug")]
+        app.register_inspectable::<Scenery>();
+
         app.add_system_to_stage(CoreStage::PostUpdate, add_scene_aabb)
             .add_system(fit_pickbox_to_collider);
     }

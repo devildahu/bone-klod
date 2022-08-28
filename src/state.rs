@@ -7,7 +7,7 @@ pub enum GameState {
     Editor,
     /// The game is running
     Playing,
-    /// Restart menu after gameover
     TimeUp,
+    /// Restart menu after gameover
     GameComplete,
 }

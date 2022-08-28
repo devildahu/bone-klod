@@ -10,12 +10,16 @@ use bevy_debug_text_overlay::screen_print;
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
 
+use self::anim::KlodVisualElem;
+#[cfg(not(feature = "editor"))]
+use crate::scene::reset_scene;
 use crate::{
     cam::OrbitCamera, collision_groups as groups, powers::Power, prefabs::AggloBundle,
     state::GameState, system_helper::EasySystemSetCtor,
 };
 
 const BASE_INPUT_IMPULSE: f32 = 1.0;
+const INPUT_WEIGHT_COMP: f32 = 0.5;
 const KLOD_INITIAL_WEIGHT: f32 = 4.2;
 const KLOD_INITIAL_RADIUS: f32 = 1.0;
 pub(crate) const MAX_KLOD_SPEED: f32 = 28.0;
@@ -24,6 +28,7 @@ pub(crate) const MAX_KLOD_SPEED: f32 = 28.0;
 pub(crate) enum BallSystems {
     FreeFallUpdate,
     DestroyKlod,
+    ResetKlod,
 }
 
 #[derive(Component)]
@@ -64,7 +69,7 @@ pub(crate) struct KlodBall;
 #[derive(Component)]
 pub(crate) struct KlodElem {
     klod: Entity,
-    scene: Option<Entity>,
+    pub(crate) scene: Option<Entity>,
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
@@ -100,8 +105,57 @@ fn spawn_klod_elem<'w, 's, 'a>(
         power,
     ))
 }
+fn spawn_ball(cmds: &mut ChildBuilder) {
+    let klod = cmds.parent_entity();
+    let mut ball = spawn_klod_elem(
+        cmds,
+        "Klod ball".to_owned(),
+        KlodElem { klod, scene: None },
+        KLOD_INITIAL_WEIGHT,
+        Collider::ball(KLOD_INITIAL_RADIUS),
+        default(),
+        Friction {
+            coefficient: 0.0,
+            combine_rule: CoefficientCombineRule::Max,
+        },
+        Restitution {
+            coefficient: 0.0,
+            combine_rule: CoefficientCombineRule::Max,
+        },
+        Power::None,
+    );
+    ball.insert(KlodBall);
+}
 
-pub(crate) fn spawn_klod(
+fn reset_klod(
+    mut cmds: Commands,
+    klod_exists: Query<(), With<Klod>>,
+    mut klod_entity: Query<(Entity, &mut Klod, &mut Velocity)>,
+    cam: Query<Entity, With<KlodCamera>>,
+    asset_server: Res<AssetServer>,
+    spawn_point: Res<KlodSpawnTransform>,
+    other_klod_elems: Query<Entity, Or<(With<KlodElem>, With<KlodVisualElem>)>>,
+) -> Option<()> {
+    if klod_exists.is_empty() {
+        spawn_klod(cmds, klod_exists, cam, asset_server, spawn_point)
+    } else {
+        let (klod, mut klod_value, mut klod_velocity) = klod_entity.get_single_mut().ok()?;
+        klod_value.weight = KLOD_INITIAL_WEIGHT;
+        *klod_velocity = default();
+        other_klod_elems.for_each(|entity| {
+            cmds.entity(entity).despawn_recursive();
+        });
+        cmds.entity(klod)
+            .insert(spawn_point.0)
+            .add_children(|cmds| {
+                spawn_ball(cmds);
+                anim::spawn_klod_visuals(cmds, &asset_server);
+            });
+    }
+    Some(())
+}
+
+fn spawn_klod(
     mut cmds: Commands,
     klod_exists: Query<(), With<Klod>>,
     cam: Query<Entity, With<KlodCamera>>,
@@ -127,25 +181,7 @@ pub(crate) fn spawn_klod(
         ))
         .insert_bundle(SpatialBundle::from_transform(spawn_point.0))
         .with_children(|cmds| {
-            let klod = cmds.parent_entity();
-            let mut ball = spawn_klod_elem(
-                cmds,
-                "Klod ball".to_owned(),
-                KlodElem { klod, scene: None },
-                KLOD_INITIAL_WEIGHT,
-                Collider::ball(KLOD_INITIAL_RADIUS),
-                default(),
-                Friction {
-                    coefficient: 0.0,
-                    combine_rule: CoefficientCombineRule::Max,
-                },
-                Restitution {
-                    coefficient: 0.0,
-                    combine_rule: CoefficientCombineRule::Max,
-                },
-                Power::None,
-            );
-            ball.insert(KlodBall);
+            spawn_ball(cmds);
             anim::spawn_klod_visuals(cmds, &asset_server);
         })
         .id();
@@ -209,7 +245,7 @@ fn agglo_to_klod(
             cmds.entity(agglo)
                 .remove_bundle::<AggloBundle>()
                 .remove_bundle::<(Collider, Friction, Restitution)>()
-                .insert(trans);
+                .insert_bundle((trans, KlodVisualElem));
             cmds.entity(klod).add_child(agglo);
             klod_data.weight += agglo_weight;
 
@@ -255,9 +291,10 @@ fn shlurp_agglomerable(
 
 fn ball_input(
     keys: Res<Input<KeyCode>>,
-    mut default_klod_position: ResMut<KlodSpawnTransform>,
     mut klod: Query<(&mut Transform, &mut ExternalImpulse, &mut Velocity, &Klod)>,
     camera: Query<&OrbitCamera>,
+    time: Res<Time>,
+    mut pound_timeout: Local<f64>,
 ) {
     use KeyCode::{A, D, S, W};
 
@@ -271,7 +308,7 @@ fn ball_input(
     let cam_rot = camera.single();
     let vel = velocity.linvel;
     let additional_weight = klod.weight - KLOD_INITIAL_WEIGHT;
-    let force = BASE_INPUT_IMPULSE + additional_weight * 0.1;
+    let force = BASE_INPUT_IMPULSE + additional_weight * INPUT_WEIGHT_COMP;
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
     let force = force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X);
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
@@ -279,12 +316,9 @@ fn ball_input(
     let force = (vel.xz() + force).clamp_length_max(max_more_force) - vel.xz();
     impulse.impulse = Vec3::new(force.x, 0.0, force.y);
 
-    if keys.just_pressed(KeyCode::Space) {
-        *transform = default_klod_position.0;
-        *velocity = Velocity::default();
-    }
-    if keys.just_pressed(KeyCode::R) {
-        default_klod_position.0 = *transform;
+    if keys.just_pressed(KeyCode::Space) && time.seconds_since_startup() > *pound_timeout {
+        *pound_timeout = time.seconds_since_startup() + 3.0;
+        velocity.linvel.y -= 50.0;
     }
 }
 
@@ -338,6 +372,12 @@ fn spawn_camera(
     .insert_bundle((Name::new("Klod Camera"), KlodCamera));
 }
 
+macro_rules! err_sys {
+    ($system:expr) => {
+        $system.chain(|_| {})
+    };
+}
+
 pub(crate) struct Plugin;
 impl BevyPlugin for Plugin {
     fn build(&self, app: &mut App) {
@@ -345,16 +385,23 @@ impl BevyPlugin for Plugin {
         app.register_inspectable::<Klod>()
             .register_inspectable::<Agglomerable>();
 
+        // No idea why, but this system crashes the game when editor feature is enabled
+        #[cfg(not(feature = "editor"))]
+        app.add_system_set(GameState::Playing.on_enter(reset_scene.exclusive_system().at_start()));
+
         app.init_resource::<KlodSpawnTransform>()
             .add_event::<AgglomerateToKlod>()
             .add_event::<anim::DestroyKlodEvent>()
             .add_startup_system(spawn_camera)
             .add_system_set(GameState::Playing.on_exit(lock_camera))
-            .add_system_set(GameState::Playing.on_enter(unlock_camera))
-            .add_system_set(GameState::Playing.on_enter(spawn_klod))
             .add_system_set(
-                SystemSet::on_update(GameState::Playing)
-                    .with_system(ball_input)
+                GameState::Playing
+                    .on_enter(unlock_camera)
+                    .with_system(err_sys!(reset_klod).label(BallSystems::ResetKlod)),
+            )
+            .add_system_set(
+                GameState::Playing
+                    .on_update(ball_input)
                     .with_system(anim::destroy_klod.label(BallSystems::DestroyKlod))
                     .with_system(set_freefall.label(BallSystems::FreeFallUpdate))
                     .with_system(shlurp_agglomerable)

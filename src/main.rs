@@ -28,6 +28,7 @@ use bevy_rapier3d::{
 };
 use scene::KlodScene;
 use state::GameState;
+use system_helper::EasySystemSetCtor;
 
 /// Event to trigger a game over.
 #[derive(Debug)]
@@ -56,7 +57,7 @@ fn main() {
         .insert_resource(LogSettings {
             level: Level::INFO,
             filter:
-                "wgpu_core::device=warn,wgpu_hal=warn,symphonia_core=warn,symphonia_format_ogg=warn"
+                "wgpu_core::device=warn,wgpu_hal=error,symphonia_core=warn,symphonia_format_ogg=warn"
                     .to_owned(),
         })
         // .insert_resource(WindowDescriptor {
@@ -88,7 +89,8 @@ fn main() {
 
     #[cfg(feature = "editor")]
     if env::args().nth(1).as_deref() == Some("--load-greybox") {
-        app.add_startup_system(box_scene::load_box_level);
+        app.add_startup_system(box_scene::load_box_level)
+            .add_system(box_scene::save_box_level.exclusive_system().at_start());
     }
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin { font_size: 24.0, ..default() })

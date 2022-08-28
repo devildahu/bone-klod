@@ -2,8 +2,9 @@ use std::fmt;
 
 use bevy::{
     prelude::{Plugin as BevyPlugin, *},
-    utils::HashSet,
+    utils::HashMap,
 };
+use bevy_debug_text_overlay::screen_print;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
@@ -43,7 +44,7 @@ pub(crate) struct ElementalObstacle {
 }
 
 fn break_elemental_obstacle(
-    kloded: Query<&Power, With<KlodElem>>,
+    kloded: Query<(&Power, Entity, &KlodElem)>,
     obstacles: Query<&ElementalObstacle>,
     mut collisions: EventReader<ContactForceEvent>,
     mut cmds: Commands,
@@ -55,12 +56,30 @@ fn break_elemental_obstacle(
             _ => continue,
         };
         if let Ok(obstacle) = obstacles.get(obstacle_entity) {
-            let kloded: HashSet<_> = kloded.iter().copied().collect();
-            let destroys_obstacle = obstacle
+            let kloded: HashMap<_, _> = kloded
+                .iter()
+                .map(|(power, entity, elem)| (*power, (entity, elem.scene)))
+                .collect();
+            let destroys_obstacle: Vec<_> = obstacle
                 .required_powers
                 .iter()
-                .all(|power| kloded.contains(power));
-            if destroys_obstacle {
+                .filter_map(|power| kloded.get(power))
+                .collect();
+            if !destroys_obstacle.is_empty() {
+                screen_print!(
+                    sec: 4.0,
+                    col: Color::MAROON,
+                    "Destroyed obstacle with powers: {:?}",
+                    obstacle.required_powers
+                );
+
+                for &&(elem, scene) in &destroys_obstacle {
+                    println!("despawn: {elem:?}, {scene:?}");
+                    cmds.entity(elem).despawn_recursive();
+                    if let Some(scene) = scene {
+                        cmds.entity(scene).despawn_recursive();
+                    }
+                }
                 cmds.entity(obstacle_entity).despawn_recursive();
             }
         }

@@ -6,6 +6,8 @@ use bevy::{
     prelude::*,
     ui::FocusPolicy,
 };
+#[cfg(feature = "debug")]
+use bevy_inspector_egui::Inspectable;
 use bevy_rapier3d::prelude::*;
 use serde::Deserialize;
 
@@ -25,7 +27,7 @@ pub(crate) trait Prefab {
 }
 
 #[cfg_attr(feature = "editor", derive(serde::Serialize))]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Copy, Clone)]
 pub(crate) struct SerdeTransform {
     pub(crate) rotation: Quat,
     pub(crate) scale: Vec3,
@@ -261,7 +263,8 @@ impl From<SerdeCollider> for Collider {
 
 /// Static physic objects
 #[cfg_attr(feature = "editor", derive(serde::Serialize))]
-#[derive(Debug, Deserialize, Component)]
+#[cfg_attr(feature = "debug", derive(Inspectable))]
+#[derive(Debug, Deserialize, Component, Clone)]
 pub(crate) struct Scenery {
     pub(crate) weakness: Vec<Power>,
 }
@@ -283,7 +286,7 @@ impl Prefab for Scenery {
 }
 
 #[cfg_attr(feature = "editor", derive(serde::Serialize))]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub(crate) struct AggloData {
     mass: f32,
     power: Power,
@@ -331,7 +334,7 @@ impl Prefab for AggloData {
 }
 
 #[cfg_attr(feature = "editor", derive(serde::Serialize))]
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub(crate) struct MusicTriggerData {
     name: String,
     trigger: MusicTrigger,

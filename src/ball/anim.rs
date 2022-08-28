@@ -3,7 +3,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{animate::Animate, collision_groups as groups};
 
-use super::{KlodBall, KlodElem};
+use super::{Klod, KlodElem};
 
 #[derive(Component)]
 pub(super) struct KlodVisualElem;
@@ -51,18 +51,28 @@ pub(super) fn destroy_klod(
         &Parent,
         &KlodElem,
     )>,
+    mut klod_velocity: Query<&mut Velocity, With<Klod>>,
     mut destroy_events: EventReader<DestroyKlodEvent>,
 ) {
     if destroy_events.iter().next().is_none() {
         return;
     }
+    let mut vel = match klod_velocity.get_single_mut() {
+        Ok(vel) => vel,
+        Err(_) => return,
+    };
+    let old_vel = *vel;
+    *vel = default();
     for (entity, transform, global_transform, parent) in &klod_visuals {
         cmds.entity(parent.get()).remove_children(&[entity]);
         cmds.entity(entity).insert_bundle((
             groups::KLOD,
             Collider::cuboid(1.0, 0.5, 1.0),
             global_transform.compute_transform(),
-            Velocity { linvel: transform.translation * 3.0, ..default() },
+            Velocity {
+                linvel: transform.translation * 3.0 + old_vel.linvel,
+                ..old_vel
+            },
             RigidBody::Dynamic,
         ));
     }

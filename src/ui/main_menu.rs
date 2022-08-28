@@ -310,7 +310,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
             node{
                 position_type: PT::Absolute,
                 position: rect!(10 pct),
-                padding: rect!(5 pct, 20 pct),
+                padding: rect!(10 px),
                 display: Display::None,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::SpaceBetween

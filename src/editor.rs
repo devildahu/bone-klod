@@ -32,8 +32,9 @@ use crate::{
     game_audio::MusicTrigger,
     powers::Power,
     prefabs::{AggloData, Scenery, SerdeCollider},
-    scene::{KlodScene, ObjectType, PhysicsObject},
+    scene::{reset_scene, save_scene, KlodScene, ObjectType, PhysicsObject},
     state::GameState,
+    system_helper::EasySystemSetCtor,
 };
 
 fn toggle_editor_active(
@@ -366,6 +367,8 @@ impl BevyPlugin for Plugin {
             .add_editor_window::<SceneWindow>()
             .set_default_panels::<ControlsWindow, SceneWindow, InspectorWindow>()
             .add_system_to_stage(CoreStage::PostUpdate, ignore_transform_gizmo)
+            .add_system_set(GameState::Editor.on_enter(reset_scene.exclusive_system().at_end()))
+            .add_system_set(GameState::Editor.on_exit(save_scene.exclusive_system().at_end()))
             .add_system(ignore_rapier_wireframes)
             .add_system(err_sys!(toggle_editor_active));
     }

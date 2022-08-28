@@ -29,8 +29,10 @@ impl Score {
     fn hint(&self) -> &'static str {
         if self.time_remaining <= 0.0 {
             "Ran out of time"
-        } else {
+        } else if !self.won() {
             "Not enough mana generated"
+        } else {
+            "Congratulations!"
         }
     }
     fn time_label(&self) -> String {
