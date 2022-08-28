@@ -60,8 +60,6 @@ fn update_sliders(
     mut cmds: Commands,
     mut audio_requests: EventWriter<AudioRequest>,
     mut nav_requests: EventWriter<NavRequest>,
-    focused: Query<Entity, With<Focused>>,
-    elems: Query<&MainMenuElem, Without<MovingSlider>>,
     mut mouse_buttons: ResMut<Input<MouseButton>>,
 ) {
     use MainMenuElem::AudioSlider;
@@ -78,16 +76,34 @@ fn update_sliders(
         if mouse_buttons.just_released(MouseButton::Left) {
             mouse_buttons.clear_just_released(MouseButton::Left);
             nav_requests.send(NavRequest::Unlock);
+            screen_print!("Stop loop effect");
             audio_requests.send(AudioRequest::StopLoopEffect);
             cmds.entity(entity).remove::<MovingSlider>();
         }
     }
-    if let Ok(entity) = focused.get_single() {
-        let is_volume_slider = matches!(elems.get(entity), Ok(AudioSlider(..)));
-        if mouse_buttons.just_pressed(MouseButton::Left) && is_volume_slider {
-            nav_requests.send(NavRequest::Action);
-            audio_requests.send(AudioRequest::LoopEffect);
-            cmds.entity(entity).insert(MovingSlider);
+}
+fn activate_sliders(
+    mut audio_requests: EventWriter<AudioRequest>,
+    mut events: EventReader<NavEvent>,
+    mut nav_requests: EventWriter<NavRequest>,
+    mut cmds: Commands,
+    elems: Query<&MainMenuElem>,
+) {
+    use NavEvent::FocusChanged;
+
+    let is_slider = |entity| matches!(elems.get(entity), Ok(MainMenuElem::AudioSlider(..)));
+    let mut start_moving_slider = |slider| {
+        nav_requests.send(NavRequest::Lock);
+        cmds.entity(slider).insert(MovingSlider);
+        audio_requests.send(AudioRequest::LoopEffect);
+    };
+    for event in events.iter() {
+        screen_print!(sec: 1.0 , "{event:?}");
+        match event {
+            FocusChanged { to: focus, .. } if is_slider(*focus.first()) => {
+                start_moving_slider(*focus.first());
+            }
+            _ => return,
         }
     }
 }
@@ -96,7 +112,6 @@ fn activate_menu(
     mut events: EventReader<NavEvent>,
     mut nav_requests: EventWriter<NavRequest>,
     mut exit: EventWriter<AppExit>,
-    // mut cmds: Commands,
     mut audio_requests: EventWriter<AudioRequest>,
     mut windows: ResMut<Windows>,
     mut game_state: ResMut<State<GameState>>,
@@ -107,11 +122,11 @@ fn activate_menu(
 ) {
     let window_msg = "There is at least one game window open";
     for activated in events.nav_iter().activated_in_query(&elems) {
+        audio_requests.send(AudioRequest::PlayEffect(audio.ui_click(), 0.05));
         match activated {
             MainMenuElem::Exit => exit.send(AppExit),
             MainMenuElem::Start => {
                 screen_print!("Player pressed the start button");
-                audio_requests.send(AudioRequest::PlayEffect(audio.ui_click(), 1.0));
                 game_state.set(GameState::Playing).unwrap();
             }
             MainMenuElem::LockMouse => {
@@ -146,7 +161,7 @@ fn activate_menu(
                 style.display = Display::Flex;
                 nav_requests.send(NavRequest::Lock);
             }
-            MainMenuElem::AudioSlider(_, _) => todo!(),
+            MainMenuElem::AudioSlider(_, _) => {}
         }
     }
 }
@@ -212,7 +227,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                     ],
                     entity[
                         image(&menu_assets.slider_handle);
-                        Focusable::lock(),
+                        focusable,
                         MainMenuElem::AudioSlider(channel, strength),
                         handle_name,
                         style! {
@@ -270,43 +285,50 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
             node{
                 position_type: PT::Absolute,
                 position: rect!(10 pct),
-                padding: rect!(10 pct),
                 display: Display::None,
-                align_items: AlignItems::FlexStart,
                 justify_content: JustifyContent::Center
             }[; UiColor(Color::rgb(0.1, 0.1, 0.1)), Name::new("Rules overlay"), RulesOverlay](
-                node[large_text("Story");],
-                node[text_bundle("The infamous warlock Hieronymous Bonechill", 30.0);],
-                node[text_bundle("has started the ritual of bones! You are his minion", 30.0);],
-                node[text_bundle("and serve him... until the end of the ritual.", 30.0);],
-                node[large_text("Game");],
-                node[text_bundle("Collect as many bones as possible and get to the end!", 30.0);],
-                node[text_bundle("You have one and an half minute until the end of the", 30.0);],
-                node[text_bundle("ritual. You must collect 1000 mana to win the game.", 30.0);],
-                node[text_bundle("Mana is equal to remaining time × bones collected.", 30.0);],
-                node[text_bundle("Heavier bones yield more mana, but make it harder", 30.0);],
-                node[text_bundle("to navigate the level.", 30.0);],
-                node[large_text("Doors");],
-                node[text_bundle("You can collect more than just bones, some items", 30.0);],
-                node[text_bundle("let you open doors to secret rooms.", 30.0);],
+                node {
+                align_items: AlignItems::FlexStart
+                }(
+                    node[large_text("Story");],
+                    node[text_bundle("The infamous warlock Hieronymous Bonechill", 30.0);],
+                    node[text_bundle("has started the ritual of bones! You are his minion", 30.0);],
+                    node[text_bundle("and serve him... until the end of the ritual.", 30.0);],
+                    node[large_text("Game");],
+                    node[text_bundle("Collect as many bones as possible and get to the end!", 30.0);],
+                    node[text_bundle("You have one and an half minute until the end of the", 30.0);],
+                    node[text_bundle("ritual. You must collect 1000 mana to win the game.", 30.0);],
+                    node[text_bundle("Mana is equal to remaining time × bones collected.", 30.0);],
+                    node[text_bundle("Heavier bones yield more mana, but make it harder", 30.0);],
+                    node[text_bundle("to navigate the level.", 30.0);],
+                    node[large_text("Doors");],
+                    node[text_bundle("You can collect more than just bones, some items", 30.0);],
+                    node[text_bundle("let you open doors to secret rooms.", 30.0);],
+                )
             ),
             node{
                 position_type: PT::Absolute,
                 position: rect!(10 pct),
+                padding: rect!(5 pct, 20 pct),
                 display: Display::None,
                 align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center
+                justify_content: JustifyContent::SpaceBetween
             }[; UiColor(Color::rgb(0.1, 0.1, 0.1)), Name::new("Credits overlay"), CreditOverlay](
                 node[
                     image(&menu_assets.team_name);
                     Name::new("Team name"),
-                    style! { size: size!(auto, 30 pct), }
+                    style! { size: size!(auto, 45 pct), }
                 ],
-                node[large_text("music, code: Gibonus");],
-                node[large_text("sfx: Kenney (www.kenney.nl)");],
-                node[large_text("graphics: Xolotl");],
-                node[large_text("Thanks to the bevy community <3 <3 <3");],
-                node[text_bundle("(Click anywhere to exit)", 30.0);]
+                node {
+                align_items: AlignItems::FlexStart
+                }(
+                    node[large_text("music, code: Gibonus");],
+                    node[large_text("sfx: Kenney (www.kenney.nl)");],
+                    node[large_text("graphics: Xolotl");],
+                    node[large_text("Thanks to the bevy community <3 <3 <3");],
+                    node[text_bundle("(Click anywhere to exit)", 30.0);]
+                )
             )
         )
     };
@@ -329,6 +351,11 @@ impl BevyPlugin for Plugin {
                 SystemSet::on_update(self.0)
                     .with_system(
                         update_sliders
+                            .before(NavRequestSystem)
+                            .before(AudioRequestSystem),
+                    )
+                    .with_system(
+                        activate_sliders
                             .before(NavRequestSystem)
                             .before(AudioRequestSystem),
                     )

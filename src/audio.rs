@@ -111,7 +111,7 @@ fn handle_requests(
             AudioRequest::LoopEffect => {
                 effect_channel.play(assets.wood_clink.clone_weak()).looped();
             }
-            AudioRequest::StopLoopEffect => state.stop_loop_effect = false,
+            AudioRequest::StopLoopEffect => state.stop_loop_effect = true,
             AudioRequest::Roll(roll_speed) => {
                 let volume = state.volumes.master * state.volumes.effect * roll_speed;
                 let pitch = 1.0 + *roll_speed * 0.6;
