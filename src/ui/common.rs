@@ -26,15 +26,11 @@ impl MenuCursor {
 
 pub struct UiAssets {
     pub font: Handle<Font>,
-    pub background_image: Handle<Image>,
 }
 impl FromWorld for UiAssets {
     fn from_world(world: &mut World) -> Self {
         let assets = world.get_resource::<AssetServer>().unwrap();
-        Self {
-            font: assets.load("Alice-Regular.ttf"),
-            background_image: assets.load("main_menu_background.png"),
-        }
+        Self { font: assets.load("Alice-Regular.ttf") }
     }
 }
 

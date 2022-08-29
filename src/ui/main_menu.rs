@@ -64,19 +64,37 @@ fn update_sliders(
     mut audio_requests: EventWriter<AudioRequest>,
     mut nav_requests: EventWriter<NavRequest>,
     mut mouse_buttons: ResMut<Input<MouseButton>>,
+    gp_axis: Res<Axis<GamepadAxis>>,
+    gp_buttons: Res<Input<GamepadButton>>,
+    uses_gamepad: Res<UsesGamepad>,
 ) {
     use MainMenuElem::AudioSlider;
     if let Ok((entity, mut style, mut elem)) = styles.get_single_mut() {
         if let (Val::Percent(left), AudioSlider(channel, strength)) =
             (style.position.left, elem.as_mut())
         {
-            let horizontal_delta: f32 = mouse_motion.iter().map(|m| m.delta.x).sum();
-            let new_left = (left / 0.9 + horizontal_delta * 0.40).min(100.0).max(0.0);
+            let gp_axis_kind = |axis_type| GamepadAxis { gamepad: Gamepad { id: 0 }, axis_type };
+            let axis_x = gp_axis_kind(GamepadAxisType::LeftStickX);
+            let gp_delta = gp_axis.get(axis_x).unwrap_or_default();
+            let gp_delta = if gp_delta.abs() > 0.01 && uses_gamepad.yes {
+                gp_delta
+            } else {
+                0.0
+            };
+            let mouse_delta: f32 = mouse_motion.iter().map(|m| m.delta.x).sum();
+            let delta = mouse_delta + gp_delta;
+            let new_left = (left / 0.9 + delta * 0.40).min(100.0).max(0.0);
             *strength = new_left;
             audio_requests.send(AudioRequest::SetVolume(*channel, new_left as f64 / 100.0));
             style.position.left = Val::Percent(new_left * 0.9)
         };
-        if mouse_buttons.just_released(MouseButton::Left) {
+        let gp_button = |button_type| GamepadButton { gamepad: Gamepad { id: 0 }, button_type };
+        let gp_a = gp_button(GamepadButtonType::South);
+        let gp_b = gp_button(GamepadButtonType::East);
+        if mouse_buttons.just_released(MouseButton::Left)
+            || gp_buttons.just_pressed(gp_a)
+            || gp_buttons.just_pressed(gp_b)
+        {
             mouse_buttons.clear_just_released(MouseButton::Left);
             nav_requests.send(NavRequest::Unlock);
             screen_print!("Stop loop effect");
@@ -92,21 +110,15 @@ fn activate_sliders(
     mut cmds: Commands,
     elems: Query<&MainMenuElem>,
 ) {
-    use NavEvent::FocusChanged;
-
     let is_slider = |entity| matches!(elems.get(entity), Ok(MainMenuElem::AudioSlider(..)));
     let mut start_moving_slider = |slider| {
         nav_requests.send(NavRequest::Lock);
         cmds.entity(slider).insert(MovingSlider);
         audio_requests.send(AudioRequest::LoopEffect);
     };
-    for event in events.iter() {
-        screen_print!(sec: 1.0 , "{event:?}");
-        match event {
-            FocusChanged { to: focus, .. } if is_slider(*focus.first()) => {
-                start_moving_slider(*focus.first());
-            }
-            _ => return,
+    for activated in events.nav_iter().activated() {
+        if is_slider(activated) {
+            start_moving_slider(activated);
         }
     }
 }
@@ -288,7 +300,6 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
             justify_content: JustifyContent::FlexStart,
             padding: rect!(0 px, 0 px, 0 px, 10 pct,)
         }[; Name::new("Main menu root node"), MainMenuRoot](
-            // entity[ui_assets.background() ;],
             id(cursor),
             entity[
                 image(&menu_assets.title_image);

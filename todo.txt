@@ -1,4 +1,0 @@
-* Make intro/outro animation
-* Place more bones
-* Animate death of KlodElem
-* allow restarts

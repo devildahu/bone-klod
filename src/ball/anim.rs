@@ -67,7 +67,7 @@ pub(super) fn destroy_klod(
     mut klod_velocity: Query<&mut Velocity, With<Klod>>,
     mut destroy_events: EventReader<DestroyKlodEvent>,
 ) {
-    if destroy_events.iter().next().is_none() {
+    if destroy_events.iter().count() == 0 {
         return;
     }
     let mut vel = match klod_velocity.get_single_mut() {
@@ -93,7 +93,7 @@ pub(super) fn destroy_klod(
         cmds.entity(entity).despawn();
         if let Some(entity) = elem.scene {
             cmds.entity(parent.get()).remove_children(&[entity]);
-            cmds.entity(entity).insert_bundle((
+            cmds.get_or_spawn(entity).insert_bundle((
                 groups::KLOD,
                 global_transform.compute_transform(),
                 Velocity { linvel: transform.translation * 10.0, ..default() },

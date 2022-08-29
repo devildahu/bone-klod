@@ -71,6 +71,8 @@ for target in x86_64-pc-windows-gnu x86_64-unknown-linux-gnu ; do
 	done
 
 	cp -r assets "$OutDir/assets"
+	cp README.md "$OutDir/README.md"
+	cp -r licenses "$OutDir/licenses"
 
 	#
 	# Pack files
