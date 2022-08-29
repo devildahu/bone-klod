@@ -7,6 +7,8 @@ use super::{Klod, KlodElem};
 
 #[derive(Component)]
 pub(super) struct KlodVisualElem;
+#[derive(Component)]
+pub(super) struct KlodBallVisual;
 
 pub(crate) struct DestroyKlodEvent;
 
@@ -37,12 +39,23 @@ pub(super) fn spawn_klod_visuals(cmds: &mut ChildBuilder, assets: &AssetServer) 
             KlodVisualElem,
         ));
     }
+    cmds.spawn_bundle(SceneBundle {
+        scene: assets.load("ball.glb#Scene0"),
+        transform: Transform::from_scale(Vec3::splat(0.01)),
+        ..default()
+    })
+    .insert_bundle((
+        Name::new("Klod ball scene"),
+        Animate::ResizeTo { target: Vec3::ONE, speed: 1.0 },
+        KlodBallVisual,
+    ));
 }
 
 // TODO: deparent the camera as well
 pub(super) fn destroy_klod(
     mut cmds: Commands,
     klod_visuals: Query<(Entity, &Transform, &GlobalTransform, &Parent), With<KlodVisualElem>>,
+    klod_ball_visual: Query<Entity, With<KlodBallVisual>>,
     klod_elems: Query<(
         Entity,
         &Collider,
@@ -88,5 +101,8 @@ pub(super) fn destroy_klod(
                 collider.clone(),
             ));
         }
+    }
+    for entity in &klod_ball_visual {
+        cmds.entity(entity).despawn_recursive();
     }
 }

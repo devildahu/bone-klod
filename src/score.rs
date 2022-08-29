@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::{Plugin as BevyPlugin, *};
 use bevy_debug_text_overlay::screen_print;
 use bevy_rapier3d::prelude::RapierContext;
@@ -78,9 +80,23 @@ fn countdown(
     mut timer: ResMut<GameData>,
     mut destroy: EventWriter<DestroyKlodEvent>,
     mut state: ResMut<State<GameState>>,
+    mut held_down: Local<f32>,
+    gp_buttons: Res<Input<GamepadButton>>,
+    keys: Res<Input<KeyCode>>,
 ) {
     timer.main_timer.tick(time.delta());
     screen_print!("Time remaining: {:.0}", timer.remaining());
+    let gp_button = |button_type| GamepadButton { gamepad: Gamepad { id: 0 }, button_type };
+    let gp_start = gp_button(GamepadButtonType::Start);
+    let reset = keys.pressed(KeyCode::R) || gp_buttons.pressed(gp_start);
+    if reset {
+        *held_down += time.delta_seconds();
+    } else {
+        *held_down = 0.0;
+    }
+    if *held_down >= 1.0 {
+        timer.main_timer.set_elapsed(Duration::from_secs(10_000));
+    }
     if timer.main_timer.finished() {
         destroy.send(DestroyKlodEvent);
         state.set(GameState::TimeUp).unwrap();
@@ -218,10 +234,10 @@ impl BevyPlugin for Plugin {
         app.add_system_set(GameState::Playing.on_enter(init_timer))
             .add_system_set(
                 SystemSet::on_update(GameState::Playing)
-                    .with_system(countdown.before(BallSystems::DestroyKlod))
+                    .with_system(countdown.before(BallSystems::DestroyKlod).before(times_up))
                     .with_system(handle_finish),
             )
-            .add_system_set(GameState::TimeUp.on_update(times_up))
+            .add_system_set(GameState::TimeUp.on_update(times_up.before(tada)))
             .add_system_set(GameState::GameComplete.on_enter(setup_scoreboard))
             .add_system_set(GameState::GameComplete.on_enter(tada.before(AudioRequestSystem)))
             .add_system_set(GameState::GameComplete.on_update(activate_scoreboard))

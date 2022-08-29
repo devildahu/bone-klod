@@ -5,13 +5,12 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::{Plugin as BevyPlugin, *};
-use bevy_debug_text_overlay::screen_print;
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_kira_audio::prelude::*;
 use enum_map::{enum_map, Enum, EnumMap};
 use fastrand::usize as rand_usize;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 pub(crate) type Sfx = Handle<AudioSource>;
 
@@ -163,7 +162,7 @@ fn play_music(
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone, Default, Copy)]
 pub(crate) enum Pitch {
     High,
@@ -172,7 +171,7 @@ pub(crate) enum Pitch {
     Low,
 }
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone, Default, Copy)]
 pub(crate) enum ImpactSound {
     Explosion,
@@ -349,7 +348,7 @@ impl FromWorld for AudioAssets {
 }
 
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone, Default, Copy, PartialEq, Eq, Enum)]
 pub(crate) enum MusicTrack {
     #[default]
@@ -359,7 +358,7 @@ pub(crate) enum MusicTrack {
     OrchestralFinale,
 }
 #[cfg_attr(feature = "debug", derive(Inspectable))]
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, Enum)]
 pub(crate) enum IntroTrack {
     #[default]

@@ -27,7 +27,7 @@ pub(crate) fn load_box_level(
         "graybox".to_owned(),
         Some("import/hitboxes.glb#Scene0".to_owned()),
         default(),
-        SerdeCollider::Ball { radius: 1.0 },
+        SerdeCollider::Ball { radius: 0.01 },
         0.8,
         0.1,
         vec![],

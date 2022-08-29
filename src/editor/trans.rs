@@ -1,7 +1,8 @@
 use bevy::math::EulerRot::XYZ;
 use bevy::prelude::{Plugin as BevyPlugin, *};
 use bevy_editor_pls::{Editor, EditorState};
-use bevy_editor_pls_default_windows::hierarchy::HierarchyWindow;
+use bevy_editor_pls_default_windows::cameras::camera_3d_panorbit::PanOrbitCamera;
+use bevy_editor_pls_default_windows::{cameras::ActiveEditorCamera, hierarchy::HierarchyWindow};
 use bevy_inspector_egui::Inspectable;
 use bevy_mod_picking::{PickingCamera, Primitive3d};
 
@@ -50,6 +51,7 @@ struct EditMod {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 enum EditModEvent {
+    MoveToCamera,
     Cancel,
     Apply,
     Start,
@@ -70,7 +72,7 @@ fn handle_trans_mod(
     mut changes: EventWriter<EditModChange>,
 ) {
     use self::Component::UniformScale;
-    use KeyCode::{Escape, LControl, LShift, RShift, G, R, S, X, Y, Z};
+    use KeyCode::{Escape, LControl, LShift, RShift, G, R, S, T, X, Y, Z};
 
     edit.snap_to_grid = input.pressed(LControl);
 
@@ -87,6 +89,9 @@ fn handle_trans_mod(
     }
     let was_active = edit.component != Component::None;
 
+    if input.just_pressed(T) && was_active {
+        events.send(EditModEvent::MoveToCamera);
+    }
     if input.just_pressed(Escape) && was_active {
         edit.component = Component::None;
         events.send(EditModEvent::Cancel);
@@ -137,6 +142,7 @@ fn handle_trans_mod(
 fn manage_editing_component(
     editor: Res<Editor>,
     editor_state: Res<EditorState>,
+    cam: Query<&PanOrbitCamera, With<ActiveEditorCamera>>,
     mut events: EventReader<EditModEvent>,
     mut cmds: Commands,
     mut editing: Query<(Entity, &mut Transform, &Editing)>,
@@ -177,6 +183,15 @@ fn manage_editing_component(
                         Err(_) => continue,
                     };
                     cmds.entity(entity).insert(Editing { original });
+                }
+            }
+            EditModEvent::MoveToCamera => {
+                for (_, mut transform, _) in &mut editing {
+                    let camera = match cam.get_single() {
+                        Ok(v) => v,
+                        Err(_) => continue,
+                    };
+                    transform.translation = camera.focus;
                 }
             }
         }

@@ -14,6 +14,7 @@ use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 use bevy_rapier3d::prelude::*;
 
 use crate::collision_groups as groups;
+use crate::UsesGamepad;
 
 const CAM_SPEED: f32 = 0.01;
 const CAM_DIST: f32 = 20.0;
@@ -92,6 +93,8 @@ fn camera_movement(
     mut events: EventReader<MouseMotion>,
     gp_axis: Res<Axis<GamepadAxis>>,
     mut query: Query<&mut OrbitCamera, With<Camera>>,
+    uses_gamepad: Res<UsesGamepad>,
+    time: Res<Time>,
 ) {
     let mut camera = match query.get_single_mut() {
         Ok(cam) => cam,
@@ -106,10 +109,10 @@ fn camera_movement(
     let gp_y_delta = gp_axis.get(axis_y).map_or(default(), |y| -Vec2::Y * y);
     let gp_x_delta = gp_axis.get(axis_x).map_or(default(), |x| Vec2::X * x);
     let gp_delta = gp_x_delta + gp_y_delta;
-    let delta = if gp_delta.length_squared() < 0.01 {
-        events.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta)
+    let delta = if gp_delta.length_squared() > 0.01 && uses_gamepad.yes {
+        gp_delta * 2.1 * time.delta_seconds() * 120.0
     } else {
-        gp_delta * 2.1
+        events.iter().fold(Vec2::ZERO, |acc, m| acc + m.delta)
     };
     if delta != Vec2::ZERO {
         let xy = delta * CAM_SPEED;

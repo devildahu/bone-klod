@@ -15,7 +15,7 @@ use self::anim::KlodVisualElem;
 use crate::scene::reset_scene;
 use crate::{
     cam::OrbitCamera, collision_groups as groups, powers::Power, prefabs::AggloBundle,
-    state::GameState, system_helper::EasySystemSetCtor,
+    state::GameState, system_helper::EasySystemSetCtor, UsesGamepad,
 };
 
 const BASE_INPUT_IMPULSE: f32 = 1.0;
@@ -297,8 +297,9 @@ fn ball_input(
     camera: Query<&OrbitCamera>,
     time: Res<Time>,
     mut pound_timeout: Local<f64>,
+    uses_gamepad: Res<UsesGamepad>,
 ) {
-    use KeyCode::{A, D, S, W};
+    use KeyCode::{Down, Left, Right, Up, A, D, S, W};
 
     let (mut impulse, mut velocity, klod) = match klod.get_single_mut() {
         Ok(impulse) => impulse,
@@ -319,10 +320,13 @@ fn ball_input(
     let additional_weight = klod.weight - KLOD_INITIAL_WEIGHT;
     let force = BASE_INPUT_IMPULSE + additional_weight * INPUT_WEIGHT_COMP;
     let force = |key, dir| if keys.pressed(key) { dir * force } else { Vec2::ZERO };
-    let force = if gp_force.length_squared() < 0.01 {
-        force(W, Vec2::Y) + force(S, -Vec2::Y) + force(A, Vec2::X) + force(D, -Vec2::X)
-    } else {
+    let force = if gp_force.length_squared() > 0.01 && uses_gamepad.yes {
         gp_force * 1.2
+    } else {
+        (force(W, Vec2::Y) + force(Up, Vec2::Y))
+            + (force(S, -Vec2::Y) + force(Down, -Vec2::Y))
+            + (force(A, Vec2::X) + force(Left, Vec2::X))
+            + (force(D, -Vec2::X) + force(Right, -Vec2::X))
     };
     let force = Vec2::from_angle(-cam_rot.horizontal_rotation()).rotate(force);
     let max_more_force = MAX_KLOD_SPEED - vel.y;
@@ -405,6 +409,7 @@ impl BevyPlugin for Plugin {
         app.add_system_set(GameState::Playing.on_enter(reset_scene.exclusive_system().at_start()));
 
         app.init_resource::<KlodSpawnTransform>()
+            .init_resource::<UsesGamepad>()
             .add_event::<AgglomerateToKlod>()
             .add_event::<anim::DestroyKlodEvent>()
             .add_startup_system(spawn_camera)

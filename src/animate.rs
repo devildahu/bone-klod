@@ -8,12 +8,19 @@ use bevy_inspector_egui::{Inspectable, RegisterInspectable};
 #[derive(Component, Debug, Clone, Copy, Default)]
 pub(crate) enum Animate {
     /// Moves the thing on the XY plane toward `target` at `speed` unit per second.
-    MoveToward { target: Vec3, speed: f32 },
+    MoveToward {
+        target: Vec3,
+        speed: f32,
+    },
     /// Shake the camera along `direction` until `until` with a forward/backward period of `period`.
     Shake {
         until: f64,
         direction: Vec3,
         period: f64,
+    },
+    ResizeTo {
+        target: Vec3,
+        speed: f32,
     },
     #[default]
     None,
@@ -36,6 +43,11 @@ fn animate_system(mut animated: Query<(&Animate, &mut Transform)>, time: Res<Tim
                     let traversed = distance_traversed * diff.normalize_or_zero();
                     let new_position = current + traversed;
                     transform.translation = new_position;
+                }
+            }
+            &Animate::ResizeTo { target, speed } => {
+                if !target.abs_diff_eq(transform.scale, 0.01) {
+                    transform.scale = transform.scale.lerp(target, speed * delta);
                 }
             }
             &Animate::Shake { until, direction, period } if until > current_time => {

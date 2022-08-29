@@ -11,6 +11,7 @@ use crate::{
     cleanup_marked,
     state::GameState,
 };
+use crate::{LightSwitch, UsesGamepad};
 
 #[derive(Component)]
 struct MovingSlider;
@@ -32,8 +33,10 @@ enum MainMenuElem {
     Rules,
     LockMouse,
     ToggleFullScreen,
+    ToggleGamepad,
     Set16_9,
     AudioSlider(SoundChannel, f32),
+    ToggleLights,
 }
 
 pub struct MenuAssets {
@@ -108,6 +111,24 @@ fn activate_sliders(
     }
 }
 
+fn update_controller_text(
+    uses_gamepad: Res<UsesGamepad>,
+    mut gamepad_text: Query<(&mut Text, &MainMenuElem)>,
+) {
+    if uses_gamepad.is_changed() {
+        for (mut text, elem) in &mut gamepad_text {
+            if matches!(elem, MainMenuElem::ToggleGamepad) {
+                let new_text = if uses_gamepad.yes {
+                    "Disable Controller input"
+                } else {
+                    "Enable Controller input"
+                };
+                text.sections[0].value = new_text.to_owned();
+            }
+        }
+    }
+}
+
 fn activate_menu(
     mut events: EventReader<NavEvent>,
     mut nav_requests: EventWriter<NavRequest>,
@@ -117,6 +138,10 @@ fn activate_menu(
     mut game_state: ResMut<State<GameState>>,
     mut credit_overlay: Query<&mut Style, With<CreditOverlay>>,
     mut rules_overlay: Query<&mut Style, (Without<CreditOverlay>, With<RulesOverlay>)>,
+    mut uses_gamepad: ResMut<UsesGamepad>,
+    mut lights: Query<&mut Visibility, With<PointLight>>,
+    mut light_switch: ResMut<LightSwitch>,
+    mut ambient_light: ResMut<AmbientLight>,
     audio: Res<AudioAssets>,
     elems: Query<&MainMenuElem>,
 ) {
@@ -162,6 +187,15 @@ fn activate_menu(
                 nav_requests.send(NavRequest::Lock);
             }
             MainMenuElem::AudioSlider(_, _) => {}
+            MainMenuElem::ToggleGamepad => uses_gamepad.yes = !uses_gamepad.yes,
+            MainMenuElem::ToggleLights => {
+                for mut vis in &mut lights {
+                    vis.is_visible = !vis.is_visible;
+                }
+                light_switch.on = !light_switch.on;
+                let ambient_brightness = if light_switch.on { 0.8 } else { 1.0 };
+                ambient_light.brightness = ambient_brightness;
+            }
         }
     }
 }
@@ -251,14 +285,15 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
         node{
             min_size: size!(100 pct, 100 pct),
             flex_direction: FD::ColumnReverse,
-            justify_content: JustifyContent::Center
+            justify_content: JustifyContent::FlexStart,
+            padding: rect!(0 px, 0 px, 0 px, 10 pct,)
         }[; Name::new("Main menu root node"), MainMenuRoot](
             // entity[ui_assets.background() ;],
             id(cursor),
             entity[
                 image(&menu_assets.title_image);
                 Name::new("Title card"),
-                style! { size: size!(60 pct, auto), }
+                style! { size: size!(auto, 40 pct), }
             ],
             node{ flex_direction: FD::Row }[; Name::new("Menu columns")](
                 node[; Name::new("Menu node")](
@@ -280,6 +315,8 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                         node[large_text("Fit window to 16:9"); focusable, Set16_9],
                     },
                     node[large_text("Toggle Full screen"); focusable, ToggleFullScreen],
+                    node[text_bundle("Disable Controller input", 34.0); focusable, ToggleGamepad],
+                    node[text_bundle("Toggle lights (performance)", 34.0); focusable, ToggleLights],
                 )
             ),
             node{
@@ -291,23 +328,27 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                 node {
                 align_items: AlignItems::FlexStart
                 }(
-                    node[large_text("Story");],
-                    node[text_bundle("The infamous warlock Hieronymous Bonechill", 30.0);],
-                    node[text_bundle("has started the ritual of bones! You are his minion", 30.0);],
-                    node[text_bundle("and serve him... until the end of the ritual.", 30.0);],
-                    node[large_text("Game");],
-                    node[text_bundle("Collect as many bones as possible and get to the end!", 30.0);],
-                    node[text_bundle("You have one and an half minute until the end of the", 30.0);],
-                    node[text_bundle("ritual. You must collect 1000 mana to win the game.", 30.0);],
-                    node[text_bundle("Mana is equal to remaining time × bones collected.", 30.0);],
-                    node[text_bundle("Heavier bones yield more mana, but make it harder", 30.0);],
-                    node[text_bundle("to navigate the level.", 30.0);],
-                    node[large_text("Doors");],
-                    node[text_bundle("You can collect more than just bones, some items", 30.0);],
-                    node[text_bundle("let you open doors to secret rooms.", 30.0);],
-                    node[large_text("Ground pound");],
-                    node[text_bundle("Press SPACE or gampead A to execute a ground pound,", 30.0);],
-                    node[text_bundle("it has a 3 seconds cooldown.", 30.0);],
+                    node[text_bundle("Story", 30.0);],
+                    node[text_bundle("The infamous warlock Hieronymous Bonechill", 25.0);],
+                    node[text_bundle("has started the ritual of bones! You are his minion", 25.0);],
+                    node[text_bundle("and serve him... until the end of the ritual.", 25.0);],
+                    node[text_bundle("Game", 30.0);],
+                    node[text_bundle("Collect as many bones as possible and get to the end!", 25.0);],
+                    node[text_bundle("You have two minutes until the end of the ritual.", 25.0);],
+                    node[text_bundle("You must collect 1000 mana to win the game. Mana is equal", 25.0);],
+                    node[text_bundle("to remaining time × bones collected. Heaver bones yield more", 25.0);],
+                    node[text_bundle("mana, but make it harder to navigate the level.", 25.0);],
+                    node[text_bundle("Doors", 30.0);],
+                    node[text_bundle("You can collect more than just bones, some items", 25.0);],
+                    node[text_bundle("let you open doors to secret rooms.", 25.0);],
+                    node[text_bundle("Ground pound", 30.0);],
+                    node[text_bundle("Press SPACE or gampead A to execute a ground pound,", 25.0);],
+                    node[text_bundle("it has a 3 seconds cooldown.", 25.0);],
+                    node[text_bundle("Reset", 30.0);],
+                    node[text_bundle("If you get stuck or fall off the map, hold down R for 1 second", 25.0);],
+                    node[text_bundle("to insta-lose. Use start on controller.", 25.0);],
+                    node[text_bundle("Controls", 30.0);],
+                    node[text_bundle("WASD/arrow keys/gamepad analog sticks", 25.0);],
                 )
             ),
             node{
@@ -329,7 +370,7 @@ fn setup_main_menu(mut cmds: Commands, menu_assets: Res<MenuAssets>, ui_assets: 
                     node[large_text("music, code: Gibonus");],
                     node[large_text("sfx: Kenney (www.kenney.nl)");],
                     node[large_text("graphics: Xolotl");],
-                    node[large_text("Thanks to the bevy community <3 <3 <3");],
+                    node[large_text("Thanks to the bevy community");],
                     node[text_bundle("(Click anywhere to exit)", 30.0);]
                 )
             )
@@ -362,6 +403,7 @@ impl BevyPlugin for Plugin {
                             .before(NavRequestSystem)
                             .before(AudioRequestSystem),
                     )
+                    .with_system(update_controller_text.after(activate_menu))
                     .with_system(leave_overlay.before(NavRequestSystem))
                     .with_system(activate_menu.after(NavRequestSystem)),
             );

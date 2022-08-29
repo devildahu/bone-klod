@@ -74,10 +74,9 @@ fn break_elemental_obstacle(
                 );
 
                 for &&(elem, scene) in &destroys_obstacle {
-                    println!("despawn: {elem:?}, {scene:?}");
                     cmds.entity(elem).despawn_recursive();
                     if let Some(scene) = scene {
-                        cmds.entity(scene).despawn_recursive();
+                        cmds.get_or_spawn(scene).despawn_recursive();
                     }
                 }
                 cmds.entity(obstacle_entity).despawn_recursive();

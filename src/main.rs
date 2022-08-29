@@ -15,6 +15,7 @@ mod state;
 mod system_helper;
 mod ui;
 
+#[cfg(feature = "editor")]
 use std::env;
 
 use bevy::{
@@ -22,13 +23,9 @@ use bevy::{
     prelude::*,
 };
 use bevy_debug_text_overlay::screen_print;
-use bevy_rapier3d::{
-    prelude::{NoUserData, RapierPhysicsPlugin},
-    render::RapierDebugRenderPlugin,
-};
+use bevy_rapier3d::prelude::{NoUserData, RapierPhysicsPlugin};
 use scene::KlodScene;
 use state::GameState;
-use system_helper::EasySystemSetCtor;
 
 /// Event to trigger a game over.
 #[derive(Debug)]
@@ -75,7 +72,7 @@ fn main() {
     app.add_plugin(bevy_inspector_egui::WorldInspectorPlugin::new());
 
     #[cfg(feature = "debug")]
-    app.add_plugin(RapierDebugRenderPlugin::default())
+    app.add_plugin(bevy_rapier3d::render::RapierDebugRenderPlugin::default())
         .add_plugin(bevy_inspector_egui_rapier::InspectableRapierPlugin)
         .add_plugin(bevy::pbr::wireframe::WireframePlugin)
         .insert_resource(bevy::render::settings::WgpuSettings {
@@ -93,9 +90,9 @@ fn main() {
             .add_system(box_scene::save_box_level.exclusive_system().at_start());
     }
     app.insert_resource(ClearColor(Color::rgb(0.293, 0.3828, 0.4023)))
+        .init_resource::<LightSwitch>()
         .add_plugin(bevy_debug_text_overlay::OverlayPlugin { font_size: 24.0, ..default() })
         .add_plugin(scene::Plugin)
-        .add_plugin(bevy_mod_fbx::FbxPlugin)
         .add_plugin(animate::Plugin)
         .add_plugin(powers::Plugin)
         .add_plugin(score::Plugin)
@@ -123,9 +120,33 @@ pub fn cleanup_marked<T: Component>(mut cmds: Commands, query: Query<Entity, Wit
 fn setup(world: &mut World) {
     let mut ambiant_light = world.resource_mut::<AmbientLight>();
     ambiant_light.color = Color::WHITE;
-    ambiant_light.brightness = 1.0;
-    let root = scene::get_base_path();
-    KlodScene::load(world, root.join("default.klodlvl"));
+    ambiant_light.brightness = 0.8;
+    #[cfg(not(target_family = "wasm"))]
+    {
+        let root = scene::get_base_path();
+        KlodScene::load(world, root.join("default.klodlvl"));
+    }
+    #[cfg(target_family = "wasm")]
+    {
+        KlodScene::load_data(world, include_bytes!("../assets/default.klodlvl"));
+    }
+}
+
+pub(crate) struct UsesGamepad {
+    pub(crate) yes: bool,
+}
+pub(crate) struct LightSwitch {
+    pub(crate) on: bool,
+}
+impl Default for UsesGamepad {
+    fn default() -> Self {
+        Self { yes: true }
+    }
+}
+impl Default for LightSwitch {
+    fn default() -> Self {
+        Self { on: true }
+    }
 }
 
 pub(crate) mod collision_groups {

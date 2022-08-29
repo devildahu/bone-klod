@@ -15,6 +15,15 @@ if [ ! -e .git ]; then
 	exit 1
 fi
 
+if [ "$1" = "--debug" ]; then
+	BuildDir="debug"
+	ReleaseFlag=""
+else
+	BuildDir="release"
+	ReleaseFlag="--release"
+fi
+
+
 #
 # Extract project name from Cargo.toml
 #
@@ -31,10 +40,10 @@ if [ ! -e target ] ; then
 fi
 
 cargo build \
-	--release --no-default-features \
-	--target wasm32-unknown-unknown \
+	$ReleaseFlag --no-default-features \
+	--target wasm32-unknown-unknown
 
-WasmFile="$(cargo metadata --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')/wasm32-unknown-unknown/release/$ProjName.wasm"
+WasmFile="$(cargo metadata --format-version 1 | sed -n 's/.*"target_directory":"\([^"]*\)".*/\1/p')/wasm32-unknown-unknown/$BuildDir/$ProjName.wasm"
 
 if [ ! -e "$WasmFile" ]; then
 	echo "Script is borken, it expects file to exist: $WasmFile"
@@ -56,12 +65,29 @@ $BINDGEN_EXEC_PATH \
 	--target web \
 	"$WasmFile"
 
+if [ -e $(which wasm-opt) ] ; then
+	BindgenOutput="$OutDir/${ProjName}_bg.wasm"
+	echo "Applying wasm-opt optimizations"
+	echo "before: $(wc -c "$BindgenOutput")"
+	wasm-opt -O3 \
+        --output "$BindgenOutput.post-processed" "$BindgenOutput"
+	echo "after : $(wc -c "$BindgenOutput.post-processed")"
+	mv "$BindgenOutput.post-processed" "$BindgenOutput"
+else
+	echo "Continuing without wasm-opt, it is highly recommended that you"
+	echo "install it, it has been known to divide by two wasm files size"
+fi
+
 #
 # Copy files
 #
 
 cp scripts/wasm_build.html "$OutDir/index.html"
 cp -r assets "$OutDir/assets"
+
+#
+# bindgen WASM-opt
+#
 
 #
 # Rename JS

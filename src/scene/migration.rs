@@ -24,6 +24,7 @@ impl From<KlodSceneV1> for super::KlodScene {
             },
             game_timer_seconds: 1.5 * 60.0,
             required_score: 1000.0,
+            lights: Vec::new(),
         }
     }
 }
@@ -51,6 +52,37 @@ impl From<KlodSceneV2> for super::KlodScene {
             objects,
             music_triggers,
             required_score: 1000.0,
+            lights: Vec::new(),
+        }
+    }
+}
+#[derive(Deserialize, Debug, Clone)]
+pub(crate) struct KlodSceneV3 {
+    klod_spawn_transform: super::SerdeTransform,
+    finish_zone: super::FinishZone,
+    game_timer_seconds: f32,
+    objects: Vec<super::PhysicsObject>,
+    music_triggers: Vec<super::MusicTriggerData>,
+    required_score: f32,
+}
+impl From<KlodSceneV3> for super::KlodScene {
+    fn from(v3: KlodSceneV3) -> Self {
+        let KlodSceneV3 {
+            klod_spawn_transform,
+            finish_zone,
+            game_timer_seconds,
+            objects,
+            music_triggers,
+            required_score,
+        } = v3;
+        super::KlodScene {
+            klod_spawn_transform,
+            finish_zone,
+            game_timer_seconds,
+            objects,
+            music_triggers,
+            required_score,
+            lights: Vec::new(),
         }
     }
 }

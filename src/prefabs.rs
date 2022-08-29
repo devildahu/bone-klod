@@ -1,10 +1,11 @@
 use std::ops::{Div, Mul};
 
+#[cfg(feature = "editor")]
+use bevy::ui::FocusPolicy;
 use bevy::{
     ecs::query::{QueryItem, WorldQuery},
     ecs::system::EntityCommands,
     prelude::*,
-    ui::FocusPolicy,
 };
 #[cfg(feature = "debug")]
 use bevy_inspector_egui::Inspectable;

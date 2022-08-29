@@ -6,6 +6,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+#[cfg(feature = "editor")]
+use bevy::ui::FocusPolicy;
 use bevy::{
     asset::AssetPath,
     ecs::{
@@ -16,7 +18,6 @@ use bevy::{
     prelude::{Plugin as BevyPlugin, *},
     render::primitives::{Aabb, Sphere},
     scene::{InstanceId, SceneInstance},
-    ui::FocusPolicy,
     utils::HashMap,
 };
 #[cfg(feature = "editor")]
@@ -26,7 +27,7 @@ use bevy_inspector_egui::RegisterInspectable;
 #[cfg(feature = "editor")]
 use bevy_mod_picking::{PickableMesh, Selection};
 use bevy_rapier3d::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::{
     audio::ImpactSound,
@@ -36,11 +37,12 @@ use crate::{
     powers::{ElementalObstacle, Power},
     prefabs::{AggloData, MusicTriggerData, Prefab, Scenery, SerdeCollider, SerdeTransform},
     score::{FinishLine, GameData},
+    LightSwitch,
 };
 
 pub(crate) struct CurrentScene(pub(crate) KlodScene);
 
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone)]
 pub(crate) struct PhysicsObject {
     name: String,
@@ -195,7 +197,7 @@ impl PhysicsObject {
     }
 }
 
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Debug, Deserialize, Clone)]
 pub(crate) enum ObjectType {
     Scenery(Scenery),
@@ -222,6 +224,7 @@ struct KlodSceneQuery<'w, 's> {
     music: Query<'w, 's, <MusicTriggerData as Prefab>::Query>,
     klod_spawn: Res<'w, KlodSpawnTransform>,
     finish_zone: Query<'w, 's, (&'static Collider, &'static Transform), With<FinishLine>>,
+    lights: Query<'w, 's, (&'static PointLight, &'static Transform)>,
 }
 #[derive(SystemParam)]
 struct KlodSweepQuery<'w, 's> {
@@ -230,6 +233,7 @@ struct KlodSweepQuery<'w, 's> {
         's,
         Entity,
         Or<(
+            With<PointLight>,
             With<Scenery>,
             With<Agglomerable>,
             With<MusicTrigger>,
@@ -242,7 +246,7 @@ impl<'w, 's> KlodSweepQuery<'w, 's> {
         self.query.iter().collect()
     }
 }
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone)]
 struct FinishZone {
     collider: SerdeCollider,
@@ -257,14 +261,52 @@ impl<'a> From<(&'a Collider, &'a Transform)> for FinishZone {
     }
 }
 
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
+#[derive(Deserialize, Debug, Clone)]
+struct SerdeLight {
+    intensity: f32,
+    color: Color,
+    position: SerdeTransform,
+    radius: f32,
+}
+impl<'a> From<(&'a PointLight, &'a Transform)> for SerdeLight {
+    fn from((light, transform): (&'a PointLight, &'a Transform)) -> Self {
+        SerdeLight {
+            intensity: light.intensity,
+            color: light.color,
+            position: (*transform).into(),
+            radius: light.radius,
+        }
+    }
+}
+impl SerdeLight {
+    fn spawn(&self, cmds: &mut Commands, is_visible: bool) {
+        let range = if self.intensity == 55555.0 { 30.0 } else { 20.0 };
+        cmds.spawn_bundle(PointLightBundle {
+            transform: self.position.into(),
+            point_light: PointLight {
+                color: self.color,
+                intensity: self.intensity,
+                radius: self.radius,
+                shadows_enabled: false,
+                range,
+                ..default()
+            },
+            visibility: Visibility { is_visible },
+            ..default()
+        });
+    }
+}
+
 #[derive(SystemParam)]
 struct KlodSpawnQuery<'w, 's> {
     cmds: Commands<'w, 's>,
     assets: Res<'w, AssetServer>,
     meshes: ResMut<'w, Assets<Mesh>>,
     klod: Query<'w, 's, Entity, With<Klod>>,
+    light_switch: Res<'w, LightSwitch>,
 }
-#[cfg_attr(feature = "editor", derive(Serialize))]
+#[cfg_attr(feature = "editor", derive(serde::Serialize))]
 #[derive(Deserialize, Debug, Clone)]
 pub(crate) struct KlodScene {
     klod_spawn_transform: SerdeTransform,
@@ -273,6 +315,7 @@ pub(crate) struct KlodScene {
     objects: Vec<PhysicsObject>,
     music_triggers: Vec<MusicTriggerData>,
     required_score: f32,
+    lights: Vec<SerdeLight>,
 }
 #[derive(SystemParam)]
 struct KlodCopyQuery<'w, 's> {
@@ -312,7 +355,10 @@ impl KlodScene {
         }
         query.apply(world);
     }
-    fn spawn(self, KlodSpawnQuery { cmds, assets, meshes, klod }: &mut KlodSpawnQuery) {
+    fn spawn(
+        self,
+        KlodSpawnQuery { cmds, assets, meshes, klod, light_switch }: &mut KlodSpawnQuery,
+    ) {
         let klod_spawn = self.klod_spawn_transform.into();
 
         cmds.insert_resource(CurrentScene(self.clone()));
@@ -338,6 +384,9 @@ impl KlodScene {
             cmds.insert(meshes.add(music.collider.clone().into()));
             music.spawn(&mut cmds);
         }
+        for light in self.lights.into_iter() {
+            light.spawn(cmds, light_switch.on);
+        }
 
         let klod = match klod.get_single() {
             Ok(klod) => klod,
@@ -358,12 +407,23 @@ impl KlodScene {
             music,
             timer,
             finish_zone,
+            lights,
         }: &KlodSceneQuery,
     ) -> Self {
         let mut objects = Vec::with_capacity(agglomerables.iter().len() + scenery.iter().len());
         objects.extend(agglomerables.iter().map(|item| item.data(assets)));
         objects.extend(scenery.iter().map(|item| item.data(assets)));
         let music_triggers = music.iter().map(|t| Prefab::from_query(t)).collect();
+        let mut lights: Vec<SerdeLight> = lights.iter().map(Into::into).collect();
+        let mut positions: Vec<Vec3> = Vec::new();
+        lights.retain(|light| {
+            let current_pos = light.position.translation;
+            let new = !positions.iter().any(|p| p.abs_diff_eq(current_pos, 0.01));
+            if !new {
+                positions.push(current_pos);
+            }
+            new
+        });
         KlodScene {
             game_timer_seconds: timer.time,
             objects,
@@ -371,6 +431,7 @@ impl KlodScene {
             music_triggers,
             finish_zone: finish_zone.get_single().unwrap().into(),
             required_score: timer.required_score,
+            lights,
         }
     }
 
@@ -397,6 +458,20 @@ impl KlodScene {
         for entity in to_sweep.into_iter() {
             world.entity_mut(entity).despawn_recursive();
         }
+    }
+
+    pub(crate) fn load_data(
+        world: &mut World,
+        data: &[u8],
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let scene: KlodScene = ron::de::from_bytes(data)?;
+
+        Self::delete_current_scene(world);
+        let mut system_state = SystemState::<KlodSpawnQuery>::new(world);
+        let mut query = system_state.get_mut(world);
+        scene.spawn(&mut query);
+        system_state.apply(world);
+        Ok(())
     }
 
     fn load_inner(
