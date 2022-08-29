@@ -1,7 +1,6 @@
 ## The Bone Klod source code
 
-This is the source code for [The Bone Klod](https://gibonus.itch.io/the-boneklod),
-developed in the context of the 2nd Bevy Game Jam.
+This is the source code for the [Klod] version submitted to the 2nd Bevy Game Jam.
 
 You currently can't build it yourself, because it relies on patches of various
 third party libraries I didn't yet publish.
@@ -23,3 +22,5 @@ the game on itch.io and use the assets from the download.
 Copyright © 2022 Devil Dahu
 
 This software is licensed under Apache 2.0. See LICENSE file for details.
+
+[Klod]: https://gibonus.itch.io/bone-klod

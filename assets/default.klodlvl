@@ -14,7 +14,7 @@
    translation: (148.87863, -480.70972, 220.39815),
   ),
  ),
- game_timer_seconds: 110.0,
+ game_timer_seconds: 120.0,
  objects: [
   (
    name: "Bone.020",
@@ -7218,15 +7218,15 @@
    )),
   ),
   (
-   name: "Cube.244",
+   name: "Sphere.010",
    asset_path: None,
    transform: (
     rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (1.5162773, 1.015793, 19.33413),
-    translation: (63.768387, -201.9226, 114.038086),
+    scale: (4.4665914, 4.4665914, 4.4665914),
+    translation: (111.455536, -147.72949, 33.129883),
    ),
-   collider: Cuboid(
-    half_extents: (1.0, 1.0, 1.0),
+   collider: Ball(
+    radius: 1.0,
    ),
    friction: 0.8,
    restitution: 0.1,
@@ -11538,12 +11538,12 @@
    )),
   ),
   (
-   name: "Cube.470",
+   name: "Cube.244",
    asset_path: None,
    transform: (
-    rotation: (-0.50163865, 0.4983558, 0.5016387, -0.49835622),
-    scale: (39.061184, 0.88418174, 8.823581),
-    translation: (47.777817, -201.05286, 133.41675),
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.5162773, 1.015793, 19.33413),
+    translation: (63.768387, -201.9226, 114.038086),
    ),
    collider: Cuboid(
     half_extents: (1.0, 1.0, 1.0),
@@ -14938,15 +14938,15 @@
    )),
   ),
   (
-   name: "Sphere.010",
+   name: "Cube.470",
    asset_path: None,
    transform: (
-    rotation: (0.0, 0.0, 0.0, 1.0),
-    scale: (4.4665914, 4.4665914, 4.4665914),
-    translation: (111.455536, -147.72949, 33.129883),
+    rotation: (-0.50163865, 0.4983558, 0.5016387, -0.49835622),
+    scale: (39.061184, 0.88418174, 8.823581),
+    translation: (47.612133, -201.05286, 133.41675),
    ),
-   collider: Ball(
-    radius: 1.0,
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
    ),
    friction: 0.8,
    restitution: 0.1,
@@ -15305,6 +15305,213 @@
     rotation: (0.0, 0.0, 0.0, 1.0),
     scale: (4.7581787, 4.7581787, 4.7581787),
     translation: (12.771784, -36.02289, 7.8922386),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.86796683, 0.0, 0.0, 0.49662864),
+    scale: (4.2486258, 14.555375, 14.555375),
+    translation: (45.61656, -463.8466, 243.25626),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.49538657, 0.0, 0.0, 0.86867446),
+    scale: (4.2486258, 14.555375, 14.555375),
+    translation: (45.61656, -463.83102, 203.56134),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.7088516, 0.0, 0.0, 0.705362),
+    scale: (0.54426193, 10.8510065, 10.8510065),
+    translation: (45.61656, -458.45645, 222.17497),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of Copy of Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (12.882902, 9.439789, 4.7598667),
+    translation: (-53.668213, -281.876, 130.28061),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (12.887312, 7.4219265, 4.7642765),
+    translation: (-110.18579, -317.6973, 130.28061),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (12.882902, 9.439789, 4.7598667),
+    translation: (25.537144, -230.50476, 130.28061),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (12.882902, 9.439789, 4.7598667),
+    translation: (68.79793, -208.58609, 137.45174),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (2.1090927, 9.713167, 5.033245),
+    translation: (57.118668, -189.27295, 137.45174),
+   ),
+   collider: Cuboid(
+    half_extents: (1.0, 1.0, 1.0),
+   ),
+   friction: 0.8,
+   restitution: 0.4,
+   sounds: [
+    GenericMetal,
+   ],
+   object: Scenery((
+    weakness: [],
+   )),
+  ),
+  (
+   name: "Copy of Copy of Copy of Copy of SpawnCorner",
+   asset_path: Some((
+    path: "cube.glb",
+    label: Some("Scene0"),
+   )),
+   transform: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (12.882902, 9.439789, 4.7598667),
+    translation: (196.59355, -134.19191, 131.39983),
    ),
    collider: Cuboid(
     half_extents: (1.0, 1.0, 1.0),
@@ -17360,6 +17567,126 @@
     rotation: (0.0, 0.0, 0.0, 1.0),
     scale: (1.0, 1.0, 1.0),
     translation: (-75.97555, -391.2567, 215.7712),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 1178.0,
+   color: Rgba(
+    red: 1.0,
+    green: 0.6745098,
+    blue: 0.6745098,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (51.577232, -477.56412, 214.81476),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 1205.0,
+   color: Rgba(
+    red: 1.0,
+    green: 0.69411767,
+    blue: 0.69411767,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (51.43524, -477.19992, 231.43138),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 2500.0,
+   color: Rgba(
+    red: 1.0,
+    green: 0.80784315,
+    blue: 0.7490196,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (146.78375, -122.63329, 115.298134),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 5555.0,
+   color: Rgba(
+    red: 0.74509805,
+    green: 0.99607843,
+    blue: 0.7176471,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (93.14398, -182.86783, 81.24916),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 888.0,
+   color: Rgba(
+    red: 1.0,
+    green: 0.9529412,
+    blue: 0.98039216,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (120.761444, -116.90608, 114.156654),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 888.0,
+   color: Rgba(
+    red: 1.0,
+    green: 0.90588236,
+    blue: 0.9647059,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (106.38688, -116.95247, 128.07031),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 888.0,
+   color: Rgba(
+    red: 1.0,
+    green: 0.85882354,
+    blue: 0.9490196,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (105.55208, -116.72491, 98.966064),
+   ),
+   radius: 0.0,
+  ),
+  (
+   intensity: 500.0,
+   color: Rgba(
+    red: 1.0,
+    green: 1.0,
+    blue: 1.0,
+    alpha: 1.0,
+   ),
+   position: (
+    rotation: (0.0, 0.0, 0.0, 1.0),
+    scale: (1.0, 1.0, 1.0),
+    translation: (102.70025, -126.59664, 118.74077),
    ),
    radius: 0.0,
   ),
