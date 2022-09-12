@@ -20,7 +20,8 @@ use bevy_editor_pls_default_windows::{
 };
 use bevy_inspector_egui::{egui, options::OptionAttributes, Inspectable};
 use bevy_mod_picking::{DefaultPickingPlugins, PickableMesh, PickingCameraBundle, Selection};
-use bevy_rapier3d::prelude::{Collider, DebugLinesMesh, RapierConfiguration, Sensor};
+use bevy_rapier3d::prelude::{Collider, RapierConfiguration, Sensor};
+use bevy_rapier3d::render::DebugLinesMesh;
 use bevy_transform_gizmo::{
     GizmoPickSource, InternalGizmoCamera, PickableGizmo, TransformGizmo, TransformGizmoPlugin,
 };

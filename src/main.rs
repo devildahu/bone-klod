@@ -57,12 +57,12 @@ fn main() {
                 "wgpu_core::device=warn,wgpu_hal=error,symphonia_core=warn,symphonia_format_ogg=warn"
                     .to_owned(),
         })
-        // .insert_resource(WindowDescriptor {
-        //     #[cfg(target_os = "linux")]
-        //     // workaround for https://github.com/bevyengine/bevy/issues/1908 (seems to be Mesa bug with X11 + Vulkan)
-        //     present_mode: bevy::window::PresentMode::Immediate,
-        //     ..default()
-        // })
+        .insert_resource(WindowDescriptor {
+            #[cfg(target_os = "linux")]
+            // workaround for https://github.com/bevyengine/bevy/issues/1908 (seems to be Mesa bug with X11 + Vulkan)
+            present_mode: bevy::window::PresentMode::Immediate,
+            ..default()
+        })
         .add_state(initial_state)
         .add_plugins(DefaultPlugins);
 
