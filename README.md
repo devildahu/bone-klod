@@ -1,12 +1,12 @@
 ## The Bone Klod source code
 
-This is the source code for the [Klod] version submitted to the 2nd Bevy Game Jam.
+**IMPORTANT**: Read the [Assets][#Assets] section for how to run the
+game once built.
 
-You currently can't build it yourself, because it relies on patches of various
-third party libraries I didn't yet publish.
+This is the source code for [Klod], submitted to the 2nd Bevy Game Jam.
 
-This is intended to run with bevy 0.8, and I don't expect to update this
-source code outside of fixing the build.
+It builds using Bevy `0.8`. A big pile of forks is required for 3rd party crates,
+all publicly available.
 
 ## License
 
@@ -14,7 +14,7 @@ source code outside of fixing the build.
 
 The assets are all rights reserved, they are not for reproduction.
 
-The assets also are NOT checked into git source, please download
+The assets also are **NOT** checked into git source, please download
 the game on itch.io and use the assets from the download.
 
 ### Source code
